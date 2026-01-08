@@ -32,7 +32,9 @@ contract STRAIN is ERC20, Ownable, ERC20Burnable, ERC20Pausable, ERC20Permit {
         _unpause();
     }
 
-    // The following functions are overrides required by Solidity.
+    // VI: Các function dưới đây là override bắt buộc bởi Solidity.
+    // EN: The following functions are overrides required by Solidity.
+    // ZH: 以下函数是 Solidity 要求的重写。
 
     function _update(address from, address to, uint256 value)
         internal

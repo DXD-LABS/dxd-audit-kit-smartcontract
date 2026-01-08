@@ -8,14 +8,20 @@ pragma solidity 0.8.9;
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
+ * VI: Interface của tiêu chuẩn ERC20 như được định nghĩa trong EIP.
+ * EN: Interface of the ERC20 standard as defined in the EIP.
+ * ZH: EIP 中定义的 ERC20 标准接口。
  */
 interface IERC20 {
     /**
      * @dev Emitted when `value` tokens are moved from one account (`from`) to
-   * another (`to`).
-   *
-   * Note that `value` may be zero.
-   */
+     * another (`to`).
+     *
+     * Note that `value` may be zero.
+     * VI: Được phát ra khi `value` token được di chuyển từ tài khoản (`from`) sang tài khoản khác (`to`).
+     * EN: Emitted when `value` tokens are moved from one account (`from`) to another (`to`).
+     * ZH: 当 `value` 代币从一个账户 (`from`) 移动到另一个账户 (`to`) 时触发。
+     */
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     /**
@@ -26,12 +32,18 @@ interface IERC20 {
 
     /**
      * @dev Returns the amount of tokens in existence.
-   */
+     * VI: Trả về tổng lượng token hiện có.
+     * EN: Returns the amount of tokens in existence.
+     * ZH: 返回存在的代币总量。
+     */
     function totalSupply() external view returns (uint256);
 
     /**
      * @dev Returns the amount of tokens owned by `account`.
-   */
+     * VI: Trả về lượng token sở hữu bởi `account`.
+     * EN: Returns the amount of tokens owned by `account`.
+     * ZH: 返回 `account` 拥有的代币数量。
+     */
     function balanceOf(address account) external view returns (uint256);
 
     /**
