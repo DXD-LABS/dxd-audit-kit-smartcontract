@@ -1,5 +1,9 @@
 # DXDLABS – Kiểm định Bảo mật Smart Contract
 
+![GitHub stars](https://img.shields.io/github/stars/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
+![GitHub license](https://img.shields.io/github/license/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
+
 Kho lưu trữ này chứa các báo cáo kiểm định bảo mật công khai được thực hiện bởi DXDLABS.
 
 ## Cấu trúc Dự án

@@ -1,5 +1,9 @@
 # DXDLABS – 智能合约安全审计
 
+![GitHub stars](https://img.shields.io/github/stars/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
+![GitHub license](https://img.shields.io/github/license/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
+
 本仓库包含由 DXDLABS 制作的公开安全审计报告。
 
 ## 项目结构

@@ -1,5 +1,9 @@
 # DXDLABS – Smart Contract Security Audits
 
+![GitHub stars](https://img.shields.io/github/stars/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
+![GitHub license](https://img.shields.io/github/license/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
+
 This repository contains public security audit reports produced by DXDLABS.
 
 ## Structure
