@@ -50,7 +50,7 @@
 
 ---
 
-### 3. Phương pháp kiểm định
+### 3. Phương pháp kiểm định & Công cụ
 
 DXDLABS đã sử dụng kết hợp các công cụ tự động và đánh giá thủ công:
 
@@ -62,10 +62,30 @@ DXDLABS đã sử dụng kết hợp các công cụ tự động và đánh gi�
     - Kiểm thử đơn vị (Unit tests), kiểm thử tích hợp, kiểm thử dựa trên thuộc tính và fuzzing nếu có thể áp dụng.
 - **Đánh giá thủ công từng dòng mã:**
     - Tập trung vào logic kinh doanh, các trường hợp biên, tấn công kinh tế và các bất biến của giao thức (protocol invariants).
+- **Kiểm thử trên Testnet (nếu có):**
+    - Triển khai và kiểm tra các kịch bản thực tế trên các mạng thử nghiệm công khai.
 
 ---
 
-### 4. Phân loại rủi ro
+### 4. Tổng quan về Hợp đồng (Contract Overview)
+
+Phần này cung cấp cái nhìn chi tiết về logic nghiệp vụ và cấu trúc dữ liệu của dự án.
+
+#### 4.1 Phân tích Logic & Luồng nghiệp vụ
+- `<Mô tả luồng hoạt động chính của hệ thống>`
+- `<Giải thích các cơ chế đặc thù: ví dụ Staking, Bonding Curve, v.v.>`
+
+#### 4.2 Cấu trúc dữ liệu & Trạng thái (Persistence)
+- `<Liệt kê các Mapping, Array, Struct quan trọng và mục đích sử dụng>`
+
+#### 4.3 Các hành động & Tham số (Actions & Parameters)
+- **Hàm `<Tên hàm>`**:
+    - **Tham số**: `<Mô tả tham số>`
+    - **Mục đích (Intent)**: `<Giải thích mục đích của hàm và các kiểm tra điều kiện>`
+
+---
+
+### 5. Phân loại rủi ro
 
 DXDLABS sử dụng các mức độ nghiêm trọng sau:
 
@@ -77,7 +97,7 @@ DXDLABS sử dụng các mức độ nghiêm trọng sau:
 
 ---
 
-### 5. Tóm tắt các phát hiện
+### 6. Tóm tắt các phát hiện
 
 | ID | Mức độ | Tiêu đề | Trạng thái |
 | :--- | :--- | :--- | :--- |
@@ -91,7 +111,17 @@ DXDLABS sử dụng các mức độ nghiêm trọng sau:
 
 ---
 
-### 6. Chi tiết các phát hiện
+### 7. Kiểm thử Thủ công (Manual Testing)
+
+Phần này ghi lại các kết quả từ việc kiểm thử thủ công trên môi trường cục bộ hoặc Testnet.
+
+- **Kịch bản kiểm thử 1**: `<Mô tả kịch bản>`
+- **Kết quả**: `<Thành công/Thất bại>`
+- **Hình ảnh minh họa**: `<Chèn screenshot kết quả giao dịch trên Explorer hoặc console>`
+
+---
+
+### 8. Chi tiết các phát hiện
 
 *Lặp lại khối sau cho mỗi phát hiện.*
 
@@ -116,8 +146,9 @@ Giải thích mức độ dễ dàng để khai thác: chỉ thực hiện đư�
 - **Chi tiết lỗ hổng:**
     - Mã giả hoặc giải thích từng bước.
 
-**Bằng chứng thực nghiệm (PoC):**  
-Cung cấp một kịch bản kiểm thử hoặc script tối thiểu để chứng minh vấn đề (ví dụ: kiểm thử Foundry/Hardhat).
+**Bằng chứng thực nghiệm (PoC) & Hình ảnh minh họa:**  
+- Cung cấp một kịch bản kiểm thử hoặc script tối thiểu để chứng minh vấn đề (ví dụ: kiểm thử Foundry/Hardhat).
+- `<Chèn hình ảnh chụp màn hình hoặc sơ đồ nếu cần thiết để làm rõ lỗ hổng>`
 
 **Khuyến nghị:**  
 Hướng dẫn cụ thể để sửa lỗi hoặc giảm thiểu lỗ hổng (mẫu thiết kế, kiểm tra, thay đổi kiểm soát truy cập, v.v.).
@@ -128,7 +159,7 @@ Mô tả ngắn gọn về cách vấn đề đã được giải quyết, kèm 
 
 ---
 
-### 7. Chất lượng mã nguồn & Thực hành tốt nhất
+### 9. Chất lượng mã nguồn & Thực hành tốt nhất
 
 Các quan sát không liên quan đến bảo mật:
 
@@ -141,7 +172,7 @@ Các quan sát không liên quan đến bảo mật:
 
 ---
 
-### 8. Phụ lục
+### 10. Phụ lục
 
 **Môi trường:**
 

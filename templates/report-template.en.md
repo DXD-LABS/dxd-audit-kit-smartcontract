@@ -50,7 +50,7 @@
 
 ---
 
-### 3. Methodology
+### 3. Methodology & Tooling
 
 DXDLABS used a combination of automated tooling and manual review:
 
@@ -62,10 +62,30 @@ DXDLABS used a combination of automated tooling and manual review:
     - Unit tests, integration tests, property-based and fuzz testing where applicable.
 - **Manual line-by-line review:**
     - Focus on business logic, edge cases, economic attacks, and protocol invariants.
+- **Testnet Testing (if applicable):**
+    - Deployment and verification of real-world scenarios on public test networks.
 
 ---
 
-### 4. Risk Classification
+### 4. Contract Overview
+
+This section provides a detailed look at the project's business logic and data structures.
+
+#### 4.1 Business Logic & Workflow
+- `<Description of the main system flow>`
+- `<Explanation of specific mechanisms: e.g. Staking, Bonding Curve, etc.>`
+
+#### 4.2 Data Structures & Persistence
+- `<List of important Mappings, Arrays, Structs and their purpose>`
+
+#### 4.3 Actions & Parameters
+- **Function `<Function Name>`**:
+    - **Parameters**: `<Parameter description>`
+    - **Intent**: `<Explanation of the function's purpose and conditional checks>`
+
+---
+
+### 5. Risk Classification
 
 DXDLABS uses the following severity levels:
 
@@ -77,7 +97,7 @@ DXDLABS uses the following severity levels:
 
 ---
 
-### 5. Summary of Findings
+### 6. Summary of Findings
 
 | ID | Severity | Title | Status |
 | :--- | :--- | :--- | :--- |
@@ -91,7 +111,17 @@ DXDLABS uses the following severity levels:
 
 ---
 
-### 6. Detailed Findings
+### 7. Manual Testing
+
+This section documents the results from manual testing on local environments or Testnets.
+
+- **Test Case 1**: `<Description of the scenario>`
+- **Result**: `<Success/Failure>`
+- **Visual Evidence**: `<Insert screenshot of transaction results on Explorer or console>`
+
+---
+
+### 8. Detailed Findings
 
 *Repeat the following block for each finding.*
 
@@ -116,8 +146,9 @@ Explain how easy it is to exploit: on-chain only, requires governance access, sp
 - **Vulnerability details:**
     - Pseudocode or step-by-step explanation.
 
-**Proof of Concept (PoC):**  
-Provide a minimal test or script that demonstrates the issue (e.g. Foundry/Hardhat test).
+**Proof of Concept (PoC) & Visual Illustrations:**  
+- Provide a minimal test or script that demonstrates the issue (e.g. Foundry/Hardhat test).
+- `<Insert screenshots or diagrams if necessary to clarify the vulnerability>`
 
 **Recommendation:**  
 Concrete guidance to fix or mitigate the vulnerability (pattern, checks, access control changes, etc.).
