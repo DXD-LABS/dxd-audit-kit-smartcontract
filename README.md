@@ -18,18 +18,26 @@ This repository contains public security audit reports produced by DXDLABS.
 A collection of security patterns and common vulnerabilities for Sui Move.
 
 ### Safe Patterns (`resources/move/safe/`)
+- `btcfi-mint-redeem-safe.move`: Secure pattern for BTCfi (Liquid BTC) on Sui.
 - `capability-safe.move`: Best practices for using Capabilities to control permissions.
 - `coin-management-safe.move`: Secure patterns for handling Coins, splitting, and merging.
 - `dynamic-fields-safe.move`: Safe usage of Dynamic Fields for flexible storage.
 - `event-emitting-safe.move`: Proper event emission for off-chain indexing.
+- `kiosk-pattern-safe.move`: Secure Kiosk pattern for NFT management and marketplaces.
 - `object-ownership-safe.move`: Ensuring clear object ownership and transfer logic.
+- `oracle-integration-safe.move`: Best practices for secure oracle price integration and staleness checks.
+- `package-upgrade-safe.move`: Secure package upgrade pattern with version control.
 - `shared-object-safe.move`: Secure management of Shared Objects and access control.
 
 ### Vulnerable Samples (`resources/move/vulnerable/`)
+- `btcfi-balance-overflow.move`: Custom balance logic leading to overflow/underflow vulnerabilities.
 - `capability-abuse.move`: Example of permission bypass via public reference to Capabilities.
 - `dos-expensive-loop.move`: Denial of Service vulnerability due to unbounded loops.
 - `friend-module-overexposure.move`: Risks of over-exposing internal functions via `friend` modules.
+- `kiosk-withdraw-abuse.move`: Vulnerability where Kiosk lacks ownership checks for withdrawals.
 - `missing-reinit-guard.move`: Security flaw where initialization functions can be called multiple times.
+- `oracle-stale-price.move`: Vulnerability using old oracle prices for manipulation.
+- `package-downgrade-attack.move`: Risk of package downgrade due to missing version checks.
 - `resource-leak.move`: Example of object ID leakage and storage bloat.
 
 ### Checklists (`resources/move/checklists/`)

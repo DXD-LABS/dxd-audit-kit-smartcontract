@@ -18,18 +18,26 @@ Kho lưu trữ này chứa các báo cáo kiểm định bảo mật công khai 
 Tập hợp các pattern bảo mật và các lỗ hổng phổ biến cho Sui Move.
 
 ### Pattern An toàn (`resources/move/safe/`)
+- `btcfi-mint-redeem-safe.move`: Pattern an toàn cho BTCfi (Liquid BTC) trên Sui.
 - `capability-safe.move`: Các thực hành tốt nhất khi sử dụng Capability để kiểm soát quyền.
 - `coin-management-safe.move`: Các pattern an toàn để xử lý Coin, chia tách (split) và hợp nhất (merge).
 - `dynamic-fields-safe.move`: Cách sử dụng Dynamic Fields an toàn để lưu trữ linh hoạt.
 - `event-emitting-safe.move`: Quy trình emit event đúng cách để phục vụ việc index off-chain.
+- `kiosk-pattern-safe.move`: Pattern Kiosk an toàn để quản lý NFT và sàn giao dịch.
 - `object-ownership-safe.move`: Đảm bảo quyền sở hữu object rõ ràng và logic chuyển nhượng an toàn.
+- `oracle-integration-safe.move`: Các thực hành tốt nhất để tích hợp giá oracle an toàn và kiểm tra độ trễ (staleness).
+- `package-upgrade-safe.move`: Pattern nâng cấp package an toàn với kiểm soát phiên bản.
 - `shared-object-safe.move`: Quản lý Shared Object an toàn và kiểm soát truy cập.
 
 ### Ví dụ Lỗ hổng (`resources/move/vulnerable/`)
+- `btcfi-balance-overflow.move`: Logic balance tùy chỉnh dẫn đến lỗ hổng tràn số (overflow/underflow).
 - `capability-abuse.move`: Ví dụ về việc vượt qua quyền kiểm soát thông qua tham chiếu công khai tới Capability.
 - `dos-expensive-loop.move`: Lỗ hổng Từ chối Dịch vụ (DoS) do các vòng lặp không giới hạn.
 - `friend-module-overexposure.move`: Rủi ro khi để lộ quá mức các hàm nội bộ thông qua các module `friend`.
+- `kiosk-withdraw-abuse.move`: Lỗ hổng khi Kiosk thiếu kiểm tra quyền sở hữu khi rút NFT.
 - `missing-reinit-guard.move`: Lỗi bảo mật khi các hàm khởi tạo có thể bị gọi nhiều lần.
+- `oracle-stale-price.move`: Lỗ hổng sử dụng giá oracle cũ để thao túng.
+- `package-downgrade-attack.move`: Rủi ro hạ cấp package do thiếu kiểm tra phiên bản.
 - `resource-leak.move`: Ví dụ về rò rỉ ID của object và gây phình to bộ lưu trữ (storage bloat).
 
 ### Danh sách kiểm tra (`resources/move/checklists/`)
