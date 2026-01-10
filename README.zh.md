@@ -21,9 +21,13 @@ Sui Move 的安全模式和常见漏洞集合。
 - `btcfi-mint-redeem-safe.move`: Sui 上 BTCfi (Liquid BTC) 的安全模式。
 - `capability-safe.move`: 使用 Capability 控制权限的最佳实践。
 - `coin-management-safe.move`: 处理代币、拆分和合并的安全模式。
+- `coin-split-merge-safe.move`: Sui 中代币拆分/合并的安全模式。
+- `dynamic-field-upgrade-safe.move`: 升级时使用动态字段的安全模式。
 - `dynamic-fields-safe.move`: 安全使用动态字段进行灵活存储。
 - `event-emitting-safe.move`: 用于链下索引的正确定发事件流程。
+- `flash-loan-hot-potato-safe.move`: Sui 上闪电贷（Hot Potato）的安全模式。
 - `kiosk-pattern-safe.move`: 用于 NFT 管理和市场的安全 Kiosk 模式。
+- `nft-kiosk-listing-safe.move`: 在 Kiosk（市场）上列出 NFT 的安全模式。
 - `object-ownership-safe.move`: 确保明确的对象所有权和安全的转移逻辑。
 - `oracle-integration-safe.move`: 安全预言机价格集成和陈旧性检查的最佳实践。
 - `package-upgrade-safe.move`: 带有版本控制的安全包升级模式。
@@ -32,16 +36,21 @@ Sui Move 的安全模式和常见漏洞集合。
 ### 漏洞示例 (`resources/move/vulnerable/`)
 - `btcfi-balance-overflow.move`: 自定义余额逻辑导致溢出/欠载漏洞。
 - `capability-abuse.move`: 通过公开引用 Capability 绕过权限控制的示例。
+- `coin-overflow-merge.move`: 自定义余额合并导致 u64 溢出。
 - `dos-expensive-loop.move`: 由于无限循环导致的拒绝服务 (DoS) 漏洞。
+- `dynamic-field-upgrade-abuse.move`: 动态字段覆盖未检查版本。
+- `flash-loan-hot-potato-abuse.move`: 闪电贷未强制执行还款/销毁。
 - `friend-module-overexposure.move`: 通过 `friend` 模块过度暴露内部函数的风险。
 - `kiosk-withdraw-abuse.move`: Kiosk 提取时缺少所有权检查的漏洞。
 - `missing-reinit-guard.move`: 初始化函数可被多次调用的安全缺陷。
+- `nft-kiosk-listing-abuse.move`: 列表 NFT 没有策略，绕过版权费。
 - `oracle-stale-price.move`: 使用过时预言机价格进行操纵的漏洞。
 - `package-downgrade-attack.move`: 由于缺少版本检查导致的包降级风险。
 - `resource-leak.move`: 对象 ID 泄漏和导致存储膨胀的示例。
 
 ### 检查清单 (`resources/move/checklists/`)
 - `move-audit-checklist.md`: 审计 Sui Move 智能合约的全面检查清单。
+- `move-defi-checklist.md`: DeFi（闪电贷、借贷、DEX）和 NFT/Kiosk 的专用检查清单。
 
 ## 报告格式
 
