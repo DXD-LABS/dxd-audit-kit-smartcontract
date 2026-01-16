@@ -32,6 +32,7 @@ A collection of security patterns and common vulnerabilities for Sui Move.
 - `oracle-integration-safe.move`: Best practices for secure oracle price integration and staleness checks.
 - `package-upgrade-safe.move`: Secure package upgrade pattern with version control.
 - `shared-object-safe.move`: Secure management of Shared Objects and access control.
+- `upgrade-policy-safe.move`: Enforce policy during package upgrade.
 
 ### Vulnerable Samples (`resources/move/vulnerable/`)
 - `btcfi-balance-overflow.move`: Custom balance logic leading to overflow/underflow vulnerabilities.
@@ -48,9 +49,35 @@ A collection of security patterns and common vulnerabilities for Sui Move.
 - `package-downgrade-attack.move`: Risk of package downgrade due to missing version checks.
 - `resource-leak.move`: Example of object ID leakage and storage bloat.
 
+### Upgrade & Migration (`resources/move/upgrade-migration/`)
+- `package-upgrade-best-practices.md` ([Multi](resources/move/upgrade-migration/package-upgrade-best-practices.md)): Best practices for secure package upgrades and versioning.
+- `solidity-to-move-migration-guide.md` ([Multi](resources/move/upgrade-migration/solidity-to-move-migration-guide.md)): Essential tips for EVM developers migrating to Move/Sui.
+
+### Migration & Upgrade Pitfalls (`resources/move/migration-upgrade/`)
+- `solidity-to-move-migration-pitfalls.md` ([Multi](resources/move/migration-upgrade/solidity-to-move-migration-pitfalls.md)): Common mistakes when migrating from Solidity to Move.
+- `package-upgrade-pitfalls.md` ([Multi](resources/move/migration-upgrade/package-upgrade-pitfalls.md)): Common pitfalls during Move package upgrades.
+
 ### Checklists (`resources/move/checklists/`)
 - `move-audit-checklist.md`: Comprehensive checklist for auditing Sui Move smart contracts.
 - `move-defi-checklist.md`: Specific checklist for DeFi (Flash Loan, Lending, DEX) and NFT/Kiosk.
+- `move-btcfi-checklist.md` ([Multi](resources/move/checklists/move-btcfi-checklist.md)): Security checklist for BTCfi (Liquid BTC) protocols.
+- `move-btcfi-edge-cases.md` ([Multi](resources/move/checklists/move-btcfi-edge-cases.md)): Edge cases checklist for BTCfi on Sui.
+- `quick-audit-template.md` ([Multi](resources/move/checklists/quick-audit-template.md)): Fast audit template for daily use (5-10 mins).
+
+### Audit Reports & Best Practices (`resources/move/`)
+- `report-examples/example-move-lending-audit-report.md` ([Multi](resources/move/report-examples/example-move-lending-audit-report.md)): Example audit report for a lending protocol on Sui.
+- `best-practices-summary.md` ([Multi](resources/move/best-practices-summary.md)): Quick summary of security best practices for Move/Sui.
+- `one-liner-tips.md` ([Multi](resources/move/one-liner-tips.md)): Viral security tips for Move/Sui developers and auditors.
+
+### Audit Tools & Scripts (`resources/move/tools-scripts/`)
+- `run-move-audit.sh`: Quick bash script to run Sui Move analyzer and tests.
+- `one-click-audit.sh`: One-click audit starter script for Move/Sui.
+- `generate-report-template.py`: Python script to auto-fill audit report templates from findings.
+
+### Real-World Audit Cases (`resources/move/real-cases/`)
+- `cetus-clmm-pool-vuln-2025.md` ([Multi](resources/move/real-cases/cetus-clmm-pool-vuln-2025.md)): Spoof-token exploit in pricing logic (Cetus 2025).
+- `navi-health-factor-manip.md` ([Multi](resources/move/real-cases/navi-health-factor-manip.md)): Health factor manipulation via oracle staleness (NAVI).
+- `scallop-isolation-bypass.md` ([Multi](resources/move/real-cases/scallop-isolation-bypass.md)): Isolation mode bypass in lending protocols (Scallop).
 
 ## Report Format
 

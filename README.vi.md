@@ -48,9 +48,35 @@ Tập hợp các pattern bảo mật và các lỗ hổng phổ biến cho Sui M
 - `package-downgrade-attack.move`: Rủi ro hạ cấp package do thiếu kiểm tra phiên bản.
 - `resource-leak.move`: Ví dụ về rò rỉ ID của object và gây phình to bộ lưu trữ (storage bloat).
 
+### Nâng cấp & Di cư (`resources/move/upgrade-migration/`)
+- `package-upgrade-best-practices.md` ([Multi](resources/move/upgrade-migration/package-upgrade-best-practices.md)): Thực hành tốt nhất để nâng cấp package an toàn và kiểm soát phiên bản.
+- `solidity-to-move-migration-guide.md` ([Multi](resources/move/upgrade-migration/solidity-to-move-migration-guide.md)): Các mẹo thiết yếu cho lập trình viên EVM khi chuyển sang Move/Sui.
+
+### Lỗi thường gặp khi Di cư & Nâng cấp (`resources/move/migration-upgrade/`)
+- `solidity-to-move-migration-pitfalls.md` ([Multi](resources/move/migration-upgrade/solidity-to-move-migration-pitfalls.md)): Các lỗi phổ biến khi di cư từ Solidity sang Move.
+- `package-upgrade-pitfalls.md` ([Multi](resources/move/migration-upgrade/package-upgrade-pitfalls.md)): Các bẫy phổ biến khi nâng cấp package Move.
+
 ### Danh sách kiểm tra (`resources/move/checklists/`)
 - `move-audit-checklist.md`: Danh sách kiểm tra toàn diện để kiểm định smart contract Sui Move.
-- `move-defi-checklist.md`: Danh sách kiểm tra đặc thù cho DeFi (Flash Loan, Lending, DEX) và NFT/Kiosk.
+- `move-defi-checklist.md`: Danh sách kiểm tra đặc thù cho DeFi (Flash Loan, Lending, DEX) and NFT/Kiosk.
+- `move-btcfi-checklist.md` ([Multi](resources/move/checklists/move-btcfi-checklist.md)): Danh sách kiểm tra bảo mật cho các giao thức BTCfi (Liquid BTC).
+- `move-btcfi-edge-cases.md` ([Multi](resources/move/checklists/move-btcfi-edge-cases.md)): Checklist các trường hợp biên cho BTCfi trên Sui.
+- `quick-audit-template.md` ([Multi](resources/move/checklists/quick-audit-template.md)): Mẫu kiểm định nhanh hàng ngày (5-10 phút).
+
+### Báo cáo Mẫu & Thực hành Tốt nhất (`resources/move/`)
+- `report-examples/example-move-lending-audit-report.md` ([Multi](resources/move/report-examples/example-move-lending-audit-report.md)): Báo cáo kiểm định mẫu cho protocol lending trên Sui.
+- `best-practices-summary.md` ([Multi](resources/move/best-practices-summary.md)): Tóm tắt nhanh các thực hành bảo mật tốt nhất cho Move/Sui.
+- `one-liner-tips.md` ([Multi](resources/move/one-liner-tips.md)): Các mẹo bảo mật ngắn gọn cho lập trình viên và kiểm định viên Move/Sui.
+
+### Công cụ & Script Kiểm định (`resources/move/tools-scripts/`)
+- `run-move-audit.sh`: Script bash nhanh để chạy bộ phân tích và kiểm tra Sui Move.
+- `one-click-audit.sh`: Script khởi đầu kiểm định một cú nhấp chuột cho Move/Sui.
+- `generate-report-template.py`: Script Python tự động điền mẫu báo cáo kiểm định từ các phát hiện.
+
+### Các Trường hợp Thực tế (`resources/move/real-cases/`)
+- `cetus-clmm-pool-vuln-2025.md` ([Multi](resources/move/real-cases/cetus-clmm-pool-vuln-2025.md)): Lỗ hổng spoof-token trong logic giá (Cetus 2025).
+- `navi-health-factor-manip.md` ([Multi](resources/move/real-cases/navi-health-factor-manip.md)): Thao túng health factor qua oracle cũ (NAVI).
+- `scallop-isolation-bypass.md` ([Multi](resources/move/real-cases/scallop-isolation-bypass.md)): Vượt qua chế độ cách ly trong lending (Scallop).
 
 ## Định dạng Báo cáo
 

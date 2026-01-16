@@ -48,9 +48,35 @@ Sui Move 的安全模式和常见漏洞集合。
 - `package-downgrade-attack.move`: 由于缺少版本检查导致的包降级风险。
 - `resource-leak.move`: 对象 ID 泄漏和导致存储膨胀的示例。
 
+### 升级与迁移 (`resources/move/upgrade-migration/`)
+- `package-upgrade-best-practices.md` ([Multi](resources/move/upgrade-migration/package-upgrade-best-practices.md)): 安全包升级和版本控制的最佳实践。
+- `solidity-to-move-migration-guide.md` ([Multi](resources/move/upgrade-migration/solidity-to-move-migration-guide.md)): EVM 开发者迁移到 Move/Sui 的基本提示。
+
+### 迁移与升级陷阱 (`resources/move/migration-upgrade/`)
+- `solidity-to-move-migration-pitfalls.md` ([Multi](resources/move/migration-upgrade/solidity-to-move-migration-pitfalls.md)): 从 Solidity 迁移到 Move 的常见错误。
+- `package-upgrade-pitfalls.md` ([Multi](resources/move/migration-upgrade/package-upgrade-pitfalls.md)): Move 包升级期间的常见陷阱。
+
 ### 检查清单 (`resources/move/checklists/`)
 - `move-audit-checklist.md`: 审计 Sui Move 智能合约的全面检查清单。
 - `move-defi-checklist.md`: DeFi（闪电贷、借贷、DEX）和 NFT/Kiosk 的专用检查清单。
+- `move-btcfi-checklist.md` ([Multi](resources/move/checklists/move-btcfi-checklist.md)): BTCfi (Liquid BTC) 协议的安全检查清单。
+- `move-btcfi-edge-cases.md` ([Multi](resources/move/checklists/move-btcfi-edge-cases.md)): Sui 上 BTCfi 的边缘案例检查清单。
+- `quick-audit-template.md` ([Multi](resources/move/checklists/quick-audit-template.md)): 每日快速审计模板（5-10 分钟）。
+
+### 审计报告示例与最佳实践 (`resources/move/`)
+- `report-examples/example-move-lending-audit-report.md` ([Multi](resources/move/report-examples/example-move-lending-audit-report.md)): Sui 借贷协议审计报告示例。
+- `best-practices-summary.md` ([Multi](resources/move/best-practices-summary.md)): Move/Sui 安全最佳实践快速摘要。
+- `one-liner-tips.md` ([Multi](resources/move/one-liner-tips.md)): 适合 Move/Sui 开发者和审计员的病毒式安全提示。
+
+### 审计工具与脚本 (`resources/move/tools-scripts/`)
+- `run-move-audit.sh`: 用于运行 Sui Move 分析器和测试的快速 Bash 脚本。
+- `one-click-audit.sh`: Move/Sui 一键审计启动脚本。
+- `generate-report-template.py`: 从发现结果自动填充审计报告模板的 Python 脚本。
+
+### 真实审计案例 (`resources/move/real-cases/`)
+- `cetus-clmm-pool-vuln-2025.md` ([Multi](resources/move/real-cases/cetus-clmm-pool-vuln-2025.md)): 定价逻辑中的伪造代币漏洞 (Cetus 2025)。
+- `navi-health-factor-manip.md` ([Multi](resources/move/real-cases/navi-health-factor-manip.md)): 通过预言机过期数据操纵健康因子 (NAVI)。
+- `scallop-isolation-bypass.md` ([Multi](resources/move/real-cases/scallop-isolation-bypass.md)): 借贷协议中的隔离模式绕过 (Scallop)。
 
 ## 报告格式
 
