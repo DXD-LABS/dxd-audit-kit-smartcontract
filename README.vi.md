@@ -12,6 +12,14 @@ Kho lưu trữ này chứa các báo cáo kiểm định bảo mật công khai 
 - `clients/<YYYY-MM>-<project-name>/` – Báo cáo kiểm định cho từng khách hàng cụ thể.
 - `resources/move/` – Các pattern bảo mật Move/Sui, ví dụ lỗ hổng và danh sách kiểm tra (checklist).
 - `tools/` – Cấu hình và ví dụ về các công cụ phân tích được sử dụng (Slither, Foundry, v.v.).
+- `docs/` – Dịch vụ kiểm định chuyên nghiệp và tài liệu bổ sung.
+
+## Dịch vụ Kiểm định Chuyên nghiệp
+
+DxDLabs – Chuyên audit smart contract Move/Sui & EVM tại Việt Nam.  
+Với kinh nghiệm audit real projects (DeFi, NFT, BTCfi), chúng tôi giúp protocol launch an toàn, tránh exploit.
+
+Để biết thêm chi tiết, vui lòng xem trang [Dịch vụ Kiểm định Chuyên nghiệp](docs/professional-audit-services.md).
 
 ## Tài nguyên Kiểm định Move/Sui
 
@@ -65,6 +73,8 @@ Tập hợp các pattern bảo mật và các lỗ hổng phổ biến cho Sui M
 
 ### Báo cáo Mẫu & Thực hành Tốt nhất (`resources/move/`)
 - `report-examples/example-move-lending-audit-report.md` ([Multi](resources/move/report-examples/example-move-lending-audit-report.md)): Báo cáo kiểm định mẫu cho protocol lending trên Sui.
+- `security-scorecard-template.md` ([Multi](resources/move/security-scorecard-template.md)): Mẫu Security Scorecard để tóm tắt kết quả kiểm định.
+- `weekly-security-tip-teaser.md` ([Multi](resources/move/weekly-security-tip-teaser.md)): Teaser cho chuỗi mẹo bảo mật hàng tuần sắp tới.
 - `best-practices-summary.md` ([Multi](resources/move/best-practices-summary.md)): Tóm tắt nhanh các thực hành bảo mật tốt nhất cho Move/Sui.
 - `one-liner-tips.md` ([Multi](resources/move/one-liner-tips.md)): Các mẹo bảo mật ngắn gọn cho lập trình viên và kiểm định viên Move/Sui.
 

@@ -12,6 +12,14 @@ This repository contains public security audit reports produced by DXDLABS.
 - `clients/<YYYY-MM>-<project-name>/` – audit reports for individual clients.
 - `resources/move/` – Move/Sui security patterns, vulnerable samples, and checklists.
 - `tools/` – configuration and examples of analysis tools used (Slither, Foundry, etc.).
+- `docs/` – professional audit services and additional documentation.
+
+## Professional Audit Services
+
+DxDLabs – Specialist in Move/Sui & EVM smart contract audits in Vietnam.  
+With experience auditing real projects (DeFi, NFT, BTCfi), we help protocols launch safely and avoid exploits.
+
+For more details, please see our [Professional Audit Services](docs/professional-audit-services.md) page.
 
 ## Move/Sui Audit Resources
 
@@ -66,6 +74,8 @@ A collection of security patterns and common vulnerabilities for Sui Move.
 
 ### Audit Reports & Best Practices (`resources/move/`)
 - `report-examples/example-move-lending-audit-report.md` ([Multi](resources/move/report-examples/example-move-lending-audit-report.md)): Example audit report for a lending protocol on Sui.
+- `security-scorecard-template.md` ([Multi](resources/move/security-scorecard-template.md)): Template for summarizing audit findings with scoring.
+- `weekly-security-tip-teaser.md` ([Multi](resources/move/weekly-security-tip-teaser.md)): Upcoming weekly security tips for Move/Sui.
 - `best-practices-summary.md` ([Multi](resources/move/best-practices-summary.md)): Quick summary of security best practices for Move/Sui.
 - `one-liner-tips.md` ([Multi](resources/move/one-liner-tips.md)): Viral security tips for Move/Sui developers and auditors.
 
