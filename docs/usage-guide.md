@@ -12,7 +12,7 @@ cd dxd-audit-kit-smartcontract
 Install Sui CLI (if not installed):
 
 ```bash
-cargo install --git https://github.com/MystenLabs/sui sui-cli --locked
+cargo install --git https://github.com/MystenLabs/sui sui --bin sui --locked
 ```
 
 ### 2) Run Snippet Tests
@@ -66,7 +66,7 @@ cd dxd-audit-kit-smartcontract
 Cai Sui CLI (neu chua co):
 
 ```bash
-cargo install --git https://github.com/MystenLabs/sui sui-cli --locked
+cargo install --git https://github.com/MystenLabs/sui sui --bin sui --locked
 ```
 
 ### 2) Chay test cho snippets
@@ -120,7 +120,7 @@ cd dxd-audit-kit-smartcontract
 An zhuang Sui CLI (ru guo hai mei an zhuang):
 
 ```bash
-cargo install --git https://github.com/MystenLabs/sui sui-cli --locked
+cargo install --git https://github.com/MystenLabs/sui sui --bin sui --locked
 ```
 
 ### 2) Yun xing snippet tests
