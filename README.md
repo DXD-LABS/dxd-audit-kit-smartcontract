@@ -11,8 +11,10 @@ This repository contains public security audit reports produced by DXDLABS.
 - `templates/` – report templates in English, Vietnamese, and Chinese.
 - `clients/<YYYY-MM>-<project-name>/` – audit reports for individual clients.
 - `resources/move/` – Move/Sui security patterns, vulnerable samples, and checklists.
+- `resources/move/tests/` – Move test suite for safe snippets.
 - `tools/` – configuration and examples of analysis tools used (Slither, Foundry, etc.).
 - `docs/` – professional audit services and additional documentation.
+- `docs/usage-guide.md` – step-by-step install and usage guide.
 
 ## Professional Audit Services
 
@@ -83,6 +85,9 @@ A collection of security patterns and common vulnerabilities for Sui Move.
 - `run-move-audit.sh`: Quick bash script to run Sui Move analyzer and tests.
 - `one-click-audit.sh`: One-click audit starter script for Move/Sui.
 - `generate-report-template.py`: Python script to auto-fill audit report templates from findings.
+
+### Tests (`resources/move/tests/`)
+- `safe-snippets-tests.move`: Move tests for hot safe snippets (capability, flash loan, kiosk).
 
 ### Real-World Audit Cases (`resources/move/real-cases/`)
 - `cetus-clmm-pool-vuln-2025.md` ([Multi](resources/move/real-cases/cetus-clmm-pool-vuln-2025.md)): Spoof-token exploit in pricing logic (Cetus 2025).

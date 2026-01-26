@@ -1,4 +1,4 @@
-# DXDLABS – Kiểm định Bảo mật Smart Contract
+﻿# DXDLABS – Kiểm định Bảo mật Smart Contract
 
 ![GitHub stars](https://img.shields.io/github/stars/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
 ![GitHub license](https://img.shields.io/github/license/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
@@ -11,8 +11,10 @@ Kho lưu trữ này chứa các báo cáo kiểm định bảo mật công khai 
 - `templates/` – Các mẫu báo cáo bằng tiếng Anh, tiếng Việt và tiếng Trung.
 - `clients/<YYYY-MM>-<project-name>/` – Báo cáo kiểm định cho từng khách hàng cụ thể.
 - `resources/move/` – Các pattern bảo mật Move/Sui, ví dụ lỗ hổng và danh sách kiểm tra (checklist).
+- `resources/move/tests/` – Bộ Move tests cho các snippet an toàn.
 - `tools/` – Cấu hình và ví dụ về các công cụ phân tích được sử dụng (Slither, Foundry, v.v.).
 - `docs/` – Dịch vụ kiểm định chuyên nghiệp và tài liệu bổ sung.
+- `docs/usage-guide.md` – Hướng dẫn cài đặt và sử dụng chi tiết.
 
 ## Dịch vụ Kiểm định Chuyên nghiệp
 
@@ -83,6 +85,9 @@ Tập hợp các pattern bảo mật và các lỗ hổng phổ biến cho Sui M
 - `one-click-audit.sh`: Script khởi đầu kiểm định một cú nhấp chuột cho Move/Sui.
 - `generate-report-template.py`: Script Python tự động điền mẫu báo cáo kiểm định từ các phát hiện.
 
+### Tests (`resources/move/tests/`)
+- `safe-snippets-tests.move`: Move tests cho các snippet an toàn (capability, flash loan, kiosk).
+
 ### Các Trường hợp Thực tế (`resources/move/real-cases/`)
 - `cetus-clmm-pool-vuln-2025.md` ([Multi](resources/move/real-cases/cetus-clmm-pool-vuln-2025.md)): Lỗ hổng spoof-token trong logic giá (Cetus 2025).
 - `navi-health-factor-manip.md` ([Multi](resources/move/real-cases/navi-health-factor-manip.md)): Thao túng health factor qua oracle cũ (NAVI).
@@ -102,3 +107,7 @@ Mỗi báo cáo tuân theo cấu trúc thống nhất:
 8. Phụ lục (môi trường, công cụ, tóm tắt kiểm tra).
 
 Xem `templates/report-template.vi.md` để biết thêm chi tiết.
+
+
+
+

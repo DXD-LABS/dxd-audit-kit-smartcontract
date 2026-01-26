@@ -1,4 +1,4 @@
-# DXDLABS – 智能合约安全审计
+﻿# DXDLABS – 智能合约安全审计
 
 ![GitHub stars](https://img.shields.io/github/stars/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
 ![GitHub license](https://img.shields.io/github/license/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
@@ -11,7 +11,10 @@
 - `templates/` – 英文、中文和越南文的报告模板。
 - `clients/<YYYY-MM>-<project-name>/` – 针对各个客户的审计报告。
 - `resources/move/` – Move/Sui 安全模式、漏洞示例和检查清单。
+- `resources/move/tests/` – Move 安全片段测试。
 - `tools/` – 所使用的分析工具（Slither、Foundry 等）的配置和示例。
+- `docs/` – 专业审计服务与补充文档。
+- `docs/usage-guide.md` – 安装与使用指南。
 
 ## Move/Sui 审计资源
 
@@ -73,6 +76,9 @@ Sui Move 的安全模式和常见漏洞集合。
 - `one-click-audit.sh`: Move/Sui 一键审计启动脚本。
 - `generate-report-template.py`: 从发现结果自动填充审计报告模板的 Python 脚本。
 
+### Tests (`resources/move/tests/`)
+- `safe-snippets-tests.move`: Move 安全片段测试（capability、flash loan、kiosk）。
+
 ### 真实审计案例 (`resources/move/real-cases/`)
 - `cetus-clmm-pool-vuln-2025.md` ([Multi](resources/move/real-cases/cetus-clmm-pool-vuln-2025.md)): 定价逻辑中的伪造代币漏洞 (Cetus 2025)。
 - `navi-health-factor-manip.md` ([Multi](resources/move/real-cases/navi-health-factor-manip.md)): 通过预言机过期数据操纵健康因子 (NAVI)。
@@ -92,3 +98,5 @@ Sui Move 的安全模式和常见漏洞集合。
 8. 附录（环境、工具、测试摘要）。
 
 详情请参阅 `templates/report-template.zh.md`。
+
+

@@ -1,0 +1,15 @@
+[package]
+name = "dxdlabs_audit_kit"
+version = "0.0.1"
+
+# VI: Dia chi module mac dinh cho vi du/test
+# EN: Default module address for examples/tests
+# ZH: Mo ren mo kuai di zhi cho vi du/test
+[addresses]
+safe = "0x0"
+
+# VI: Phu thuoc Sui framework
+# EN: Sui framework dependency
+# ZH: Sui framework yi lai
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "main" }

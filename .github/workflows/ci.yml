@@ -1,0 +1,18 @@
+# VI: CI cho Move/Sui Audit Kit
+# EN: CI for Move/Sui Audit Kit
+# ZH: Move/Sui Audit Kit de CI
+name: CI for Move/Sui Audit Kit
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Sui CLI
+        run: cargo install --git https://github.com/MystenLabs/sui sui-cli --locked
+      - name: Run Move tests
+        run: sui move test --path resources/move/
