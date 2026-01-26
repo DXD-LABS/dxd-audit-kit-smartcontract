@@ -13,6 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Sui CLI
-        run: cargo install --git https://github.com/MystenLabs/sui --package sui --bin sui --locked
+        run: cargo install --git https://github.com/MystenLabs/sui --package sui --bin sui --locked --force
       - name: Run Move tests
         run: sui move test --path resources/move/
