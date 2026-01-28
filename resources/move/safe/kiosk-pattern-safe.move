@@ -25,8 +25,8 @@ module safe::kiosk_pattern {
     /// EN: Transfer owner cap to a new address.
     /// VI: Chuyá»ƒn owner cap cho address má»›i.
     /// ZH: å°† owner cap è½¬ç§»åˆ°æ–°åœ°å€ã€‚
-    public entry fun transfer_owner_cap(cap: KioskOwnerCap, recipient: address) {
-        transfer::transfer(cap, recipient);
+    public fun transfer_owner_cap(cap: KioskOwnerCap, recipient: address) {
+        transfer::public_transfer(cap, recipient);
     }
 
     /// EN: Mint a test NFT.
@@ -39,7 +39,7 @@ module safe::kiosk_pattern {
     /// EN: Securely place NFT into kiosk.
     /// VI: Place NFT vÃ o kiosk an toÃ n.
     /// ZH: å®‰å…¨åœ°å°† NFT æ”¾å…¥ kioskã€‚
-    public entry fun place_nft(kiosk: &mut Kiosk, nft: MyNFT, cap: &KioskOwnerCap) {
+    public fun place_nft(kiosk: &mut Kiosk, nft: MyNFT, cap: &KioskOwnerCap) {
         kiosk::place(kiosk, cap, nft);
     }
 
@@ -47,7 +47,7 @@ module safe::kiosk_pattern {
     /// VI: Withdraw NFT chá»‰ owner má»›i lÃ m Ä‘Æ°á»£c.
     /// ZH: åªæœ‰æ‰€æœ‰è€…å¯ä»¥æå– NFTã€‚
     public fun withdraw_nft(kiosk: &mut Kiosk, cap: &KioskOwnerCap, id: ID): MyNFT {
-        kiosk::withdraw(kiosk, cap, id)
+        kiosk::take<MyNFT>(kiosk, cap, id)
     }
 }
 

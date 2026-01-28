@@ -1,0 +1,18 @@
+rules:
+  - name: capability_misuse
+    description: Flag functions without proper capability checks (Key/Store)
+    pattern: "capability|Key|Store"
+    severity: high
+    sui_specific: true
+  - name: object_ownership_leak
+    description: Detect shared objects without freeze or transfer hints
+    pattern: "shared|freeze|transfer"
+    severity: medium
+  - name: kiosk_policy_bypass
+    description: Check kiosk modules for missing policy enforcement hints
+    pattern: "kiosk|policy"
+    severity: high
+  - name: flash_loan_reentrancy
+    description: Flag flash loan flows without reentrancy guard hints
+    pattern: "flash_loan|reentrancy"
+    severity: critical

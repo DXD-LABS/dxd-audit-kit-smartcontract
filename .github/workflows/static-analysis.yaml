@@ -1,0 +1,34 @@
+name: Move Static Analysis
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Sui CLI
+        run: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/MystenLabs/sui/releases/download/mainnet-v1.XX/sui-install | sh
+
+      - name: Install Move Lint
+        run: cargo install move-lint
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python deps
+        run: pip install -r static-analysis/requirements.txt
+
+      - name: Run Static Analysis
+        run: python static-analysis/scripts/analyze.py .
+
+      - name: Run Bytecode Parse
+        run: python static-analysis/scripts/parse_bytecode.py .

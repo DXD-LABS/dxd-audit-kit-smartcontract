@@ -1,0 +1,12 @@
+[package]
+name = "sui-move-lint-custom"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+move-lint = { git = "https://github.com/BeosinBlockchainSecurity/Move-Lint" }
+yaml-rust = "0.4"
+regex = "1"
+clap = { version = "4", features = ["derive"] }
+walkdir = "2"
+anyhow = "1"

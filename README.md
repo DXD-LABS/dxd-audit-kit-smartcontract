@@ -3,6 +3,7 @@
 ![GitHub stars](https://img.shields.io/github/stars/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
 ![GitHub license](https://img.shields.io/github/license/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
 ![GitHub last commit](https://img.shields.io/github/last-commit/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
+![Static Analysis](https://github.com/DXD-LABS/dxd-audit-kit-smartcontract/workflows/Move%20Static%20Analysis/badge.svg)
 
 This repository contains public security audit reports produced by DXDLABS.
 
