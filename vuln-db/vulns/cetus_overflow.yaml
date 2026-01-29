@@ -1,0 +1,28 @@
+name: Integer Overflow in Liquidity Library
+cve_id: None
+date: 2025-05-22
+affected_projects: Cetus Protocol
+description: >
+  Incorrect shift bound check in a liquidity helper allowed oversized shifts to pass.
+  Attackers used flash swaps to inject extreme liquidity and extract value.
+impact: Critical - large scale fund loss and pool imbalance.
+severity: Critical
+references:
+  - https://www.elliptic.co/blog/cetus-protocol-hacked-for-more-than-200-million
+  - https://www.dlnews.com/articles/defi/how-hacker-used-fake-tokens-to-syphon-220m-sui-dex-cetus
+code_vuln: |
+  fun checked_shlw(x: u256, shift: u8): u256 {
+      if (shift > 256) { abort(OVERFLOW); } // wrong bound
+      x << shift
+  }
+code_fixed: |
+  fun checked_shlw(x: u256, shift: u8): u256 {
+      if (shift > 192) { abort(OVERFLOW); }
+      x << shift
+  }
+test_vector:
+  inputs:
+    token_amount: 1
+    shift_value: 200
+  expected_exploit: Liquidity inflated to drain pool
+  sui_testnet_tx: 0xexample_tx_id

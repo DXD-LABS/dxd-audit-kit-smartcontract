@@ -1,0 +1,7 @@
+[package]
+name = "vuln_db"
+version = "0.0.1"
+published-at = "0x0"
+
+[addresses]
+vuln_db = "0x0"

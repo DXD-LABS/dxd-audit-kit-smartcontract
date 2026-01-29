@@ -15,6 +15,16 @@
 - `tools/` – 所使用的分析工具（Slither、Foundry 等）的配置和示例。
 - `docs/` – 专业审计服务与补充文档。
 - `docs/usage-guide.md` – 安装与使用指南。
+- `vuln-db/` – YAML 格式的漏洞数据库与解析器。
+- `tests/` – vuln-db 的 Move PoC 模块与单元/集成测试。
+
+## 漏洞库与 PoC 测试
+
+- Sui CLI 固定为 `mainnet-v1.64.2` 以保证可复现。
+- 生成 summary：`cd vuln-db && python parser.py`
+- 运行单元测试：`cd tests && sui move test`
+- 运行单元 + testnet 集成：`cd tests && ./run_tests.sh`
+- Windows (MSYS2)：用 `pacman -S mingw-w64-x86_64-python-yaml` 安装 PyYAML
 
 ## Move/Sui 审计资源
 

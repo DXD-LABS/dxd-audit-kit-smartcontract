@@ -16,6 +16,16 @@ This repository contains public security audit reports produced by DXDLABS.
 - `tools/` – configuration and examples of analysis tools used (Slither, Foundry, etc.).
 - `docs/` – professional audit services and additional documentation.
 - `docs/usage-guide.md` – step-by-step install and usage guide.
+- `vuln-db/` – YAML vulnerability database and parser.
+- `tests/` – Move PoC modules and unit/integration tests for vuln-db.
+
+## Vuln DB + PoC Tests
+
+- Sui CLI pinned to `mainnet-v1.64.2` for reproducible results.
+- Generate summary: `cd vuln-db && python parser.py`
+- Run unit tests: `cd tests && sui move test`
+- Run unit + testnet integration: `cd tests && ./run_tests.sh`
+- Windows (MSYS2): install PyYAML with `pacman -S mingw-w64-x86_64-python-yaml`
 
 - ## For AI Agents
 

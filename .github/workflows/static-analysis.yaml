@@ -7,6 +7,8 @@ on:
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    env:
+      SUI_VERSION: mainnet-v1.64.2
     steps:
       - uses: actions/checkout@v4
 
@@ -14,7 +16,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install Sui CLI
-        run: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/MystenLabs/sui/releases/download/mainnet-v1.XX/sui-install | sh
+        run: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/MystenLabs/sui/releases/download/${SUI_VERSION}/sui-install | sh
 
       - name: Install Move Lint
         run: cargo install move-lint
@@ -25,10 +27,18 @@ jobs:
           python-version: '3.12'
 
       - name: Install Python deps
-        run: pip install -r static-analysis/requirements.txt
+        run: pip install -r static-analysis/requirements.txt -r vuln-db/requirements.txt
 
       - name: Run Static Analysis
         run: python static-analysis/scripts/analyze.py .
 
       - name: Run Bytecode Parse
         run: python static-analysis/scripts/parse_bytecode.py .
+
+      - name: Generate Vuln Summary
+        run: python vuln-db/parser.py
+
+      - name: Run Vuln Tests (unit + testnet)
+        run: |
+          chmod +x tests/run_tests.sh
+          tests/run_tests.sh

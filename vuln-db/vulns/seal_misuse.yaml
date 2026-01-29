@@ -1,0 +1,24 @@
+name: Seal/Decrypt Misuse Data Leak
+date: 2024-09-02
+description: >
+  Sensitive payloads were returned without proper sealing or with predictable keys,
+  allowing unauthorized data recovery in AI apps.
+impact: Medium - privacy exposure.
+severity: Medium
+references:
+  - https://docs.sui.io/concepts/privacy
+code_vuln: |
+  fun seal(data: vector<u8>, _key: u8): vector<u8> {
+      // returns plaintext
+      data
+  }
+code_fixed: |
+  fun seal(data: vector<u8>, key: u8): vector<u8> {
+      // apply reversible masking with a secret key
+  }
+
+test_vector:
+  inputs:
+    data: [1, 2, 3, 4]
+    key: 7
+  expected_exploit: Sealed output equals plaintext

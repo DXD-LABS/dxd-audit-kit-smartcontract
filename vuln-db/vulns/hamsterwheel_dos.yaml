@@ -1,0 +1,20 @@
+name: HamsterWheel DoS Infinite Loop
+date: 2023-06-19
+description: >
+  A malicious control flow graph can force the verifier into a non-terminating loop,
+  stalling validation and causing a denial of service.
+impact: Critical - validator halt and potential network disruption.
+severity: Critical
+references:
+  - https://www.certik.com/resources/blog/the-hamsterwheel-an-in-depth-exploration-of-a-novel-attack-vector-on-the-sui
+code_vuln: |
+  // Malicious bytecode structure causes unbounded verifier loop
+  loop { if (false) break; }
+code_fixed: |
+  // Verifier patch enforces maximum loop depth and aborts
+  if (loop_depth > MAX_DEPTH) abort(VERIFIER_LIMIT);
+
+test_vector:
+  inputs:
+    loop_depth: 1000000
+  expected_exploit: Verifier hangs or exceeds limit

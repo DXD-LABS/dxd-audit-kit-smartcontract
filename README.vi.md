@@ -15,6 +15,16 @@ Kho lưu trữ này chứa các báo cáo kiểm định bảo mật công khai 
 - `tools/` – Cấu hình và ví dụ về các công cụ phân tích được sử dụng (Slither, Foundry, v.v.).
 - `docs/` – Dịch vụ kiểm định chuyên nghiệp và tài liệu bổ sung.
 - `docs/usage-guide.md` – Hướng dẫn cài đặt và sử dụng chi tiết.
+- `vuln-db/` – Cơ sở dữ liệu lỗ hổng dạng YAML và bộ parser.
+- `tests/` – Các module PoC Move và unit/integration tests cho vuln-db.
+
+## Vuln DB + PoC Tests
+
+- Sui CLI cố định ở `mainnet-v1.64.2` để đảm bảo tái lập.
+- Tạo summary: `cd vuln-db && python parser.py`
+- Chạy unit tests: `cd tests && sui move test`
+- Chạy unit + testnet integration: `cd tests && ./run_tests.sh`
+- Windows (MSYS2): cài PyYAML với `pacman -S mingw-w64-x86_64-python-yaml`
 
 ## Dịch vụ Kiểm định Chuyên nghiệp
 
