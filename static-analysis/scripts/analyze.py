@@ -33,8 +33,7 @@ def check_vuln(code: str, rule: dict, file_path: Path):
         name = rule.get("name", "unknown")
         desc = rule.get("description", "")
         sev = rule.get("severity", "info").lower()
-        print(f"[VULN] {name}: {desc} (Severity: {sev}) in {file_path}")
-        return sev
+        return {'name': name, 'description': desc, 'severity': sev, 'file': str(file_path)}
     return None
 
 
@@ -64,20 +63,24 @@ def main():
     parser.add_argument("path", help="Move file or package directory")
     parser.add_argument("--rules", default="static-analysis/rules/sui_vuln_rules.yaml")
     parser.add_argument("--no-move-lint", action="store_true")
+    parser.add_argument("--json", "-j", action="store_true", help="Output JSON findings")
     args = parser.parse_args()
 
     base = Path(args.path)
     rules_path = Path(args.rules)
     rules = load_rules(rules_path)
 
+    findings = []
     highest = 0
     linted_packages = set()
     for move_file in iter_move_files(base):
         code = move_file.read_text(encoding="utf-8")
         for rule in rules:
-            sev = check_vuln(code, rule, move_file)
-            if sev:
-                highest = max(highest, SEVERITY_RANK.get(sev, 0))
+            vuln = check_vuln(code, rule, move_file)
+            if vuln:
+                print(f"[VULN] {vuln['name']}: {vuln['description']} (Severity: {vuln['severity']}) in {move_file}")
+                findings.append(vuln)
+                highest = max(highest, SEVERITY_RANK.get(vuln['severity'], 0))
 
         if not args.no_move_lint:
             pkg = find_move_package_root(move_file)
@@ -85,6 +88,10 @@ def main():
                 run_move_lint(pkg)
                 linted_packages.add(pkg)
 
+    if args.json:
+        import json
+        print(json.dumps(findings, indent=2))
+        sys.exit(0)
     if highest >= SEVERITY_RANK["high"]:
         return 1
     return 0

@@ -15,6 +15,7 @@ Kho lưu trữ này chứa các báo cáo kiểm định bảo mật công khai 
 - `tools/` – Cấu hình và ví dụ về các công cụ phân tích được sử dụng (Slither, Foundry, v.v.).
 - `docs/` – Dịch vụ kiểm định chuyên nghiệp và tài liệu bổ sung.
 - `docs/usage-guide.md` – Hướng dẫn cài đặt và sử dụng chi tiết.
+- `scorecard/` – Công cụ Security Scorecard BVSS (CLI + Web tương tác, tích hợp vuln-db & static-analysis).
 - `vuln-db/` – Cơ sở dữ liệu lỗ hổng dạng YAML và bộ parser.
 - `tests/` – Các module PoC Move và unit/integration tests cho vuln-db.
 

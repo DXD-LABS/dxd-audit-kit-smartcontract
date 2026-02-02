@@ -15,6 +15,7 @@
 - `tools/` – 所使用的分析工具（Slither、Foundry 等）的配置和示例。
 - `docs/` – 专业审计服务与补充文档。
 - `docs/usage-guide.md` – 安装与使用指南。
+- `scorecard/` – BVSS 安全记分牌工具 (CLI + Web 仪表板，集成 vuln-db & static-analysis)。
 - `vuln-db/` – YAML 格式的漏洞数据库与解析器。
 - `tests/` – vuln-db 的 Move PoC 模块与单元/集成测试。
 

@@ -31,7 +31,15 @@ jobs:
 
       - name: Run Static Analysis
         run: python static-analysis/scripts/analyze.py .
-
+      - name: Run Static Analysis JSON
+        run: python static-analysis/scripts/analyze.py . --json > lint.json
+      - name: Run Scorecard on Lint
+        run: python scorecard/cli.py --lint-output lint.json --output html
+      - name: Upload Scorecard Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scorecard-report
+          path: scorecard_report.html
       - name: Run Bytecode Parse
         run: python static-analysis/scripts/parse_bytecode.py .
 

@@ -16,6 +16,7 @@ This repository contains public security audit reports produced by DXDLABS.
 - `tools/` – configuration and examples of analysis tools used (Slither, Foundry, etc.).
 - `docs/` – professional audit services and additional documentation.
 - `docs/usage-guide.md` – step-by-step install and usage guide.
+- `scorecard/` – BVSS Security Scorecard Tool (CLI + interactive Web, integrates vuln-db & static-analysis).
 - `vuln-db/` – YAML vulnerability database and parser.
 - `tests/` – Move PoC modules and unit/integration tests for vuln-db.
 

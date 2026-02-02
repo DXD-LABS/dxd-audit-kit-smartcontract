@@ -49,5 +49,39 @@ Dùng cho Demo hoặc khách hàng tương tác trực tiếp.
 - **Exploit Maturity**: Trạng thái của mã khai thác (Theoretical, POC, Active).
 - **Privileged Access**: Yêu cầu quyền truy cập đặc biệt.
 
+## 🚀 Usage Nâng cao & Tích hợp CI/CD
+
+**Tích hợp Static Analysis (từ lint.json):**
+```bash
+python scorecard/cli.py --lint-output lint.json --output html  # Tạo scorecard_report.html
+```
+
+**Full BVSS Args Override:**
+```bash
+python scorecard/cli.py --vuln-id cetus_overflow \\
+  --impact Critical --likelihood High \\
+  --exploitability Network --scope Changed --economic-loss Billions \\
+  --maturity Active --output markdown
+```
+
+**CI/CD (.github/workflows/static-analysis.yaml):**
+- Tự chạy `analyze.py --json > lint.json` → scorecard → upload artifact `scorecard-report`.
+
+## 📈 Ví dụ Kết quả
+```
+# Results for cetus_overflow
+- Impact: Critical
+- Likelihood: High  
+- Score: 9.8/10
+- Severity: 🔴 Critical
+```
+
+**Config tùy chỉnh:** Chỉnh `scorecard_config.json` (weights, multipliers).
+
+## 🌐 Ngôn ngữ / Languages
+- [🇺🇸 English](./README.en.md)
+- [🇻🇳 Tiếng Việt](./README.md) 
+- [🇨🇳 中文](./README.zh.md)
+
 ---
 *Phát triển bởi DXD Labs.*

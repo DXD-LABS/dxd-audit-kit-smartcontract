@@ -26,7 +26,24 @@
       {"threshold": 7.0, "label": "High", "color": "🟠"},
       {"threshold": 4.0, "label": "Medium", "color": "🟡"},
       {"threshold": 0.0, "label": "Low", "color": "🟢"}
-    ]
+    ],
+    "bvss_metrics": {
+      "exploitability_map": {
+        "Network": 3.0,
+        "Adjacent": 2.0,
+        "Local": 1.0
+      },
+      "scope_map": {
+        "Unchanged": 1.0,
+        "Changed": 1.2
+      },
+      "economic_loss_map": {
+        "Negligible": 1,
+        "Thousands": 2,
+        "Millions": 3,
+        "Billions": 4
+      }
+    }
   },
   "blockchain_factors": {
     "exploit_maturity": {
