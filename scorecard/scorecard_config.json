@@ -1,0 +1,42 @@
+{
+  "version": "1.0.0",
+  "project": "DXD Labs Smart Contract Audit",
+  "scoring_logic": {
+    "impact_map": {
+      "Low": 1,
+      "Medium": 2,
+      "High": 3,
+      "Critical": 4
+    },
+    "likelihood_map": {
+      "Low": 1,
+      "Medium": 2,
+      "High": 3
+    },
+    "weights": {
+      "impact": 0.6,
+      "likelihood": 0.4
+    },
+    "multipliers": {
+      "immutability": 1.5,
+      "on_chain_immutable": 2.0
+    },
+    "severity_levels": [
+      {"threshold": 9.0, "label": "Critical", "color": "🔴"},
+      {"threshold": 7.0, "label": "High", "color": "🟠"},
+      {"threshold": 4.0, "label": "Medium", "color": "🟡"},
+      {"threshold": 0.0, "label": "Low", "color": "🟢"}
+    ]
+  },
+  "blockchain_factors": {
+    "exploit_maturity": {
+      "Theoretical": 0.8,
+      "POC": 1.0,
+      "Active": 1.2
+    },
+    "privileged_access": {
+      "Required": 0.7,
+      "Not Required": 1.1
+    }
+  }
+}

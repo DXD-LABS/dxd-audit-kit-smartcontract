@@ -1,0 +1,111 @@
+[
+  {
+    "name": "Integer Overflow in Liquidity Library",
+    "cve_id": "None",
+    "date": "2025-05-22",
+    "affected_projects": "Cetus Protocol",
+    "description": "Incorrect shift bound check in a liquidity helper allowed oversized shifts to pass. Attackers used flash swaps to inject extreme liquidity and extract value.\n",
+    "impact": "Critical - large scale fund loss and pool imbalance.",
+    "severity": "Critical",
+    "references": [
+      "https://www.elliptic.co/blog/cetus-protocol-hacked-for-more-than-200-million",
+      "https://www.dlnews.com/articles/defi/how-hacker-used-fake-tokens-to-syphon-220m-sui-dex-cetus"
+    ],
+    "code_vuln": "fun checked_shlw(x: u256, shift: u8): u256 {\n    if (shift > 256) { abort(OVERFLOW); } // wrong bound\n    x << shift\n}\n",
+    "code_fixed": "fun checked_shlw(x: u256, shift: u8): u256 {\n    if (shift > 192) { abort(OVERFLOW); }\n    x << shift\n}\n",
+    "test_vector": {
+      "inputs": {
+        "token_amount": 1,
+        "shift_value": 200
+      },
+      "expected_exploit": "Liquidity inflated to drain pool",
+      "sui_testnet_tx": "0xexample_tx_id"
+    },
+    "id": "cetus_overflow"
+  },
+  {
+    "name": "HamsterWheel DoS Infinite Loop",
+    "date": "2023-06-19",
+    "description": "A malicious control flow graph can force the verifier into a non-terminating loop, stalling validation and causing a denial of service.\n",
+    "impact": "Critical - validator halt and potential network disruption.",
+    "severity": "Critical",
+    "references": [
+      "https://www.certik.com/resources/blog/the-hamsterwheel-an-in-depth-exploration-of-a-novel-attack-vector-on-the-sui"
+    ],
+    "code_vuln": "// Malicious bytecode structure causes unbounded verifier loop\nloop { if (false) break; }\n",
+    "code_fixed": "// Verifier patch enforces maximum loop depth and aborts\nif (loop_depth > MAX_DEPTH) abort(VERIFIER_LIMIT);\n",
+    "test_vector": {
+      "inputs": {
+        "loop_depth": 1000000
+      },
+      "expected_exploit": "Verifier hangs or exceeds limit"
+    },
+    "id": "hamsterwheel_dos"
+  },
+  {
+    "name": "Oracle Manipulation via Stale Price",
+    "date": "2024-11-03",
+    "description": "A lending market accepted stale oracle prices without enforcing a freshness window, allowing flash loan price skew and under-collateralized borrowing.\n",
+    "impact": "High - bad debt and insolvency risk.",
+    "severity": "High",
+    "references": [
+      "https://docs.sui.io/concepts/defi/oracles"
+    ],
+    "code_vuln": "fun get_price(price: u64, last_updated: u64, now: u64): u64 {\n    // missing staleness guard\n    price\n}\n",
+    "code_fixed": "fun get_price(price: u64, last_updated: u64, now: u64): u64 {\n    if (now - last_updated > MAX_STALE_SECS) abort(STALE_PRICE);\n    price\n}\n",
+    "test_vector": {
+      "inputs": {
+        "price": 100,
+        "last_updated": 0,
+        "now": 1000
+      },
+      "expected_exploit": "Stale price accepted for borrow"
+    },
+    "id": "oracle_manipulation"
+  },
+  {
+    "name": "Seal/Decrypt Misuse Data Leak",
+    "date": "2024-09-02",
+    "description": "Sensitive payloads were returned without proper sealing or with predictable keys, allowing unauthorized data recovery in AI apps.\n",
+    "impact": "Medium - privacy exposure.",
+    "severity": "Medium",
+    "references": [
+      "https://docs.sui.io/concepts/privacy"
+    ],
+    "code_vuln": "fun seal(data: vector<u8>, _key: u8): vector<u8> {\n    // returns plaintext\n    data\n}\n",
+    "code_fixed": "fun seal(data: vector<u8>, key: u8): vector<u8> {\n    // apply reversible masking with a secret key\n}\n",
+    "test_vector": {
+      "inputs": {
+        "data": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "key": 7
+      },
+      "expected_exploit": "Sealed output equals plaintext"
+    },
+    "id": "seal_misuse"
+  },
+  {
+    "name": "Package Upgrade Abort via Capability Mismatch",
+    "date": "2024-07-14",
+    "description": "Upgrade logic accepted mismatched capability versions, causing publish aborts or inconsistent upgrade state.\n",
+    "impact": "Medium - deployment failures and upgrade downtime.",
+    "severity": "Medium",
+    "references": [
+      "https://docs.sui.io/concepts/upgrade"
+    ],
+    "code_vuln": "fun can_upgrade(cap_version: u64, target_version: u64): bool {\n    // missing strict equality check\n    true\n}\n",
+    "code_fixed": "fun can_upgrade(cap_version: u64, target_version: u64): bool {\n    if (cap_version != target_version) abort(VERSION_MISMATCH);\n    true\n}\n",
+    "test_vector": {
+      "inputs": {
+        "cap_version": 1,
+        "target_version": 2
+      },
+      "expected_exploit": "Upgrade proceeds with invalid capability"
+    },
+    "id": "upgrade_abort"
+  }
+]

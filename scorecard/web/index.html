@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DXD Labs Security Scorecard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="calculator.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8">
+        <div class="flex items-center justify-between border-bottom pb-4 mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Security Scorecard Interactive</h1>
+            <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">Senior Agent Edition</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Form Input -->
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Chọn lỗ hổng từ DB (Tùy chọn)</label>
+                    <select id="vuln-select" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                        <option value="">-- Nhập thủ công --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Impact</label>
+                    <select id="impact" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                        <option value="Critical">Critical (4)</option>
+                        <option value="High">High (3)</option>
+                        <option value="Medium" selected>Medium (2)</option>
+                        <option value="Low">Low (1)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Likelihood</label>
+                    <select id="likelihood" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                        <option value="High">High (3)</option>
+                        <option value="Medium" selected>Medium (2)</option>
+                        <option value="Low">Low (1)</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center">
+                    <input id="is-immutable" type="checkbox" checked class="h-4 w-4 text-blue-600 border-gray-300 rounded">
+                    <label for="is-immutable" class="ml-2 block text-sm text-gray-900">Immutable (Blockchain-specific multiplier)</label>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Exploit Maturity</label>
+                    <select id="maturity" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                        <option value="Active">Active Exploits (1.2x)</option>
+                        <option value="POC" selected>POC available (1.0x)</option>
+                        <option value="Theoretical">Theoretical (0.8x)</option>
+                    </select>
+                </div>
+
+                <button id="calculate-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200">
+                    Tính toán rủi ro
+                </button>
+            </div>
+
+            <!-- Kết quả -->
+            <div class="bg-gray-50 rounded-lg p-6 border flex flex-col items-center justify-center text-center">
+                <div class="text-sm text-gray-500 uppercase tracking-widest mb-2">Security Score</div>
+                <div id="result-score" class="text-6xl font-black text-gray-800 mb-2">0.0</div>
+                <div id="result-severity" class="text-xl font-bold px-4 py-1 rounded-full bg-gray-200 text-gray-700">
+                    N/A
+                </div>
+                
+                <div class="mt-8 w-full border-t pt-4">
+                    <div class="text-left text-xs text-gray-400 mb-2">Chi tiết trọng số:</div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span>Impact Weighted:</span>
+                        <span id="detail-impact">-</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span>Likelihood Weighted:</span>
+                        <span id="detail-likelihood">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let config = null;
+        let calculator = null;
+        let vulns = [];
+
+        async function init() {
+            // Load config
+            const response = await fetch('../scorecard_config.json');
+            config = await response.json();
+            calculator = new BVSSCalculator(config);
+
+            // Load exported vulns if available
+            try {
+                const vRes = await fetch('vulns_exported.json');
+                vulns = await vRes.json();
+                const select = document.getElementById('vuln-select');
+                vulns.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v.id;
+                    opt.textContent = `${v.id} (${v.severity || 'Medium'})`;
+                    select.appendChild(opt);
+                });
+            } catch (e) {
+                console.log("No exported vulns found, using manual mode.");
+            }
+        }
+
+        document.getElementById('calculate-btn').onclick = () => {
+            const impact = document.getElementById('impact').value;
+            const likelihood = document.getElementById('likelihood').value;
+            const isImmutable = document.getElementById('is-immutable').checked;
+            const maturity = document.getElementById('maturity').value;
+
+            const res = calculator.calculate(impact, likelihood, isImmutable, maturity);
+            
+            document.getElementById('result-score').textContent = res.score.toFixed(1);
+            document.getElementById('result-severity').textContent = `${res.color} ${res.severity}`;
+            
+            // Update color
+            const sevEl = document.getElementById('result-severity');
+            sevEl.className = "text-xl font-bold px-4 py-1 rounded-full ";
+            if (res.severity === 'Critical') sevEl.classList.add('bg-red-100', 'text-red-700');
+            else if (res.severity === 'High') sevEl.classList.add('bg-orange-100', 'text-orange-700');
+            else if (res.severity === 'Medium') sevEl.classList.add('bg-yellow-100', 'text-yellow-700');
+            else sevEl.classList.add('bg-green-100', 'text-green-700');
+        };
+
+        document.getElementById('vuln-select').onchange = (e) => {
+            const vuln = vulns.find(v => v.id === e.target.value);
+            if (vuln) {
+                if (vuln.impact) document.getElementById('impact').value = vuln.impact;
+                if (vuln.likelihood) document.getElementById('likelihood').value = vuln.likelihood;
+            }
+        };
+
+        init();
+    </script>
+</body>
+</html>
