@@ -189,6 +189,17 @@ A collection of security patterns and common vulnerabilities for Sui Move.
 - `navi-health-factor-manip.md` ([Multi](resources/move/real-cases/navi-health-factor-manip.md)): Health factor manipulation via oracle staleness (NAVI).
 - `scallop-isolation-bypass.md` ([Multi](resources/move/real-cases/scallop-isolation-bypass.md)): Isolation mode bypass in lending protocols (Scallop).
 
+### Move Prover Examples (`prover-examples/`)
+
+Hands-on examples for Move Prover formal verification using MSL specs.
+
+- **Basics**: safe_transfer (no double-spend), no_double_spend (balance invariant).
+- **DeFi**: flash_loan_safe (repayment enforced), lending_collateral (over-collateralized), oracle_safe (price freshness).
+- Dual-language guides (VN/EN/ZH): Setup Sui CLI/Z3/Boogie, run `sui move prove`.
+- GitHub Actions CI: Auto-verify on PRs.
+
+See [prover-examples/README.md](./prover-examples/README.md).
+
 ## Report Format
 
 Each report follows the same structure:

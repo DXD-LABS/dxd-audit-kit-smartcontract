@@ -1,0 +1,23 @@
+name: Move Prover Check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Sui CLI
+        run: cargo install --locked sui --git https://github.com/MystenLabs/sui.git
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y z3 libz3-dev
+          dotnet tool install -g boogie
+      - name: Run Move Prover
+        run: cd prover-examples && sui move prove
+      - name: Fail if Not Verified
+        if: failure()
+        run: echo "Prover failed - Specs not held!" &amp;&amp; exit 1

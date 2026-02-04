@@ -104,6 +104,18 @@ Tập hợp các pattern bảo mật và các lỗ hổng phổ biến cho Sui M
 - `navi-health-factor-manip.md` ([Multi](resources/move/real-cases/navi-health-factor-manip.md)): Thao túng health factor qua oracle cũ (NAVI).
 - `scallop-isolation-bypass.md` ([Multi](resources/move/real-cases/scallop-isolation-bypass.md)): Vượt qua chế độ cách ly trong lending (Scallop).
 
+### Move Prover Examples (`prover-examples/`)
+
+Các ví dụ thực hành cho Move Prover formal verification sử dụng MSL specs.
+
+- **Cơ bản**: safe_transfer (không double-spend), no_double_spend (invariant balance).
+- **DeFi**: flash_loan_safe (bắt buộc hoàn trả), lending_collateral (siêu thế chấp), oracle_safe (độ tươi giá), no_double_spend_transfer (chuyển coin an toàn), liquidation_safe (kiểm tra liquidation an toàn), oracle_deviation_safe (kiểm tra độ lệch oracle).
+
+- Hướng dẫn ba ngôn ngữ (VN/EN/ZH): Setup Sui CLI/Z3/Boogie, chạy `sui move prove`.
+- GitHub Actions CI: Tự động verify trên PRs.
+
+Xem [prover-examples/README.md](./prover-examples/README.md).
+
 ## Định dạng Báo cáo
 
 Mỗi báo cáo tuân theo cấu trúc thống nhất:

@@ -1,0 +1,15 @@
+[prover]
+auto_trace_level = "VerifiedFunction"
+verbosity = "Low"
+
+[verify]
+safe_transfer.transfer_safe = true
+no_double_spend.withdraw = true
+flash_loan_safe.borrow_flash_loan = true
+flash_loan_safe.repay_flash_loan = true
+lending_collateral.borrow = true
+oracle_safe.get_price = true
+no_double_spend_transfer.safe_transfer = true
+liquidation_safe.needs_liquidation = true
+liquidation_safe.liquidate = true
+oracle_deviation_safe.safe_price_check = true

@@ -95,6 +95,17 @@ Sui Move 的安全模式和常见漏洞集合。
 - `navi-health-factor-manip.md` ([Multi](resources/move/real-cases/navi-health-factor-manip.md)): 通过预言机过期数据操纵健康因子 (NAVI)。
 - `scallop-isolation-bypass.md` ([Multi](resources/move/real-cases/scallop-isolation-bypass.md)): 借贷协议中的隔离模式绕过 (Scallop)。
 
+### Move Prover 示例 (`prover-examples/`)
+
+使用 MSL 规范的 Move Prover 正式验证的动手示例。
+
+- **基础**: safe_transfer (无双花)，no_double_spend (余额不变量)。
+- **DeFi**: flash_loan_safe (强制还款)，lending_collateral (超额抵押)，oracle_safe (价格新鲜度)。
+- 三语指南 (VN/EN/ZH): 设置 Sui CLI/Z3/Boogie，运行 `sui move prove`。
+- GitHub Actions CI: PR 自动验证。
+
+查看 [prover-examples/README.md](./prover-examples/README.md)。
+
 ## 报告格式
 
 每份报告均遵循统一的结构：
