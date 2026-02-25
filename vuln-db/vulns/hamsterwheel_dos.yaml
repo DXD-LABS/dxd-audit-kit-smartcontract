@@ -1,5 +1,6 @@
 name: HamsterWheel DoS Infinite Loop
 date: 2023-06-19
+loss: $0 (Network Halt)
 description: >
   A malicious control flow graph can force the verifier into a non-terminating loop,
   stalling validation and causing a denial of service.

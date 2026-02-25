@@ -1,0 +1,15 @@
+name: Unaudited Custom Library Dependency Inheritance
+date: 2025-01-01
+loss: Multiple (Typus/Cetus-like)
+description: Reliance on unaudited/open-source libs (math libs như integer-mate) inherits bugs (rounding/overflow) → exploits in caller contracts.
+impact: High - Supply chain risk, common ở Sui DeFi dùng libs chưa audit.
+severity: High
+code_vuln: |
+  use third_party::unsafe_math::mul_div;  // Unaudited, bug in mul_div
+code_fixed: |
+  use sui::math;  // Built-in audited
+test_vector: Lib bug trigger overflow in caller → pool manip/drain.
+references:
+  - https://slowmist.com/blog/post/sui-exploit-2025-report
+  - https://www.halborn.com/blog/post/explained-the-typus-finance-hack-october-2025
+sui_specific: true

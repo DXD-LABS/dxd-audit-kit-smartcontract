@@ -104,6 +104,14 @@ Tập hợp các pattern bảo mật và các lỗ hổng phổ biến cho Sui M
 - `navi-health-factor-manip.md` ([Multi](resources/move/real-cases/navi-health-factor-manip.md)): Thao túng health factor qua oracle cũ (NAVI).
 - `scallop-isolation-bypass.md` ([Multi](resources/move/real-cases/scallop-isolation-bypass.md)): Vượt qua chế độ cách ly trong lending (Scallop).
 
+### Cơ sở dữ liệu Lỗ hổng (`vuln-db/`)
+- `vulns/`: Danh sách các lỗ hổng thực tế được phân loại theo format YAML.
+- `summary.md`: Tóm tắt các lỗ hổng, sắp xếp theo mức độ thiệt hại (Loss).
+- **Các vụ hack tiêu biểu 2025**:
+  - **Cetus ($223M)**: Lỗi tràn số (Overflow) và Spoof Token.
+  - **Typus ($3.44M)**: Oracle Authority Bypass.
+  - **Nemo ($2.4M)**: Economic Logic Exploit.
+
 ### Move Prover Examples (`prover-examples/`)
 
 Các ví dụ thực hành cho Move Prover formal verification sử dụng MSL specs.

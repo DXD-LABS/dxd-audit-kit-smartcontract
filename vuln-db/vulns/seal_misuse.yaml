@@ -1,5 +1,6 @@
 name: Seal/Decrypt Misuse Data Leak
 date: 2024-09-02
+loss: $0 (Privacy Exposure)
 description: >
   Sensitive payloads were returned without proper sealing or with predictable keys,
   allowing unauthorized data recovery in AI apps.

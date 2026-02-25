@@ -95,6 +95,14 @@ Sui Move 的安全模式和常见漏洞集合。
 - `navi-health-factor-manip.md` ([Multi](resources/move/real-cases/navi-health-factor-manip.md)): 通过预言机过期数据操纵健康因子 (NAVI)。
 - `scallop-isolation-bypass.md` ([Multi](resources/move/real-cases/scallop-isolation-bypass.md)): 借贷协议中的隔离模式绕过 (Scallop)。
 
+### 漏洞数据库 (`vuln-db/`)
+- `vulns/`: 以 YAML 格式分类的实际漏洞列表。
+- `summary.md`: 漏洞摘要，按损失 (Loss) 排序。
+- **2025 年典型黑客案例**:
+  - **Cetus ($223M)**: 溢出错误 (Overflow) 和 Spoof Token。
+  - **Typus ($3.44M)**: 预言机权限绕过 (Oracle Authority Bypass)。
+  - **Nemo ($2.4M)**: 经济逻辑漏洞 (Economic Logic Exploit)。
+
 ### Move Prover 示例 (`prover-examples/`)
 
 使用 MSL 规范的 Move Prover 正式验证的动手示例。

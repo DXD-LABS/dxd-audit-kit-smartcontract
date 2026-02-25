@@ -8,6 +8,7 @@ import yaml
 REQUIRED_FIELDS = [
     "name",
     "date",
+    "loss",
     "description",
     "impact",
     "severity",
@@ -53,6 +54,22 @@ def _severity_key(vuln):
     return SEVERITY_ORDER.get(severity, 999)
 
 
+def _parse_loss(loss_str):
+    if not loss_str or "N/A" in str(loss_str):
+        return 0
+    # Extract numbers and multipliers (M for million, B for billion)
+    match = re.search(r"\$?([\d.]+)\s*([MB]?)", str(loss_str), re.IGNORECASE)
+    if match:
+        value = float(match.group(1))
+        multiplier = match.group(2).upper()
+        if multiplier == "M":
+            return value * 1_000_000
+        if multiplier == "B":
+            return value * 1_000_000_000
+        return value
+    return 0
+
+
 def generate_summary():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     vuln_dir = os.path.join(base_dir, "vulns")
@@ -70,12 +87,14 @@ def generate_summary():
         _validate(data, path)
         vulns.append(data)
 
-    vulns.sort(key=lambda v: (v.get("date", ""), -_severity_key(v)), reverse=True)
+    # Sort by loss descending, then by date descending
+    vulns.sort(key=lambda v: (_parse_loss(v.get("loss", "")), v.get("date", "")), reverse=True)
 
     lines = ["# Sui Vuln Database Summary", ""]
     for vuln in vulns:
         lines.append(f"## {vuln['name']}")
         lines.append(f"- Date: {vuln['date']}")
+        lines.append(f"- Loss: {vuln['loss']}")
         lines.append(f"- Severity: {vuln['severity']}")
         lines.append(f"- Impact: {vuln['impact']}")
         lines.append("")

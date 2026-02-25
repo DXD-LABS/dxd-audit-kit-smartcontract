@@ -1,5 +1,6 @@
 name: Package Upgrade Abort via Capability Mismatch
 date: 2024-07-14
+loss: $0 (Protocol Lock)
 description: >
   Upgrade logic accepted mismatched capability versions, causing publish aborts
   or inconsistent upgrade state.

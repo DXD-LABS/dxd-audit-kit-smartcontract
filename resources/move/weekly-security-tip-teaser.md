@@ -44,6 +44,14 @@ Xem: resources/move/safe/dynamic-fields-safe.move
 Tránh custom balance → dùng Coin<T> & Balance<T> để tránh overflow/underflow.  
 Xem: resources/move/safe/coin-management-safe.move
 
+**Tip #11: Cetus Overflow – Shift limit check**  
+Shift u256 trong Sui chỉ tối đa 192 (thay vì 256) → check bound chặt chẽ tránh liquidity inflate.  
+Xem: vuln-db/vulns/cetus_spoof_overflow.yaml
+
+**Tip #12: Typus Oracle – Auth check update**  
+Update hàm oracle phải assert(ctx.sender() == admin) → tránh auth bypass manip prices.  
+Xem: vuln-db/vulns/typus_oracle_bypass.yaml
+
 Theo dõi repo/X (@Loki_Alcie) để nhận tip hàng tuần!  
 Anh em có tip hay thì PR hoặc tag mình nhé! 💡🔒
 

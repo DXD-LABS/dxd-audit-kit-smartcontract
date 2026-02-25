@@ -1,5 +1,6 @@
 name: Oracle Manipulation via Stale Price
 date: 2024-11-03
+loss: $0 (Theoretical)
 description: >
   A lending market accepted stale oracle prices without enforcing a freshness window,
   allowing flash loan price skew and under-collateralized borrowing.

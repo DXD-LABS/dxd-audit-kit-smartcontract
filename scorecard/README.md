@@ -1,59 +1,59 @@
 # DXD Labs Security Scorecard Tool
 
-Công cụ đánh giá mức độ nghiêm trọng của lỗ hổng bảo mật dựa trên bộ tiêu chí BVSS (Blockchain Vulnerability Scoring System).
+Tool for assessing the severity of security vulnerabilities based on BVSS (Blockchain Vulnerability Scoring System) criteria.
 
-## 📁 Cấu trúc thư mục
-- `core/`: Chứa logic tính điểm dùng chung.
-- `parsers/`: Các module đọc dữ liệu từ vuln-db (YAML) và checklist (MD).
-- `web/`: Giao diện Dashboard tương tác (HTML/JS).
-- `templates/`: Template báo cáo (Jinja2).
-- `scorecard_config.json`: File cấu hình trọng số duy nhất (Single Source of Truth).
+## 📁 Directory Structure
+- `core/`: Contains shared scoring logic.
+- `parsers/`: Modules for reading data from vuln-db (YAML) and checklists (MD).
+- `web/`: Interactive Dashboard interface (HTML/JS).
+- `templates/`: Report templates (Jinja2).
+- `scorecard_config.json`: Single Source of Truth configuration file for weights.
 
-## 🚀 Hướng dẫn sử dụng
+## 🚀 Usage Guide
 
 ### Option 1: CLI Tool (Python)
-Dùng cho Auditor để tính điểm nhanh và xuất báo cáo vào Audit Report.
+For Auditors to quickly score and export reports into Audit Reports.
 
-**Tính điểm cho 1 lỗ hổng từ vuln-db:**
+**Score a single vulnerability from vuln-db:**
 ```bash
 python scorecard/cli.py --vuln-id cetus_overflow
 ```
 
-**Ghi đè các tham số rủi ro:**
+**Override risk parameters:**
 ```bash
 python scorecard/cli.py --vuln-id cetus_overflow --likelihood High --maturity Active
 ```
 
-**Xuất báo cáo từ checklist:**
+**Export report from checklist:**
 ```bash
 python scorecard/cli.py --checklist path/to/checklist.md --output html
 ```
 
-**Đồng bộ dữ liệu cho Web:**
+**Sync data for Web:**
 ```bash
 python scorecard/cli.py --export-web
 ```
 
 ### Option 2: Web Dashboard (GitHub Pages)
-Dùng cho Demo hoặc khách hàng tương tác trực tiếp.
+For demos or direct client interaction.
 
-1. Đảm bảo đã chạy lệnh `--export-web` ở trên.
-2. Mở file `scorecard/web/index.html` trên trình duyệt.
-3. Chọn lỗ hổng hoặc nhập tay các thông số Impact/Likelihood.
+1. Ensure the `--export-web` command above has been run.
+2. Open `scorecard/web/index.html` in a browser.
+3. Select vulnerability or manually enter Impact/Likelihood parameters.
 
-## 📊 Thuật toán tính điểm (BVSS)
-Điểm số được tính dựa trên:
-- **Impact (60%)**: Mức độ ảnh hưởng tài chính/hệ thống.
-- **Likelihood (40%)**: Khả năng xảy ra cuộc tấn công.
-- **Immutability Multiplier (1.5x)**: Đặc thù không thể sửa đổi của Blockchain.
-- **Exploit Maturity**: Trạng thái của mã khai thác (Theoretical, POC, Active).
-- **Privileged Access**: Yêu cầu quyền truy cập đặc biệt.
+## 📊 Scoring Algorithm (BVSS)
+Score is calculated based on:
+- **Impact (60%)**: Financial/system impact level.
+- **Likelihood (40%)**: Likelihood of attack occurrence.
+- **Immutability Multiplier (1.5x)**: Blockchain-specific immutability feature.
+- **Exploit Maturity**: Status of exploit code (Theoretical, POC, Active).
+- **Privileged Access**: Requirement for special access.
 
-## 🚀 Usage Nâng cao & Tích hợp CI/CD
+## 🚀 Advanced Usage & CI/CD Integration
 
-**Tích hợp Static Analysis (từ lint.json):**
+**Integrate Static Analysis (from lint.json):**
 ```bash
-python scorecard/cli.py --lint-output lint.json --output html  # Tạo scorecard_report.html
+python scorecard/cli.py --lint-output lint.json --output html  # Creates scorecard_report.html
 ```
 
 **Full BVSS Args Override:**
@@ -65,9 +65,9 @@ python scorecard/cli.py --vuln-id cetus_overflow \\
 ```
 
 **CI/CD (.github/workflows/static-analysis.yaml):**
-- Tự chạy `analyze.py --json > lint.json` → scorecard → upload artifact `scorecard-report`.
+- Automatically runs `analyze.py --json > lint.json` → scorecard → upload artifact `scorecard-report`.
 
-## 📈 Ví dụ Kết quả
+## 📈 Example Results
 ```
 # Results for cetus_overflow
 - Impact: Critical
@@ -76,12 +76,7 @@ python scorecard/cli.py --vuln-id cetus_overflow \\
 - Severity: 🔴 Critical
 ```
 
-**Config tùy chỉnh:** Chỉnh `scorecard_config.json` (weights, multipliers).
-
-## 🌐 Ngôn ngữ / Languages
-- [🇺🇸 English](./README.en.md)
-- [🇻🇳 Tiếng Việt](./README.md) 
-- [🇨🇳 中文](./README.zh.md)
+**Custom Config:** Edit `scorecard_config.json` (weights, multipliers).
 
 ---
-*Phát triển bởi DXD Labs.*
+*Developed by DXD Labs.*

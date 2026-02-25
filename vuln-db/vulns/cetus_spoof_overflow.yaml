@@ -1,0 +1,22 @@
+name: Cetus Spoof Token + Liquidity Math Overflow
+date: 2025-05-22
+loss: $223M (largest Sui hack 2025)
+description: Attacker deploys spoof tokens mimic legit → abuse flawed checked_shlw (shift limit 256 thay vì 192) → overflow in liquidity calc → mint huge LP with minimal deposit, drain pools (SUI/USDC etc.).
+impact: Critical - Pools emptied, TVL crash, $60M bridged out, $162M frozen by validators.
+severity: Critical
+code_vuln: |
+  fun checked_shlw(x: u256, shift: u8): u256 {
+      if (shift > 256) abort OVERFLOW;  // Wrong limit
+      x << shift
+  }
+code_fixed: |
+  fun checked_shlw(x: u256, shift: u8): u256 {
+      if (shift > 192) abort OVERFLOW;  // Correct for u256 in Sui math
+      x << shift
+  }
+test_vector: Deploy spoof token + large shift → liquidity inflate → drain via swap.
+references:
+  - https://www.elliptic.co/blog/cetus-protocol-hacked-for-more-than-200-million
+  - https://www.halborn.com/blog/post/explained-the-cetus-hack-may-2025
+  - https://dedaub.com/blog/cetus-overflow-analysis
+sui_specific: true

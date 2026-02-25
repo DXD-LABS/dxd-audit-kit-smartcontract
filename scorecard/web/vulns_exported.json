@@ -1,31 +1,26 @@
 [
   {
-    "name": "Integer Overflow in Liquidity Library",
-    "cve_id": "None",
+    "name": "Cetus Spoof Token + Liquidity Math Overflow",
     "date": "2025-05-22",
-    "affected_projects": "Cetus Protocol",
-    "description": "Incorrect shift bound check in a liquidity helper allowed oversized shifts to pass. Attackers used flash swaps to inject extreme liquidity and extract value.\n",
-    "impact": "Critical - large scale fund loss and pool imbalance.",
+    "loss": "$223M (largest Sui hack 2025)",
+    "description": "Attacker deploys spoof tokens mimic legit → abuse flawed checked_shlw (shift limit 256 thay vì 192) → overflow in liquidity calc → mint huge LP with minimal deposit, drain pools (SUI/USDC etc.).",
+    "impact": "Critical - Pools emptied, TVL crash, $60M bridged out, $162M frozen by validators.",
     "severity": "Critical",
+    "code_vuln": "fun checked_shlw(x: u256, shift: u8): u256 {\n    if (shift > 256) abort OVERFLOW;  // Wrong limit\n    x << shift\n}\n",
+    "code_fixed": "fun checked_shlw(x: u256, shift: u8): u256 {\n    if (shift > 192) abort OVERFLOW;  // Correct for u256 in Sui math\n    x << shift\n}\n",
+    "test_vector": "Deploy spoof token + large shift → liquidity inflate → drain via swap.",
     "references": [
       "https://www.elliptic.co/blog/cetus-protocol-hacked-for-more-than-200-million",
-      "https://www.dlnews.com/articles/defi/how-hacker-used-fake-tokens-to-syphon-220m-sui-dex-cetus"
+      "https://www.halborn.com/blog/post/explained-the-cetus-hack-may-2025",
+      "https://dedaub.com/blog/cetus-overflow-analysis"
     ],
-    "code_vuln": "fun checked_shlw(x: u256, shift: u8): u256 {\n    if (shift > 256) { abort(OVERFLOW); } // wrong bound\n    x << shift\n}\n",
-    "code_fixed": "fun checked_shlw(x: u256, shift: u8): u256 {\n    if (shift > 192) { abort(OVERFLOW); }\n    x << shift\n}\n",
-    "test_vector": {
-      "inputs": {
-        "token_amount": 1,
-        "shift_value": 200
-      },
-      "expected_exploit": "Liquidity inflated to drain pool",
-      "sui_testnet_tx": "0xexample_tx_id"
-    },
-    "id": "cetus_overflow"
+    "sui_specific": true,
+    "id": "cetus_spoof_overflow"
   },
   {
     "name": "HamsterWheel DoS Infinite Loop",
     "date": "2023-06-19",
+    "loss": "$0 (Network Halt)",
     "description": "A malicious control flow graph can force the verifier into a non-terminating loop, stalling validation and causing a denial of service.\n",
     "impact": "Critical - validator halt and potential network disruption.",
     "severity": "Critical",
@@ -43,8 +38,27 @@
     "id": "hamsterwheel_dos"
   },
   {
+    "name": "Nemo Economic Logic Exploit",
+    "date": "2025-09-08",
+    "loss": "$2.4M USDC",
+    "description": "Logic flaw in yield/bridge handling allows stolen funds bridged cross-chain (Arbitrum → Ethereum) before maintenance. Despite Move safety, protocol-level economic bug (yield split PT/YT abuse).",
+    "impact": "High - Cross-chain drain, TVL drop mạnh, dù language prevent reentrancy/overflow.",
+    "severity": "High",
+    "code_vuln": "// Vulnerable: No post-bridge verification\nfun repay_yield(...) {\n    bridge(stolen_funds, ...);\n    // No assert bridge success or verified\n}\n",
+    "code_fixed": "fun repay_yield(...) {\n    let bridged = bridge(stolen_funds, ...);\n    assert!(verified_bridge(bridged), E_BRIDGE_FAIL);\n    ...\n}\n",
+    "test_vector": "Bridge stolen USDC via Circle → external drain trước khi suspend contracts.",
+    "references": [
+      "https://www.coindesk.com/markets/2025/09/08/sui-based-yield-protocol-nemo-exploited-for-usd2-4m-in-usdc",
+      "https://finance.yahoo.com/news/nemo-protocol-loses-2-4m-163622264.html",
+      "https://x.com/PeckShieldAlert/status/1832698375635837332"
+    ],
+    "sui_specific": true,
+    "id": "nemo_economic_logic"
+  },
+  {
     "name": "Oracle Manipulation via Stale Price",
     "date": "2024-11-03",
+    "loss": "$0 (Theoretical)",
     "description": "A lending market accepted stale oracle prices without enforcing a freshness window, allowing flash loan price skew and under-collateralized borrowing.\n",
     "impact": "High - bad debt and insolvency risk.",
     "severity": "High",
@@ -66,6 +80,7 @@
   {
     "name": "Seal/Decrypt Misuse Data Leak",
     "date": "2024-09-02",
+    "loss": "$0 (Privacy Exposure)",
     "description": "Sensitive payloads were returned without proper sealing or with predictable keys, allowing unauthorized data recovery in AI apps.\n",
     "impact": "Medium - privacy exposure.",
     "severity": "Medium",
@@ -89,8 +104,62 @@
     "id": "seal_misuse"
   },
   {
+    "name": "Shared Object Race in Mysticeti Parallel Execution",
+    "date": "2025-06-01",
+    "loss": "N/A (Risk post-upgrade)",
+    "description": "Missing version/sequence check in shared object updates → race condition khi parallel tx mutate cùng object (Mysticeti tăng speed → higher risk).",
+    "impact": "Medium-High - Inconsistent state, DoS, hoặc value loss ở shared pools.",
+    "severity": "Medium",
+    "code_vuln": "fun update_shared(obj: &mut SharedObj) { obj.value += 1; }  // No version check\n",
+    "code_fixed": "assert!(obj.version == expected_version, E_RACE);\nobj.value += 1;\nobj.version = obj.version + 1;\n",
+    "test_vector": "Two parallel tx call update_shared → inconsistent value.",
+    "references": [
+      "https://docs.sui.io/concepts/cryptography/mysticeti",
+      "https://www.zellic.io/blog/sui-shared-object-safety",
+      "https://www.halborn.com/blog/post/sui-shared-objects-race-conditions"
+    ],
+    "sui_specific": true,
+    "id": "shared_object_race_mysticeti"
+  },
+  {
+    "name": "Typus Oracle Authority Bypass",
+    "date": "2025-10-15",
+    "loss": "$3.44M (SUI, USDC, xBTC, suiETH)",
+    "description": "Missing assert in custom oracle contract bypasses authorization checks → attacker calls update_v2 to set fake prices, manipulates TLP pools and drains funds. Unaudited oracle + lack of sender check.",
+    "impact": "Critical - Direct pool drain via price manip, 3rd major Sui exploit 2025 (sau Cetus & Nemo).",
+    "severity": "Critical",
+    "code_vuln": "// Vulnerable: No auth check\npublic entry fun update_v2(...) {\n    // Update price without assert(ctx.sender() == admin)\n    oracle.price = new_price;\n}\n",
+    "code_fixed": "public entry fun update_v2(...) {\n    assert!(ctx.sender() == oracle_admin, E_UNAUTHORIZED);\n    oracle.price = new_price;\n}\n",
+    "test_vector": "Attacker calls update_v2 with fake price → swap at manipulated rate → drain liquidity.",
+    "references": [
+      "https://www.halborn.com/blog/post/explained-the-typus-finance-hack-october-2025",
+      "https://medium.com/@TypusFinance/typus-finance-tlp-oracle-exploit-post-mortem-report-response-plan-ce2d0800808b",
+      "https://slowmist.com/blog/post/typus-finance-oracle-exploit-analysis"
+    ],
+    "sui_specific": true,
+    "id": "typus_oracle_bypass"
+  },
+  {
+    "name": "Unaudited Custom Library Dependency Inheritance",
+    "date": "2025-01-01",
+    "loss": "Multiple (Typus/Cetus-like)",
+    "description": "Reliance on unaudited/open-source libs (math libs như integer-mate) inherits bugs (rounding/overflow) → exploits in caller contracts.",
+    "impact": "High - Supply chain risk, common ở Sui DeFi dùng libs chưa audit.",
+    "severity": "High",
+    "code_vuln": "use third_party::unsafe_math::mul_div;  // Unaudited, bug in mul_div\n",
+    "code_fixed": "use sui::math;  // Built-in audited\n",
+    "test_vector": "Lib bug trigger overflow in caller → pool manip/drain.",
+    "references": [
+      "https://slowmist.com/blog/post/sui-exploit-2025-report",
+      "https://www.halborn.com/blog/post/explained-the-typus-finance-hack-october-2025"
+    ],
+    "sui_specific": true,
+    "id": "unaudited_lib_inheritance"
+  },
+  {
     "name": "Package Upgrade Abort via Capability Mismatch",
     "date": "2024-07-14",
+    "loss": "$0 (Protocol Lock)",
     "description": "Upgrade logic accepted mismatched capability versions, causing publish aborts or inconsistent upgrade state.\n",
     "impact": "Medium - deployment failures and upgrade downtime.",
     "severity": "Medium",
