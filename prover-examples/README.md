@@ -30,6 +30,20 @@ All specs should verify OK.
 - **liquidation_safe.move**: Safe liquidation check (needs_liquidation true only under-collateral >120%, aborts liquidate healthy position).
 - **oracle_deviation_safe.move**: Oracle freshness + deviation check (aborts stale >300s or deviation >5%).
 
+### AI-Agent Specific Examples
+Examples for proving invariants critical to AI agent security on Sui (agent wallets, machine transactions):
+
+- **agent_policy_guard.move**: Prove agent spend <= policy.limit + intent_verified
+  - `invariant spent <= spend_limit`: Agent cannot overspend beyond policy limit
+  - `aborts_if !intent_verified`: Requires intent verification (from Seal/Nautilus or user signature) before execute
+  - `ensures policy.spent == old(policy.spent) + action.amount`: Spend increases correctly
+  - Use case: Beep/Talus agent wallets with programmable spend limits
+
+- **agent_tool_access.move**: Aborts if unauthorized tool call
+  - `aborts_if !allowed_tool_X`: Prevents agent from calling tools not in allowlist
+  - `ensures agent.allowed_tool_X`: Only authorized tools can execute
+  - Use case: Prevent rogue trades, unauthorized bridge calls, or fund drains
+
 ### Troubleshooting
 - "Z3 not found": Add Z3 bin to PATH, restart terminal.
 - "Boogie error": Check .NET SDK installed.
