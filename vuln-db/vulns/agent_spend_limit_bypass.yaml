@@ -1,0 +1,30 @@
+name: AGENT-002 Rogue Agent Spend Limit Bypass
+date: 2025-12-02
+loss: Simulated $50k+ in test env
+description: Agent bypasses its spend limit through multi-step workflows or memory poisoning. If an agent's tracked spending is stored off-chain or poorly managed on-chain, it can be reset or manipulated.
+impact: Medium to High
+severity: High
+code_vuln: |
+  public entry fun execute_workflow_step_vulnerable(
+      config: &mut AgentConfig, amount: u64, target: address, ctx: &mut TxContext
+  ) {
+      if (config.memory_tainted) { config.current_spent = 0; };
+      assert!(config.current_spent + amount <= config.spend_limit, EOverSpendLimit);
+      let extracted = coin::split(&mut config.treasury, amount, ctx);
+      transfer::public_transfer(extracted, target);
+      config.current_spent = config.current_spent + amount;
+  }
+code_fixed: |
+  public entry fun execute_workflow_step_fixed(
+      config: &mut AgentConfig, amount: u64, target: address, ctx: &mut TxContext
+  ) {
+      assert!(config.current_spent + amount <= config.spend_limit, EOverSpendLimit);
+      let extracted = coin::split(&mut config.treasury, amount, ctx);
+      transfer::public_transfer(extracted, target);
+      config.current_spent = config.current_spent + amount;
+  }
+test_vector: Poison memory to reset limits and drain funds exceeding the cap.
+references:
+  - https://arxiv.org/html/2601.04583v1
+
+sui_specific: true

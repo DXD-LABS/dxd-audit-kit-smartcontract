@@ -1,0 +1,26 @@
+name: AGENT-007 Verifiable Intent Failure
+date: 2025-12-07
+loss: Logic bypass mapping
+description: An agent executes a transaction without on-chain verifiable intent proof (e.g., ZK Proof or Multi-Signature verification missing).
+impact: Medium
+severity: Medium
+code_vuln: |
+  public entry fun execute_action_vulnerable(
+      wallet: &mut AgentWallet, target: address, amount: u64, ctx: &mut TxContext
+  ) {
+      let extracted = coin::split(&mut wallet.balance, amount, ctx);
+      transfer::public_transfer(extracted, target);
+  }
+code_fixed: |
+  public fun execute_action_fixed(
+      wallet: &mut AgentWallet, target: address, amount: u64, proof: IntentProof, ctx: &mut TxContext
+  ) {
+      assert!(proof.is_valid, EMissingIntentProof);
+      let extracted = coin::split(&mut wallet.balance, amount, ctx);
+      transfer::public_transfer(extracted, target);
+  }
+test_vector: Send a transaction omitting IntentProof entirely, relying on the function not checking it.
+references:
+  - https://arxiv.org/html/2601.04583v1
+
+sui_specific: true

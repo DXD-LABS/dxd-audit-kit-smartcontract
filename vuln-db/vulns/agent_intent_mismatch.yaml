@@ -1,0 +1,30 @@
+name: AGENT-004 Intent Spoofing / Mismatch
+date: 2025-12-04
+loss: Simulated asset theft
+description: Off-chain agent intent mismatches on-chain execution. The function does not verify the hash of the expected parameters.
+impact: High
+severity: High
+code_vuln: |
+  public entry fun execute_vulnerable(
+      wallet: &mut AgentWallet, target: address, amount: u64, offchain_intent_hash: vector<u8>, ctx: &mut TxContext
+  ) {
+      let extracted = coin::split(&mut wallet.balance, amount, ctx);
+      transfer::public_transfer(extracted, target);
+  }
+code_fixed: |
+  public entry fun execute_fixed(
+      wallet: &mut AgentWallet, target: address, amount: u64, offchain_intent_hash: vector<u8>, ctx: &mut TxContext
+  ) {
+      let mut payload = vector::empty<u8>();
+      vector::append(&mut payload, bcs::to_bytes(&target));
+      vector::append(&mut payload, bcs::to_bytes(&amount));
+      let onchain_hash = hash::blake2b256(&payload);
+      assert!(onchain_hash == offchain_intent_hash, EIntentMismatch);
+      let extracted = coin::split(&mut wallet.balance, amount, ctx);
+      transfer::public_transfer(extracted, target);
+  }
+test_vector: Supply false parameters while bypassing intent verification due to missing checks.
+references:
+  - https://arxiv.org/html/2601.04583v1
+
+sui_specific: true

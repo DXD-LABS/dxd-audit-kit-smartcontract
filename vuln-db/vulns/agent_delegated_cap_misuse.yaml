@@ -1,0 +1,28 @@
+name: AGENT-003 Permission Abuse in Delegated Execution
+date: 2025-12-03
+loss: Simulated complete protocol takeover
+description: Agent misuses delegated capabilities (e.g., via kiosk or shared object) for unauthorized actions, performing administrative tasks instead of its scoped role.
+impact: Critical (Unauthorized admin access)
+severity: Critical
+code_vuln: |
+  public entry fun misuse_cap_vulnerable(
+      agent: &mut AgentContext, target: address, amount: u64, ctx: &mut TxContext
+  ) {
+      assert!(std::option::is_some(&agent.delegate_cap), EMisusedCap);
+      let extracted = coin::split(&mut agent.treasury, amount, ctx);
+      transfer::public_transfer(extracted, target);
+  }
+code_fixed: |
+  public entry fun use_cap_fixed(
+      agent: &mut AgentContext, target: address, amount: u64, intent_verified: bool, ctx: &mut TxContext
+  ) {
+      assert!(std::option::is_some(&agent.delegate_cap), EMisusedCap);
+      assert!(intent_verified == true, EMisusedCap); 
+      let extracted = coin::split(&mut agent.treasury, amount, ctx);
+      transfer::public_transfer(extracted, target);
+  }
+test_vector: Pass a delegated AdminCap to an agent expecting it only to perform a specific action, but it abuses the cap.
+references:
+  - https://arxiv.org/html/2601.04583v1
+
+sui_specific: true

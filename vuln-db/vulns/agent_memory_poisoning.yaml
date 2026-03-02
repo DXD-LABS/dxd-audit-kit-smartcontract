@@ -1,0 +1,29 @@
+name: AGENT-005 Memory Poisoning Leading to Rogue Tx
+date: 2025-12-05
+loss: Simulated $1M in false contract approvals
+description: Adversarial input poisons agent memory (LLM context window or external RAG DB), leading to harmful on-chain transactions like approving malicious contracts.
+impact: High
+severity: High
+code_vuln: |
+  public entry fun approve_contract_vulnerable(
+      agent: &mut AgentContext, target: address, ctx: &mut TxContext
+  ) {
+      if (agent.memory_poisoned) {
+          std::vector::push_back(&mut agent.approved_contracts, target);
+      } else {
+          assert!(tx_context::sender(ctx) == agent.owner, EInvalidState);
+          std::vector::push_back(&mut agent.approved_contracts, target);
+      }
+  }
+code_fixed: |
+  public entry fun approve_contract_fixed(
+      agent: &mut AgentContext, target: address, intent_verified: bool, ctx: &mut TxContext
+  ) {
+      assert!(tx_context::sender(ctx) == agent.owner || intent_verified, EInvalidState);
+      std::vector::push_back(&mut agent.approved_contracts, target);
+  }
+test_vector: Poison memory with adversarial prompt, forcing the agent to approve a malicious contract.
+references:
+  - https://arxiv.org/html/2601.04583v1
+
+sui_specific: true

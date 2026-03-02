@@ -19,13 +19,30 @@
     },
     "multipliers": {
       "immutability": 1.5,
-      "on_chain_immutable": 2.0
+      "on_chain_immutable": 2.0,
+      "autonomous_agent": 1.8
     },
     "severity_levels": [
-      {"threshold": 9.0, "label": "Critical", "color": "🔴"},
-      {"threshold": 7.0, "label": "High", "color": "🟠"},
-      {"threshold": 4.0, "label": "Medium", "color": "🟡"},
-      {"threshold": 0.0, "label": "Low", "color": "🟢"}
+      {
+        "threshold": 9.0,
+        "label": "Critical",
+        "color": "🔴"
+      },
+      {
+        "threshold": 7.0,
+        "label": "High",
+        "color": "🟠"
+      },
+      {
+        "threshold": 4.0,
+        "label": "Medium",
+        "color": "🟡"
+      },
+      {
+        "threshold": 0.0,
+        "label": "Low",
+        "color": "🟢"
+      }
     ],
     "bvss_metrics": {
       "exploitability_map": {
@@ -54,6 +71,11 @@
     "privileged_access": {
       "Required": 0.7,
       "Not Required": 1.1
+    },
+    "agent_autonomy": {
+      "None": 1.0,
+      "Partial": 1.2,
+      "Full": 1.5
     }
   }
 }

@@ -24,6 +24,62 @@ Missing assert in custom oracle contract bypasses authorization checks → attac
 
 Logic flaw in yield/bridge handling allows stolen funds bridged cross-chain (Arbitrum → Ethereum) before maintenance. Despite Move safety, protocol-level economic bug (yield split PT/YT abuse).
 
+## AGENT-005 Memory Poisoning Leading to Rogue Tx
+- Date: 2025-12-05
+- Loss: Simulated $1M in false contract approvals
+- Severity: High
+- Impact: High
+
+Adversarial input poisons agent memory (LLM context window or external RAG DB), leading to harmful on-chain transactions like approving malicious contracts.
+
+## AGENT-002 Rogue Agent Spend Limit Bypass
+- Date: 2025-12-02
+- Loss: Simulated $50k+ in test env
+- Severity: High
+- Impact: Medium to High
+
+Agent bypasses its spend limit through multi-step workflows or memory poisoning. If an agent's tracked spending is stored off-chain or poorly managed on-chain, it can be reset or manipulated.
+
+## AGENT-001 Unauthorized Tool Call via Prompt Injection
+- Date: 2025-12-01
+- Loss: Simulated $10k–$100k+ in test env
+- Severity: High
+- Impact: High (potential full wallet drain)
+
+Attacker crafts adversarial prompt to make AI agent call unauthorized tool (e.g., transfer without user intent verification), bypassing guardrails.
+
+## AGENT-007 Verifiable Intent Failure
+- Date: 2025-12-07
+- Loss: Logic bypass mapping
+- Severity: Medium
+- Impact: Medium
+
+An agent executes a transaction without on-chain verifiable intent proof (e.g., ZK Proof or Multi-Signature verification missing).
+
+## AGENT-006 Shared Object Race in Multi-Agent Workflow
+- Date: 2025-12-06
+- Loss: Simulated extraction race conditions
+- Severity: High
+- Impact: High
+
+Multiple agents accessing a shared object (e.g., treasury vault) sequentially without atomic operations exploit race conditions.
+
+## AGENT-004 Intent Spoofing / Mismatch
+- Date: 2025-12-04
+- Loss: Simulated asset theft
+- Severity: High
+- Impact: High
+
+Off-chain agent intent mismatches on-chain execution. The function does not verify the hash of the expected parameters.
+
+## AGENT-003 Permission Abuse in Delegated Execution
+- Date: 2025-12-03
+- Loss: Simulated complete protocol takeover
+- Severity: Critical
+- Impact: Critical (Unauthorized admin access)
+
+Agent misuses delegated capabilities (e.g., via kiosk or shared object) for unauthorized actions, performing administrative tasks instead of its scoped role.
+
 ## Shared Object Race in Mysticeti Parallel Execution
 - Date: 2025-06-01
 - Loss: N/A (Risk post-upgrade)
