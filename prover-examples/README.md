@@ -69,6 +69,12 @@ Examples for proving invariants critical to AI agent security on Sui (agent wall
   - `ensures shared_vault.balance_post == old(shared_vault.balance) - withdrawal_amount`: Withdraw đúng, no double-withdraw.
   - Use case: Multi-agent coordination (e.g., agent swarm access treasury vault), chống race condition ở parallel tx.
 
+- **agent_owned_receipt.move**: Prove secure isolation in Owned Object receipts vs Shared Object congestion (derived from Navi Protocol audit).
+  - `ensures receipt.deposited_amount == old(receipt.deposited_amount) + amount`: Safe state modification isolated to user.
+  - `ensures receipt.owner == old(receipt.owner)`: Receipt ownership immutable.
+  - `aborts_if receipt.deposited_amount + amount > MAX_U64`: Prevent overflow.
+  - Use case: High-frequency Agent DeFi actions avoiding global shared object congestion by using owned receipts for accounting.
+
 ### Troubleshooting
 
 - "Z3 not found": Add Z3 bin to PATH, restart terminal.
