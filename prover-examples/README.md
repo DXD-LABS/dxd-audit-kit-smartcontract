@@ -75,6 +75,56 @@ Examples for proving invariants critical to AI agent security on Sui (agent wall
   - `aborts_if receipt.deposited_amount + amount > MAX_U64`: Prevent overflow.
   - Use case: High-frequency Agent DeFi actions avoiding global shared object congestion by using owned receipts for accounting.
 
+### Nautilus TEE Attestation Specs
+
+Formal proof specs for Trusted Execution Environment (TEE) patterns on Sui / Nautilus:
+
+- **nautilus_tee_attest.move**: Prove on-chain attestation gate — execution only proceeds with valid, fresh TEE quote that matches committed input hash.
+  - `aborts_if !report.is_valid with E_ATTESTATION_FAIL`: Abort if attestation cryptographically invalid.
+  - `aborts_if current_epoch - report.issued_epoch > MAX_STALE_EPOCHS with E_STALE_ATTESTATION`: Enforce freshness window.
+  - `aborts_if report.report_data != request.input_hash with E_HASH_MISMATCH`: Proof must attest to committed input.
+  - `ensures result.attested == true`: Result only produced with valid attestation.
+  - Use case: Any protocol using Nautilus TEE for off-chain computation with on-chain proof submission.
+
+- **nautilus_computation_integrity.move**: Prove receipt minting is gated by TEE hash + no double-mint.
+  - `aborts_if commit.tee_hash != commit.input_hash with E_INTEGRITY_FAIL`: TEE must attest correct computation.
+  - `aborts_if table::spec_contains(registry, input_hash) with E_ALREADY_MINTED`: Prevent double receipt.
+  - `ensures table::spec_len(registry) == old(table::spec_len(registry)) + 1`: Registry grows exactly by 1.
+  - `invariant verified == true`: Receipt object only exists if attested.
+  - Use case: On-chain mint/unlock gated by Nautilus off-chain compute proof.
+
+```bash
+# Audit TEE patterns via unified CLI
+python -m cli tee attest --module my_tee_module
+python -m cli tee vectors
+python -m cli prove --module nautilus_tee_attest --link-vulns
+```
+
+### zk-Intent Verification Specs
+
+Formal proof specs for zero-knowledge intent verification privacy patterns:
+
+- **zk_intent_verify.move**: Prove commit-then-execute ordering with zk-proof gating.
+  - `aborts_if !commitment.committed with E_NOT_COMMITTED`: Commitment must precede execution.
+  - `aborts_if !proof.is_valid with E_PROOF_INVALID`: zk-proof must verify on-chain.
+  - `aborts_if proof.intent_hash != commitment.commitment_hash with E_HASH_MISMATCH`: Proof must match commitment.
+  - `ensures commitment.commitment_hash == old(commitment.commitment_hash)`: Commitment immutable during execute.
+  - Use case: Agent intent verification where intent is committed off-chain and proven on-chain before execution.
+
+- **zk_nullifier_uniqueness.move**: Prove nullifier registry is append-only — no replay possible.
+  - `aborts_if table::spec_contains(registry, nullifier) with E_DOUBLE_SPEND`: Reject replayed proof.
+  - `ensures table::spec_len(registry) == old(table::spec_len(registry)) + 1`: Append-only growth.
+  - `forall nf: old(contains(nf)) ==> contains(nf)`: Existing nullifiers never removed.
+  - `invariant count == table::spec_len(registry)`: Count consistent with table.
+  - Use case: zk-intent protocols needing replay protection (double-execution prevention).
+
+```bash
+# Audit zk-intent patterns via unified CLI
+python -m cli zk verify-intent --module my_intent_module
+python -m cli zk nullifier-check
+python -m cli prove --module zk_nullifier_uniqueness --link-vulns
+```
+
 ### Troubleshooting
 
 - "Z3 not found": Add Z3 bin to PATH, restart terminal.

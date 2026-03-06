@@ -69,6 +69,62 @@ sui move prove
   - `ensures shared_vault.balance_post == old(shared_vault.balance) - withdrawal_amount`: 正确提款，无重复提款。
   - 用例: 多代理协调（例如，代理群访问金库），防止并行交易中的竞争条件。
 
+- **agent_owned_receipt.move**: 证明拥有对象收据中的安全隔离（相较于共享对象的拥塞情况）。
+  - `ensures receipt.deposited_amount == old(receipt.deposited_amount) + amount`: 安全状态修改，与用户隔离。
+  - `ensures receipt.owner == old(receipt.owner)`: 收据所有权不变。
+  - `aborts_if receipt.deposited_amount + amount > MAX_U64`: 防止溢出。
+  - 用例: 高频 AI Agent DeFi 操作，使用拥有收据避免全局共享对象拥塞。
+
+### Nautilus TEE 认证规范
+
+针对 Sui / Nautilus 上可信执行环境（TEE）模式的形式化证明规范：
+
+- **nautilus_tee_attest.move**: 证明链上认证门控 — 仅在 TEE 引用有效、新鲜且与已提交的输入哈希匹配时才执行。
+  - `aborts_if !report.is_valid with E_ATTESTATION_FAIL`: 密码学认证无效时中止。
+  - `aborts_if current_epoch - report.issued_epoch > MAX_STALE_EPOCHS with E_STALE_ATTESTATION`: 强制执行新鲜度窗口（1 个 epoch）。
+  - `aborts_if report.report_data != request.input_hash with E_HASH_MISMATCH`: 证明必须证实已提交的输入。
+  - `ensures result.attested == true`: 仅在有效认证时产生结果。
+  - 用例: 任何使用 Nautilus TEE 进行链下计算并在链上提交证明的协议。
+
+- **nautilus_computation_integrity.move**: 证明收据铸造受 TEE 哈希门控且无双重铸造。
+  - `aborts_if commit.tee_hash != commit.input_hash with E_INTEGRITY_FAIL`: TEE 必须证实正确的计算。
+  - `aborts_if table::spec_contains(registry, input_hash) with E_ALREADY_MINTED`: 防止双重收据。
+  - `ensures table::spec_len(registry) == old(table::spec_len(registry)) + 1`: 注册表恰好增长 1 条目。
+  - `invariant verified == true`: 收据对象仅在已认证时存在。
+  - 用例: 由 Nautilus 链下计算证明门控的链上铸造/解锁。
+
+```bash
+# 通过统一 CLI 审计 TEE 模式
+python -m cli tee attest --module my_tee_module
+python -m cli tee vectors
+python -m cli prove --module nautilus_tee_attest --link-vulns
+```
+
+### zk-Intent 验证规范
+
+针对零知识意图验证隐私模式的形式化证明规范：
+
+- **zk_intent_verify.move**: 证明带 zk-proof 门控的提交-然后-执行顺序。
+  - `aborts_if !commitment.committed with E_NOT_COMMITTED`: 提交必须在执行之前发生。
+  - `aborts_if !proof.is_valid with E_PROOF_INVALID`: zk-proof 必须在链上验证通过。
+  - `aborts_if proof.intent_hash != commitment.commitment_hash with E_HASH_MISMATCH`: 证明必须与提交匹配。
+  - `ensures commitment.commitment_hash == old(commitment.commitment_hash)`: 提交在执行期间不可变。
+  - 用例: 代理意图验证，意图在链下提交并在链上证明后再执行。
+
+- **zk_nullifier_uniqueness.move**: 证明 nullifier 注册表只允许追加 — 不可重放证明。
+  - `aborts_if table::spec_contains(registry, nullifier) with E_DOUBLE_SPEND`: 拒绝重放证明。
+  - `ensures table::spec_len(registry) == old(table::spec_len(registry)) + 1`: 只追加增长。
+  - `forall nf: old(contains(nf)) ==> contains(nf)`: 现有 nullifier 永不删除。
+  - `invariant count == table::spec_len(registry)`: 计数与表格一致。
+  - 用例: 需要重放保护的 zk-intent 协议（防止双重执行）。
+
+```bash
+# 通过统一 CLI 审计 zk-intent 模式
+python -m cli zk verify-intent --module my_intent_module
+python -m cli zk nullifier-check
+python -m cli prove --module zk_nullifier_uniqueness --link-vulns
+```
+
 ### 故障排除
 
 - "Z3 not found": 将 Z3 bin 添加到 PATH，重启终端。

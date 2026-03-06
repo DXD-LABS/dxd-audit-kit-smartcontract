@@ -1,0 +1,49 @@
+name: zk-Intent Proof Replay (Missing Nullifier)
+date: 2026-03-06
+loss: N/A (High risk — dependent on TVL of protocol)
+description: >
+  A smart contract accepted the same zero-knowledge intent proof multiple
+  times because the nullifier registry was not checked on-chain.
+  This allowed an attacker to replay the same zk-proof across multiple
+  transactions, executing the same intent action more than once.
+  The root cause is the absence of a nullifier uniqueness check before
+  allowing action execution. Each zk-proof must consume a unique nullifier
+  that is recorded on-chain and rejected on second submission.
+impact: High — double-execution of intent, potential fund drain or state corruption.
+severity: High
+references:
+  - https://docs.sui.io/concepts/cryptography/zklogin
+  - https://eprint.iacr.org/2021/1190
+code_vuln: |
+  // ❌ VULNERABLE: no nullifier check, proof can be replayed
+  public fun execute_action(
+      proof: &ZkProof,
+      action: &mut ActionRecord,
+  ) {
+      assert!(proof.is_valid, E_PROOF_INVALID);
+      action.executed = true;
+  }
+code_fixed: |
+  // ✅ FIXED: nullifier uniqueness enforced before execution
+  public fun execute_action(
+      proof: &ZkProof,
+      registry: &mut NullifierRegistry,
+      action: &mut ActionRecord,
+  ) {
+      assert!(proof.is_valid, E_PROOF_INVALID);
+      // Reject if nullifier already spent
+      assert!(
+          !table::contains(&registry.registry, proof.nullifier),
+          E_DOUBLE_SPEND
+      );
+      // Record nullifier as spent
+      table::add(&mut registry.registry, proof.nullifier, true);
+      action.intent_hash = proof.intent_hash;
+      action.executed = true;
+  }
+test_vector:
+  inputs:
+    proof_is_valid: true
+    nullifier: "0xabc123"
+    already_spent: true
+  expected_exploit: Proof replayed — action executed twice with same nullifier

@@ -48,6 +48,22 @@ Agent bypasses its spend limit through multi-step workflows or memory poisoning.
 
 Attacker crafts adversarial prompt to make AI agent call unauthorized tool (e.g., transfer without user intent verification), bypassing guardrails.
 
+## Nautilus TEE Attestation Bypass
+- Date: 2026-03-06
+- Loss: N/A (Theoretical — potential total fund loss)
+- Severity: Critical
+- Impact: Critical — complete compromise of TEE-attested computation integrity.
+
+An on-chain smart contract accepted attested computation results without verifying the TEE attestation report. An attacker could fabricate a TEE quote or replay a stale attestation to submit fraudulent computation outputs on-chain, bypassing integrity guarantees. Missing checks include: attestation validity gate, freshness window (epoch-based), and report_data == committed_input_hash binding.
+
+## zk-Intent Proof Replay (Missing Nullifier)
+- Date: 2026-03-06
+- Loss: N/A (High risk — dependent on TVL of protocol)
+- Severity: High
+- Impact: High — double-execution of intent, potential fund drain or state corruption.
+
+A smart contract accepted the same zero-knowledge intent proof multiple times because the nullifier registry was not checked on-chain. This allowed an attacker to replay the same zk-proof across multiple transactions, executing the same intent action more than once. The root cause is the absence of a nullifier uniqueness check before allowing action execution. Each zk-proof must consume a unique nullifier that is recorded on-chain and rejected on second submission.
+
 ## AGENT-007 Verifiable Intent Failure
 - Date: 2025-12-07
 - Loss: Logic bypass mapping

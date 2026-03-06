@@ -2,12 +2,25 @@
 node_modules/
 .venv/
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Report outputs
+*_audit_report.md
+*_audit_report.html
+
+
 # Build artifacts
 build/
 artifacts/
 cache/
 typechain/
 typechain-types/
+
 
 # Hardhat
 cache/

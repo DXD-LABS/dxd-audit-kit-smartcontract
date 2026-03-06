@@ -69,6 +69,62 @@ Các ví dụ chứng minh invariants mang tính chất quan trọng về securi
   - `ensures shared_vault.balance_post == old(shared_vault.balance) - withdrawal_amount`: Withdraw đúng, no double-withdraw.
   - Use case: Multi-agent coordination (e.g., agent swarm access treasury vault), chống race condition ở parallel tx.
 
+- **agent_owned_receipt.move**: Chứng minh cô lập an toàn trong Owned Object receipts vs Shared Object congestion.
+  - `ensures receipt.deposited_amount == old(receipt.deposited_amount) + amount`: Sửa đổi state an toàn, tách biệt với user.
+  - `ensures receipt.owner == old(receipt.owner)`: Quyền sở hữu receipt không thay đổi.
+  - `aborts_if receipt.deposited_amount + amount > MAX_U64`: Ngăn overflow.
+  - Use case: AI Agent DeFi tần suất cao tránh tắc nghẽn shared object bằng owned receipts.
+
+### Nautilus TEE Attestation Specs
+
+Specs chứng minh hình thức cho các pattern TEE (Trusted Execution Environment) trên Sui / Nautilus:
+
+- **nautilus_tee_attest.move**: Chứng minh cổng attestation on-chain — chỉ thực thi khi TEE quote hợp lệ, còn mới và khớp với input hash đã cam kết.
+  - `aborts_if !report.is_valid with E_ATTESTATION_FAIL`: Hủy nếu attestation không hợp lệ về mặt mật mã.
+  - `aborts_if current_epoch - report.issued_epoch > MAX_STALE_EPOCHS with E_STALE_ATTESTATION`: Bắt buộc khung thời gian còn mới (1 epoch).
+  - `aborts_if report.report_data != request.input_hash with E_HASH_MISMATCH`: Bằng chứng phải chứng thực đúng input đã cam kết.
+  - `ensures result.attested == true`: Kết quả chỉ được tạo ra với attestation hợp lệ.
+  - Use case: Mọi protocol dùng Nautilus TEE cho tính toán off-chain với bằng chứng on-chain.
+
+- **nautilus_computation_integrity.move**: Chứng minh việc mint receipt được kiểm soát bởi TEE hash và không bị double-mint.
+  - `aborts_if commit.tee_hash != commit.input_hash with E_INTEGRITY_FAIL`: TEE phải chứng thực tính toán đúng.
+  - `aborts_if table::spec_contains(registry, input_hash) with E_ALREADY_MINTED`: Ngăn double receipt.
+  - `ensures table::spec_len(registry) == old(table::spec_len(registry)) + 1`: Registry tăng đúng 1 entry.
+  - `invariant verified == true`: Object Receipt chỉ tồn tại nếu đã được chứng thực.
+  - Use case: On-chain mint/unlock được kiểm soát bởi Nautilus off-chain compute proof.
+
+```bash
+# Audit TEE patterns qua unified CLI
+python -m cli tee attest --module my_tee_module
+python -m cli tee vectors
+python -m cli prove --module nautilus_tee_attest --link-vulns
+```
+
+### zk-Intent Verification Specs
+
+Specs chứng minh hình thức cho các pattern xác minh zero-knowledge intent:
+
+- **zk_intent_verify.move**: Chứng minh thứ tự commit-rồi-execute với cổng zk-proof.
+  - `aborts_if !commitment.committed with E_NOT_COMMITTED`: Cam kết phải có trước khi thực thi.
+  - `aborts_if !proof.is_valid with E_PROOF_INVALID`: zk-proof phải được xác minh on-chain.
+  - `aborts_if proof.intent_hash != commitment.commitment_hash with E_HASH_MISMATCH`: Bằng chứng phải khớp với cam kết.
+  - `ensures commitment.commitment_hash == old(commitment.commitment_hash)`: Cam kết không thay đổi trong lúc execute.
+  - Use case: Xác minh intent của agent — intent được cam kết off-chain và chứng minh on-chain trước khi thực thi.
+
+- **zk_nullifier_uniqueness.move**: Chứng minh nullifier registry chỉ được append — không thể replay bằng chứng.
+  - `aborts_if table::spec_contains(registry, nullifier) with E_DOUBLE_SPEND`: Từ chối bằng chứng bị replay.
+  - `ensures table::spec_len(registry) == old(table::spec_len(registry)) + 1`: Chỉ tăng trưởng (append-only).
+  - `forall nf: old(contains(nf)) ==> contains(nf)`: Nullifier hiện có không bao giờ bị xóa.
+  - `invariant count == table::spec_len(registry)`: Count nhất quán với table.
+  - Use case: Các protocol zk-intent cần bảo vệ replay (ngăn thực thi hai lần).
+
+```bash
+# Audit zk-intent patterns qua unified CLI
+python -m cli zk verify-intent --module my_intent_module
+python -m cli zk nullifier-check
+python -m cli prove --module zk_nullifier_uniqueness --link-vulns
+```
+
 ### Xử lý lỗi
 
 - "Z3 not found": Thêm Z3 bin vào PATH, khởi động lại terminal.

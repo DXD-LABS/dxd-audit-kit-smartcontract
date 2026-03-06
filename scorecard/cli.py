@@ -23,12 +23,42 @@ def main():
     parser.add_argument('--export-web', action='store_true', help='Export vuln-db to JSON for Web tool')
     parser.add_argument('--output', choices=['markdown', 'html', 'json'], default='markdown', help='Output format')
     parser.add_argument('--lint-output', help='Path to static-analysis JSON output')
+    parser.add_argument('--report', metavar='PROJECT_NAME',
+                        help='Auto-generate full audit report (MD+HTML) from vuln-db + scorecard')
+    parser.add_argument('--report-output', choices=['markdown', 'html', 'both'], default='both',
+                        help='Report output format (default: both)')
     
     args = parser.parse_args()
     
     calc = BVSSCalculator()
     db_parser = VulnDBParser()
     
+    # 0. Handle unified Report generation
+    if args.report:
+        import os as _os
+        ROOT = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), '..'))
+        if ROOT not in sys.path:
+            sys.path.insert(0, ROOT)
+        from cli.core.report_engine import generate_report_data, render_markdown, render_html
+        data = generate_report_data(
+            project_name=args.report,
+            vuln_dir=_os.path.join(ROOT, 'vuln-db', 'vulns'),
+            prover_path=_os.path.join(ROOT, 'prover-examples'),
+            run_prover=False,
+        )
+        fmt = args.report_output
+        if fmt in ('markdown', 'both'):
+            md = render_markdown(data)
+            with open(f"{args.report}_audit_report.md", 'w', encoding='utf-8') as f:
+                f.write(md)
+            print(f"📄 Markdown report → {args.report}_audit_report.md")
+        if fmt in ('html', 'both'):
+            html = render_html(data)
+            with open(f"{args.report}_audit_report.html", 'w', encoding='utf-8') as f:
+                f.write(html)
+            print(f"🌐 HTML report    → {args.report}_audit_report.html")
+        return
+
     # 1. Handle Web Export
     if args.export_web:
         output_file = 'scorecard/web/vulns_exported.json'
