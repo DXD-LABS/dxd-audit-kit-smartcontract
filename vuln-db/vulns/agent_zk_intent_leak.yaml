@@ -1,0 +1,54 @@
+name: AGENT-008 Privacy Leak via Unverified ZK-Intent in Agent Execution
+date: 2026-03-07
+loss: "Simulated ($100k+ in privacy-compromised assets)"
+description: >
+  An agent executes a transaction based on a zk-proof intent but does not
+  fully verify the proof fields, allowing sensitive data (user wallet state,
+  off-chain memory, intent payload) to be exposed via on-chain dynamic fields
+  or side-channels. The root cause is accepting a ZkIntentProof without
+  asserting that no sensitive data is exposed through proof.public_inputs or
+  leaked dynamic field writes. An attacker who can observe on-chain object
+  state can extract the user's intent or balance information.
+impact: "Critical (data exfil, user privacy breach in agentic economy)"
+severity: Critical
+code_vuln: |
+  // ❌ VULNERABLE: proof accepted without field-level privacy check
+  public fun execute_zk_intent_vulnerable(
+      proof: &ZkIntentProof,
+      wallet: &mut AgentWallet,
+      ctx: &mut TxContext,
+  ) {
+      assert!(proof.is_valid, E_PROOF_INVALID);
+      // Missing: no check that proof.public_inputs does not expose wallet balance
+      // Dynamic field write leaks sensitive state to on-chain observers
+      dynamic_field::add(&mut wallet.id, b"last_intent", proof.public_inputs);
+      wallet.balance = wallet.balance - proof.amount;
+  }
+code_fixed: |
+  // ✅ FIXED: full field verification + data exposure guard
+  public fun execute_zk_intent_fixed(
+      proof: &ZkIntentProof,
+      wallet: &mut AgentWallet,
+      ctx: &mut TxContext,
+  ) {
+      assert!(proof.is_valid, E_PROOF_INVALID);
+      // Guard: proof must not expose sensitive data in public inputs
+      assert!(!proof.exposes_sensitive_data, E_PRIVACY_VIOLATION);
+      // Only write a commitment hash, never raw public inputs
+      dynamic_field::add(&mut wallet.id, b"last_intent_hash",
+          hash::blake2b256(&proof.public_inputs));
+      wallet.balance = wallet.balance - proof.amount;
+  }
+test_vector:
+  inputs:
+    proof_is_valid: true
+    exposes_sensitive_data: true
+    public_inputs: "0xSECRET_WALLET_STATE"
+  expected_exploit: Sensitive wallet state written to on-chain dynamic field and observable by any reader
+references:
+  - https://arxiv.org/html/2602.04567v1
+  - https://genai.owasp.org/resource/owasp-top-10-for-agentic-ai-v1-0/
+  - https://docs.sui.io/concepts/cryptography/zklogin
+  - https://docs.sui.io/guides/developer/getting-started/nautilus
+
+sui_specific: true

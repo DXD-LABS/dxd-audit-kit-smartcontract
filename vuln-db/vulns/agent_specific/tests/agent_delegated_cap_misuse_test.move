@@ -1,9 +1,10 @@
 #[test_only]
+#[allow(unused_use)]
 module agent_specific::agent_delegated_cap_misuse_test {
-    use sui::test_scenario::{Self, Scenario};
+    use sui::test_scenario;
     use sui::coin::{Self, Coin};
     use sui::sui::SUI;
-    use agent_specific::agent_delegated_cap_misuse::{Self, AgentContext, AdminCap};
+    use agent_specific::agent_delegated_cap_misuse::{Self, AgentContext};
 
     const USER: address = @0x1;
     const ATTACKER: address = @0x2;

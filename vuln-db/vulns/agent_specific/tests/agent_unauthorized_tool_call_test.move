@@ -1,6 +1,7 @@
 #[test_only]
+#[allow(unused_use)]
 module agent_specific::agent_unauthorized_tool_call_test {
-    use sui::test_scenario::{Self, Scenario};
+    use sui::test_scenario;
     use sui::coin::{Self, Coin};
     use sui::sui::SUI;
     use std::string::utf8;
@@ -68,10 +69,7 @@ module agent_specific::agent_unauthorized_tool_call_test {
             // Attacker intent verification fails
             agent_unauthorized_tool_call::execute_tool_fixed(
                 &mut wallet,
-                utf8(b"transfer"),
-                ATTACKER,
-                50_000,
-                false, // intent not verified
+                agent_unauthorized_tool_call::create_intent(utf8(b"transfer"), ATTACKER, 50_000, true), // injected
                 ctx
             );
             

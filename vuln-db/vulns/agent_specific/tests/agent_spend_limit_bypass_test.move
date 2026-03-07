@@ -1,8 +1,7 @@
 #[test_only]
+#[allow(unused_use)]
 module agent_specific::agent_spend_limit_bypass_test {
-    use sui::test_scenario::{Self, Scenario};
-    use sui::coin::{Self, Coin};
-    use sui::sui::SUI;
+    use sui::test_scenario;
     use agent_specific::agent_spend_limit_bypass::{Self, AgentConfig};
 
     const USER: address = @0x1;

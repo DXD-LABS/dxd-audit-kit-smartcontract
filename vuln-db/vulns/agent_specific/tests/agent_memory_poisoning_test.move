@@ -1,6 +1,7 @@
 #[test_only]
+#[allow(unused_use)]
 module agent_specific::agent_memory_poisoning_test {
-    use sui::test_scenario::{Self, Scenario};
+    use sui::test_scenario;
     use agent_specific::agent_memory_poisoning::{Self, AgentContext};
 
     const USER: address = @0x1;
@@ -65,7 +66,7 @@ module agent_specific::agent_memory_poisoning_test {
             let mut agent = test_scenario::take_shared<AgentContext>(&scenario);
             let ctx = test_scenario::ctx(&mut scenario);
             
-            agent_memory_poisoning::approve_contract_fixed(&mut agent, ATTACKER, false, ctx);
+            agent_memory_poisoning::approve_contract_fixed(&mut agent, ATTACKER, agent_memory_poisoning::verify_approval(false), ctx);
             
             test_scenario::return_shared(agent);
         };

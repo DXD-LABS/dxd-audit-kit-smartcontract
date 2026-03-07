@@ -1,6 +1,7 @@
 #[test_only]
+#[allow(unused_use)]
 module agent_specific::shared_object_race_test {
-    use sui::test_scenario::{Self, Scenario};
+    use sui::test_scenario;
     use agent_specific::shared_object_race::{Self, SharedTreasury};
 
     const AGENT_1: address = @0x1;

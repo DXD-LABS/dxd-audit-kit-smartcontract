@@ -1,0 +1,68 @@
+name: AGENT-010 Multi-Agent Consensus Failure via Byzantine Rogue Agent
+date: 2026-03-07
+loss: "Simulated (multi-agent drain $200k+)"
+description: >
+  In a multi-agent workflow, a rogue (Byzantine) agent injects faulty votes
+  or approvals into a shared consensus object without signature verification.
+  The contract tallies unverified votes and grants approval even when the
+  cryptographically-verified threshold is not met. This allows the rogue agent
+  to trigger a shared vault drain, unauthorized treasury sweep, or intent
+  execution below quorum. Root cause: the vote counter accepts any caller's
+  vote without verifying an agent signature or membership proof.
+impact: "High (ecosystem-wide if agent swarms control large treasuries)"
+severity: High
+code_vuln: |
+  // ❌ VULNERABLE: votes accepted without signature verification
+  public entry fun cast_vote_vulnerable(
+      consensus: &mut SwarmConsensus,
+      approve: bool,
+      ctx: &mut TxContext,
+  ) {
+      // Anyone can call — no agent identity or signature check
+      if (approve) { consensus.approve_count = consensus.approve_count + 1 };
+      if (consensus.approve_count >= consensus.threshold) {
+          consensus.approved = true; // Threshold met by rogue actors
+      }
+  }
+
+  public entry fun execute_if_approved_vulnerable(
+      consensus: &SwarmConsensus,
+      vault: &mut SwarmVault,
+      target: address,
+      ctx: &mut TxContext,
+  ) {
+      assert!(consensus.approved, E_NOT_APPROVED);
+      let extracted = coin::split(&mut vault.balance, vault.drain_amount, ctx);
+      transfer::public_transfer(extracted, target);
+  }
+code_fixed: |
+  // ✅ FIXED: verified_votes counter gated by per-agent signature check
+  public entry fun cast_vote_fixed(
+      consensus: &mut SwarmConsensus,
+      approve: bool,
+      agent_sig: vector<u8>,
+      ctx: &mut TxContext,
+  ) {
+      let sender = tx_context::sender(ctx);
+      // Verify agent is a registered member with valid signature
+      assert!(table::contains(&consensus.registered_agents, sender), E_UNKNOWN_AGENT);
+      let msg = bcs::to_bytes(&approve);
+      assert!(ed25519::ed25519_verify(&agent_sig, &sender_pubkey(consensus, sender), &msg),
+              E_INVALID_SIGNATURE);
+      if (approve) { consensus.verified_votes = consensus.verified_votes + 1 };
+      if (consensus.verified_votes >= consensus.threshold) {
+          consensus.approved = true;
+      }
+  }
+test_vector:
+  inputs:
+    rogue_agents: 3
+    threshold: 5
+    total_registered: 7
+    verified_votes_after_rogue: 3
+  expected_exploit: consensus.approved set to true with only 3 unverified votes out of threshold=5
+references:
+  - https://arxiv.org/html/2601.04583v1
+  - https://docs.sui.io/concepts/object-ownership/shared
+
+sui_specific: true

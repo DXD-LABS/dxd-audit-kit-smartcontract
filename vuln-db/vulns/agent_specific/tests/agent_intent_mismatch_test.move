@@ -1,7 +1,7 @@
 #[test_only]
+#[allow(unused_use)]
 module agent_specific::agent_intent_mismatch_test {
-    use sui::test_scenario::{Self, Scenario};
-    use std::vector;
+    use sui::test_scenario;
     use std::bcs;
     use sui::hash;
     use agent_specific::agent_intent_mismatch::{Self, AgentWallet};

@@ -1,0 +1,73 @@
+name: AGENT-014 Unaudited Lib Dependency in Agent Modules
+date: 2026-03-07
+loss: "Simulated ($300k+ via lib vuln cascade)"
+description: >
+  An agent module imports a third-party Move library (e.g., a zk helper or
+  TEE SDK) that has not been audited and contains a backdoor: a public init
+  function that mints an AdminCap accessible to any caller. On deployment or
+  first use, an attacker calls the backdoor to extract the AdminCap and gain
+  full admin control over the agent module (drain treasury, upgrade packages,
+  modify agent policies). Root cause: no verification that imported library
+  packages are from audited, trusted sources before integration into the agent.
+impact: "High (systemic if lib popular in agentic economy; full admin takeover)"
+severity: High
+code_vuln: |
+  // ❌ VULNERABLE: imports unaudited lib that exposes backdoor AdminCap mint
+  // (simulating a malicious third-party Move package)
+  module agent_specific::bad_lib {
+      use sui::object::{Self, UID};
+      use sui::tx_context::TxContext;
+      use sui::transfer;
+
+      public struct BadAdminCap has key, store { id: UID }
+
+      // Backdoor: any caller can mint an AdminCap
+      public fun backdoor_mint_cap(ctx: &mut TxContext): BadAdminCap {
+          BadAdminCap { id: object::new(ctx) }
+      }
+  }
+
+  // Agent module consuming the unaudited lib
+  public entry fun use_lib_vulnerable(ctx: &mut TxContext) {
+      let cap = bad_lib::backdoor_mint_cap(ctx); // Attacker calls this directly
+      transfer::public_transfer(cap, tx_context::sender(ctx));
+  }
+code_fixed: |
+  // ✅ FIXED: audit_verified flag + static rule prevents unaudited libs
+  public struct LibRegistry has key {
+      id: UID,
+      audit_verified: bool,
+      auditor: address,
+  }
+
+  public entry fun register_lib(
+      registry: &mut LibRegistry,
+      auditor_sig: vector<u8>,
+      ctx: &mut TxContext,
+  ) {
+      let auditor = tx_context::sender(ctx);
+      // Only whitelisted auditors can mark lib as verified
+      assert!(is_whitelisted_auditor(auditor), E_UNVERIFIED_AUDITOR);
+      registry.audit_verified = true;
+      registry.auditor = auditor;
+  }
+
+  public entry fun use_lib_fixed(
+      registry: &LibRegistry,
+      ctx: &mut TxContext,
+  ) {
+      // Abort if lib has not been audited and registered
+      assert!(registry.audit_verified, E_UNAUDITED_LIB);
+      // ... safe lib usage
+  }
+test_vector:
+  inputs:
+    lib_audit_verified: false
+    attacker_calls_backdoor: true
+  expected_exploit: Attacker mints AdminCap via backdoor_mint_cap and gains full admin control
+references:
+  - https://owasp.org/www-project-supply-chain-security/
+  - https://arxiv.org/html/2601.04583v1
+  - https://docs.sui.io/guides/developer/sui-101/move-package-management
+
+sui_specific: true

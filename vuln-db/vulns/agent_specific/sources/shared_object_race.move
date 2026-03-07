@@ -1,17 +1,14 @@
-#[allow(unused_variable, lint(unused_variable))]
+#[allow(lint(coin_field))]
 module agent_specific::shared_object_race {
-    use sui::object::{Self, UID};
-    use sui::tx_context::{Self, TxContext};
-    use sui::transfer;
     use sui::coin::{Self, Coin};
     use sui::sui::SUI;
 
-    const ERaceConditionExploited: u64 = 1;
+    const E_RACE_CONDITION_EXPLOITED: u64 = 1;
 
     /// Shared treasury vault accessed by multiple agents concurrently
     public struct SharedTreasury has key {
         id: UID,
-        balance: coin::Coin<SUI>,
+        balance: Coin<SUI>,
         extraction_locked: bool
     }
 
@@ -26,17 +23,17 @@ module agent_specific::shared_object_race {
 
     /// Vulnerable: Relies on two separate steps where state can change between transactions 
     /// due to Sui's parallel execution and agent asynchronous behavior.
-    public entry fun prepare_extraction_vulnerable(treasury: &mut SharedTreasury) {
+    public fun prepare_extraction_vulnerable(treasury: &mut SharedTreasury) {
         treasury.extraction_locked = true;
     }
 
-    public entry fun execute_extraction_vulnerable(
+    public fun execute_extraction_vulnerable(
         treasury: &mut SharedTreasury, 
         amount: u64, 
         target: address, 
         ctx: &mut TxContext
     ) {
-        assert!(treasury.extraction_locked == true, ERaceConditionExploited);
+        assert!(treasury.extraction_locked == true, E_RACE_CONDITION_EXPLOITED);
         
         let extracted = coin::split(&mut treasury.balance, amount, ctx);
         transfer::public_transfer(extracted, target);
@@ -46,6 +43,9 @@ module agent_specific::shared_object_race {
 
     /// Fixed: Combines the lock and extraction into a single atomic PTB via programmable transaction blocks 
     /// or ensures strong consistency through Hot Potato pattern.
+    /// Note: ExtractionTicket intentionally lacks `drop` and `store` abilities.
+    /// This enforces the Hot-Potato pattern: once prepared, the extraction MUST be executed
+    /// or the transaction will abort.
     public struct ExtractionTicket { amount: u64 }
 
     public fun prepare_extraction_fixed(treasury: &mut SharedTreasury, amount: u64): ExtractionTicket {
@@ -60,7 +60,7 @@ module agent_specific::shared_object_race {
         ctx: &mut TxContext
     ) {
         let ExtractionTicket { amount } = ticket;
-        assert!(treasury.extraction_locked == true, ERaceConditionExploited);
+        assert!(treasury.extraction_locked == true, E_RACE_CONDITION_EXPLOITED);
         
         let extracted = coin::split(&mut treasury.balance, amount, ctx);
         transfer::public_transfer(extracted, target);

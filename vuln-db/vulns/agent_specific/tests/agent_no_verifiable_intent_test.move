@@ -1,6 +1,7 @@
 #[test_only]
+#[allow(unused_use)]
 module agent_specific::agent_no_verifiable_intent_test {
-    use sui::test_scenario::{Self, Scenario};
+    use sui::test_scenario;
     use agent_specific::agent_no_verifiable_intent::{Self, AgentWallet};
     use sui::coin::{Self, Coin};
     use sui::sui::SUI;

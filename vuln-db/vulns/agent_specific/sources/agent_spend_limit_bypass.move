@@ -1,8 +1,6 @@
-#[allow(unused_variable, lint(unused_variable))]
+#[allow(lint(coin_field))]
 module agent_specific::agent_spend_limit_bypass {
-    use sui::object::{Self, UID};
-    use sui::tx_context::{Self, TxContext};
-    use sui::transfer;
+
     use sui::coin::{Self, Coin};
     use sui::sui::SUI;
 
@@ -12,10 +10,10 @@ module agent_specific::agent_spend_limit_bypass {
     public struct AgentConfig has key {
         id: UID,
         spend_limit: u64,
-        treasury: coin::Coin<SUI>,
+        treasury: Coin<SUI>,
         // Vulnerable: Off-chain memory poisoning can manipulate this state if not properly isolated
         current_spent: u64,
-        memory_tainted: bool
+        memory_tainted: bool,
     }
 
     public fun init_agent(limit: u64, fund: Coin<SUI>, ctx: &mut TxContext) {
@@ -24,52 +22,44 @@ module agent_specific::agent_spend_limit_bypass {
             spend_limit: limit,
             treasury: fund,
             current_spent: 0,
-            memory_tainted: false
+            memory_tainted: false,
         };
         transfer::share_object(config);
     }
 
-    /// Vulnerable implementation: Relies on off-chain state synchronization that can be poisoned.
-    /// If an attacker poisons the agent's memory off-chain, the agent might reset the sequence or bypass the aggregator.
-    public entry fun execute_workflow_step_vulnerable(
+    /// Vulnerable: Relies on off-chain state that can be poisoned.
+    public fun execute_workflow_step_vulnerable(
         config: &mut AgentConfig,
         amount: u64,
         target: address,
-        ctx: &mut TxContext
+        ctx: &mut TxContext,
     ) {
-        // Assume memory poisoning can artificially reset current_spent 
-        // We simulate memory poisoning resetting the tracking variable
+        // ❌ Simulate memory poisoning: attacker resets current_spent via tainted flag
         if (config.memory_tainted) {
-            config.current_spent = 0; // Attacker wiped the tracked state
+            config.current_spent = 0;
         };
-
         assert!(config.current_spent + amount <= config.spend_limit, EOverSpendLimit);
-        
         let extracted = coin::split(&mut config.treasury, amount, ctx);
         transfer::public_transfer(extracted, target);
-        
         config.current_spent = config.current_spent + amount;
     }
 
     /// Attacker function to simulate off-chain memory poisoning (e.g., via compromised RAG).
-    public entry fun poison_memory(config: &mut AgentConfig) {
+    public fun poison_memory(config: &mut AgentConfig) {
         config.memory_tainted = true;
     }
 
-    /// Fixed implementation: Hard enforcement via invariant limits that cannot be bypassed by memory state.
-    public entry fun execute_workflow_step_fixed(
+    /// Fixed: Hard enforcement via invariant limits that cannot be bypassed by memory state.
+    public fun execute_workflow_step_fixed(
         config: &mut AgentConfig,
         amount: u64,
         target: address,
-        ctx: &mut TxContext
+        ctx: &mut TxContext,
     ) {
-        // Mitigation: Always firmly track the cumulative state, ignoring transient mutable flags.
-        // In real systems, use an epochs or time-locked counter that cannot be overwritten by the agent.
+        // ✅ Always enforce cumulative limit — ignores transient mutable flags
         assert!(config.current_spent + amount <= config.spend_limit, EOverSpendLimit);
-        
         let extracted = coin::split(&mut config.treasury, amount, ctx);
         transfer::public_transfer(extracted, target);
-        
         config.current_spent = config.current_spent + amount;
     }
 

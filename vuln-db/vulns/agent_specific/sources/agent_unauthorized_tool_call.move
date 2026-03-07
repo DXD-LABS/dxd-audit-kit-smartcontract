@@ -1,28 +1,31 @@
-#[allow(unused_variable, lint(unused_variable))]
+#[allow(lint(coin_field))]
 module agent_specific::agent_unauthorized_tool_call {
-    use sui::object::{Self, UID};
-    use sui::tx_context::{Self, TxContext};
+    use sui::tx_context::TxContext;
     use sui::transfer;
     use sui::coin::{Self, Coin};
     use sui::sui::SUI;
-    use std::string::{Self, String, utf8};
+    use std::string::String;
 
-    /// Error codes
     const EUnauthorizedAction: u64 = 1;
 
     /// The Agent's Wallet representing treasury funds they manage.
     public struct AgentWallet has key {
         id: UID,
-        balance: coin::Coin<SUI>,
+        balance: Coin<SUI>,
         owner: address,
     }
 
     /// Represents an AI agent's execution intent generated off-chain (e.g., via LLM).
-    public struct AgentIntent has store, drop {
+    public struct AgentIntent has drop {
         action: String,
         target: address,
         amount: u64,
-        prompt_injected: bool
+        prompt_injected: bool,
+    }
+
+    #[test_only]
+    public fun create_intent(action: String, target: address, amount: u64, prompt_injected: bool): AgentIntent {
+        AgentIntent { action, target, amount, prompt_injected }
     }
 
     /// Create a new AgentWallet funded with some SUI.
@@ -30,41 +33,34 @@ module agent_specific::agent_unauthorized_tool_call {
         let wallet = AgentWallet {
             id: object::new(ctx),
             balance: fund,
-            owner: tx_context::sender(ctx)
+            owner: ctx.sender(),
         };
         transfer::share_object(wallet);
     }
 
-    /// Vulnerable tool execution: Trusts the `intent` blindly without verifying it matches user constraints
-    /// or checking if a prompt injection flag is true.
-    public entry fun execute_tool_vulnerable(
+    /// Vulnerable: Trusts the `intent` blindly without verifying it matches user constraints
+    public fun execute_tool_vulnerable(
         wallet: &mut AgentWallet,
-        action_name: String,
+        _action_name: String,
         target: address,
         amount: u64,
-        ctx: &mut TxContext
+        ctx: &mut TxContext,
     ) {
-        // Vulnerability: No check to see if the action is authorized or if intent is spoofed/injected!
-        // We just act on the supplied intent.
-        
+        // ❌ No check — action is executed regardless of whether intent is spoofed/injected
         let extracted = coin::split(&mut wallet.balance, amount, ctx);
         transfer::public_transfer(extracted, target);
     }
 
-    /// Fixed tool execution: Ensures programmable guardrails or invariants hold.
-    public entry fun execute_tool_fixed(
+    /// Fixed: Requires a verifiable proof that intent matches the user's actual request.
+    public fun execute_tool_fixed(
         wallet: &mut AgentWallet,
-        action_name: String,
-        target: address,
-        amount: u64,
-        intent_verified: bool, // Required MSL-like verification proof
-        ctx: &mut TxContext
+        intent: AgentIntent,
+        ctx: &mut TxContext,
     ) {
-        // Mitigation: Require a verifiable proof that intent matches the user's actual request.
-        assert!(intent_verified == true, EUnauthorizedAction);
-
-        let extracted = coin::split(&mut wallet.balance, amount, ctx);
-        transfer::public_transfer(extracted, target);
+        // ✅ Require a verifiable proof object directly representing the request
+        assert!(!intent.prompt_injected, EUnauthorizedAction);
+        let extracted = coin::split(&mut wallet.balance, intent.amount, ctx);
+        transfer::public_transfer(extracted, intent.target);
     }
 
     #[test_only]
