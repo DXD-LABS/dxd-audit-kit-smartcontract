@@ -23,3 +23,10 @@
 6. **Gas & Storage** | **Gas 与存储**
    - Delete object không cần. | Delete unnecessary objects. | 删除不必要的对象。
    - Tránh loop lớn trong entry function. | Avoid large loops in entry functions. | 避免在 entry 函数中使用大型循环。
+   - Tối ưu Struct: Dùng Packed struct cho các loại dữ liệu cố định thay vì xé nhỏ thành Object để giảm storage rebate & gas fee.
+   - Tránh dùng `Coin<T>` trong Object: Luôn unpack thành `Balance<T>` trước khi lưu vào field để tránh tạo object lồng nhau gây lãng phí bộ nhớ trên node.
+
+7. **Move 2024 Features (Sui Move mới nhất)**
+   - Sử dụng `enum`: Thay vì tạo nhiều struct rời rạc dễ gây lỗi logic, hãy dùng `enum` để quản lý các trạng thái/loại object chuẩn mực hơn.
+   - Sử dụng `macro`: Dọn dẹp code rườm rà lặp đi lặp lại như vòng lặp Vector hoặc check điều kiện, tăng tốc thời gian audit.
+   - Method Syntax: Gọi hàm `Vector::push_back(&mut v, item)` ngắn gọn thành `v.push_back(item)` hạn chế lỗi Reference khi viết code phức tạp.
