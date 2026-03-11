@@ -1,0 +1,96 @@
+{
+    "version": "0.2",
+    "target": "sui_move_lending",
+    "phases": [
+        {
+            "id": "threat_model",
+            "title": "Threat Model & Asset Inventory",
+            "priority": "high",
+            "items": [
+                {
+                    "id": "asset_inventory",
+                    "question": "Các asset chính trong hệ thống là gì và ai là chủ thể lợi ích chính (depositor, borrower, liquidator...)?",
+                    "severity_if_ignored": "high"
+                },
+                {
+                    "id": "core_threats",
+                    "question": "Các hành vi nguy hiểm nhất làm sập hệ thống (mất fund, lock fund, oracle abuse, governance hijack) là gì?",
+                    "severity_if_ignored": "critical"
+                }
+            ]
+        },
+        {
+            "id": "scope_and_context",
+            "title": "Scope & Context",
+            "priority": "high",
+            "items": [
+                {
+                    "id": "scope.modules",
+                    "question": "Liệt kê tất cả package/module Move chính (lending_core, oracle, liquid_staking, ...)?",
+                    "severity_if_ignored": "medium"
+                },
+                {
+                    "id": "scope.audit_history",
+                    "question": "Module nào đã được audit (ví dụ OtterSec) và diff hiện tại là gì?",
+                    "severity_if_ignored": "medium"
+                }
+            ]
+        },
+        {
+            "id": "sui_specific_risks",
+            "title": "Sui / Move specific checks",
+            "priority": "critical",
+            "items": [
+                {
+                    "id": "capability_misuse",
+                    "question": "Có capability nào (store/copy/drop/share) bị expose sai hoặc truyền qua API public không?",
+                    "severity_if_ignored": "high"
+                },
+                {
+                    "id": "object_ownership_flow",
+                    "question": "Luồng ownership của asset chính (collateral, debt, pool token, LST) có thể bị leak hoặc bypass policy không?",
+                    "severity_if_ignored": "critical"
+                },
+                {
+                    "id": "oracle_integrity",
+                    "question": "Oracle và giá (Switchboard, TWAP, config) có thể bị manipulate hoặc stale dẫn tới under‑collateral không?",
+                    "severity_if_ignored": "critical"
+                }
+            ]
+        },
+        {
+            "id": "access_control",
+            "title": "Access Control & Configuration",
+            "priority": "high",
+            "items": [
+                {
+                    "id": "admin_config_control",
+                    "question": "Ai có quyền thay đổi params quan trọng (LTV, reserve factor, oracle source)? Có cơ chế timelock/multisig không?",
+                    "severity_if_ignored": "high"
+                },
+                {
+                    "id": "upgradeability",
+                    "question": "Có cơ chế upgrade module hoặc thay đổi luồng nào có thể rug pull hoặc phá vỡ invariants của giao thức không?",
+                    "severity_if_ignored": "medium"
+                }
+            ]
+        },
+        {
+            "id": "protocol_logic",
+            "title": "Protocol logic & risk",
+            "priority": "critical",
+            "items": [
+                {
+                    "id": "liquidation_edge_cases",
+                    "question": "Có edge case liquidation nào cho phép debt escape, bad debt, hoặc griefing liquidator không?",
+                    "severity_if_ignored": "high"
+                },
+                {
+                    "id": "interest_and_index",
+                    "question": "Cơ chế tính lãi / index có overflow, drift, hoặc lệch precision gây loss không?",
+                    "severity_if_ignored": "medium"
+                }
+            ]
+        }
+    ]
+}

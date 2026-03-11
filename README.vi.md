@@ -1,4 +1,4 @@
-﻿# DXDLABS – Kiểm định Bảo mật Smart Contract
+# DXDLABS – Kiểm định Bảo mật Smart Contract
 
 ![GitHub stars](https://img.shields.io/github/stars/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
 ![GitHub license](https://img.shields.io/github/license/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
@@ -85,6 +85,13 @@ Tập hợp các pattern bảo mật và các lỗ hổng phổ biến cho Sui M
 - `quick-audit-template.md` ([Multi](resources/move/checklists/quick-audit-template.md)): Mẫu kiểm định nhanh hàng ngày (5-10 phút).
 
 ### Báo cáo Mẫu & Thực hành Tốt nhất (`resources/move/`)
+- `sui-dev-resource-hub.md` ([Multi](resources/move/sui-dev-resource-hub.md)): Trung tâm tài nguyên thiết yếu cho nhà phát triển Sui.
+
+### Sui Secure Design Patterns
+- [Capability Pattern](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/move/sui-patterns/capability-witness-pattern.md)
+- [Object-Centric Design](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/move/sui-patterns/object-centric-pattern.md)
+- [Emergency & Time Patterns](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/move/sui-patterns/emergency-time-patterns.md)
+- [Upgrade & Archival Patterns](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/move/sui-patterns/upgrade-archival-patterns.md)
 - `report-examples/example-move-lending-audit-report.md` ([Multi](resources/move/report-examples/example-move-lending-audit-report.md)): Báo cáo kiểm định mẫu cho protocol lending trên Sui.
 - `security-scorecard-template.md` ([Multi](resources/move/security-scorecard-template.md)): Mẫu Security Scorecard để tóm tắt kết quả kiểm định.
 - `weekly-security-tip-teaser.md` ([Multi](resources/move/weekly-security-tip-teaser.md)): Teaser cho chuỗi mẹo bảo mật hàng tuần sắp tới.
@@ -101,6 +108,9 @@ Tập hợp các pattern bảo mật và các lỗ hổng phổ biến cho Sui M
 
 ### Các Trường hợp Thực tế (`resources/move/real-cases/`)
 - `cetus-clmm-pool-vuln-2025.md` ([Multi](resources/move/real-cases/cetus-clmm-pool-vuln-2025.md)): Lỗ hổng spoof-token trong logic giá (Cetus 2025).
+- `nemo-pricing-logic-vuln.md` ([Multi](resources/move/real-cases/nemo-pricing-logic-vuln.md)): Lỗi logic định giá rút cạn pool USDC (Nemo 2025).
+- `cross-chain-token-compat.md` ([Multi](resources/move/real-cases/cross-chain-token-compat.md)): Lỗ hổng tương thích token cross-chain (Sui 2024).
+- `amm-rounding-error-exploit.md` ([Multi](resources/move/real-cases/amm-rounding-error-exploit.md)): Lỗ hổng làm tròn số trong AMM (Sui 2025).
 - `navi-health-factor-manip.md` ([Multi](resources/move/real-cases/navi-health-factor-manip.md)): Thao túng health factor qua oracle cũ (NAVI).
 - `scallop-isolation-bypass.md` ([Multi](resources/move/real-cases/scallop-isolation-bypass.md)): Vượt qua chế độ cách ly trong lending (Scallop).
 

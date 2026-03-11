@@ -170,6 +170,13 @@ A collection of security patterns and common vulnerabilities for Sui Move.
 - `quick-audit-template.md` ([Multi](resources/move/checklists/quick-audit-template.md)): Fast audit template for daily use (5-10 mins).
 
 ### Audit Reports & Best Practices (`resources/move/`)
+- `sui-dev-resource-hub.md` ([Multi](resources/move/sui-dev-resource-hub.md)): Curated collection of essential resources for Sui developers.
+
+### Sui Secure Design Patterns
+- [Capability Pattern](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/move/sui-patterns/capability-witness-pattern.md)
+- [Object-Centric Design](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/move/sui-patterns/object-centric-pattern.md)
+- [Emergency & Time Patterns](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/move/sui-patterns/emergency-time-patterns.md)
+- [Upgrade & Archival Patterns](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/move/sui-patterns/upgrade-archival-patterns.md)
 - `report-examples/example-move-lending-audit-report.md` ([Multi](resources/move/report-examples/example-move-lending-audit-report.md)): Example audit report for a lending protocol on Sui.
 - `security-scorecard-template.md` ([Multi](resources/move/security-scorecard-template.md)): Template for summarizing audit findings with scoring.
 - `weekly-security-tip-teaser.md` ([Multi](resources/move/weekly-security-tip-teaser.md)): Upcoming weekly security tips for Move/Sui.
@@ -186,6 +193,9 @@ A collection of security patterns and common vulnerabilities for Sui Move.
 
 ### Real-World Audit Cases (`resources/move/real-cases/`)
 - `cetus-clmm-pool-vuln-2025.md` ([Multi](resources/move/real-cases/cetus-clmm-pool-vuln-2025.md)): Spoof-token exploit in pricing logic (Cetus 2025).
+- `nemo-pricing-logic-vuln.md` ([Multi](resources/move/real-cases/nemo-pricing-logic-vuln.md)): Pricing logic exploit in USDC pool (Nemo 2025).
+- `cross-chain-token-compat.md` ([Multi](resources/move/real-cases/cross-chain-token-compat.md)): Cross-chain token compatibility vulnerability (Sui 2024).
+- `amm-rounding-error-exploit.md` ([Multi](resources/move/real-cases/amm-rounding-error-exploit.md)): AMM rounding error manipulation (Sui 2025).
 - `navi-health-factor-manip.md` ([Multi](resources/move/real-cases/navi-health-factor-manip.md)): Health factor manipulation via oracle staleness (NAVI).
 - `scallop-isolation-bypass.md` ([Multi](resources/move/real-cases/scallop-isolation-bypass.md)): Isolation mode bypass in lending protocols (Scallop).
 

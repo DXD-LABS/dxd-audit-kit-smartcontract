@@ -1,4 +1,4 @@
-﻿# DXDLABS – 智能合约安全审计
+# DXDLABS – 智能合约安全审计
 
 ![GitHub stars](https://img.shields.io/github/stars/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
 ![GitHub license](https://img.shields.io/github/license/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
@@ -77,7 +77,14 @@ Sui Move 的安全模式和常见漏洞集合。
 - `move-btcfi-edge-cases.md` ([Multi](resources/move/checklists/move-btcfi-edge-cases.md)): Sui 上 BTCfi 的边缘案例检查清单。
 - `quick-audit-template.md` ([Multi](resources/move/checklists/quick-audit-template.md)): 每日快速审计模板（5-10 分钟）。
 
+### Sui Secure Design Patterns
+- [Capability Pattern](resources/move/sui-patterns/capability-witness-pattern.md)
+- [Object-Centric Design](resources/move/sui-patterns/object-centric-pattern.md)
+- [Emergency & Time Patterns](resources/move/sui-patterns/emergency-time-patterns.md)
+- [Upgrade & Archival Patterns](resources/move/sui-patterns/upgrade-archival-patterns.md)
+
 ### 审计报告示例与最佳实践 (`resources/move/`)
+- `sui-dev-resource-hub.md` ([Multi](resources/move/sui-dev-resource-hub.md)): 为 Sui 开发者精选的必备资源中心。
 - `report-examples/example-move-lending-audit-report.md` ([Multi](resources/move/report-examples/example-move-lending-audit-report.md)): Sui 借贷协议审计报告示例。
 - `best-practices-summary.md` ([Multi](resources/move/best-practices-summary.md)): Move/Sui 安全最佳实践快速摘要。
 - `one-liner-tips.md` ([Multi](resources/move/one-liner-tips.md)): 适合 Move/Sui 开发者和审计员的病毒式安全提示。
@@ -92,6 +99,9 @@ Sui Move 的安全模式和常见漏洞集合。
 
 ### 真实审计案例 (`resources/move/real-cases/`)
 - `cetus-clmm-pool-vuln-2025.md` ([Multi](resources/move/real-cases/cetus-clmm-pool-vuln-2025.md)): 定价逻辑中的伪造代币漏洞 (Cetus 2025)。
+- `nemo-pricing-logic-vuln.md` ([Multi](resources/move/real-cases/nemo-pricing-logic-vuln.md)): USDC 池定价逻辑漏洞 (Nemo 2025)。
+- `cross-chain-token-compat.md` ([Multi](resources/move/real-cases/cross-chain-token-compat.md)): 跨链代币兼容性漏洞 (Sui 2024)。
+- `amm-rounding-error-exploit.md` ([Multi](resources/move/real-cases/amm-rounding-error-exploit.md)): AMM 取整错误利用 (Sui 2025)。
 - `navi-health-factor-manip.md` ([Multi](resources/move/real-cases/navi-health-factor-manip.md)): 通过预言机过期数据操纵健康因子 (NAVI)。
 - `scallop-isolation-bypass.md` ([Multi](resources/move/real-cases/scallop-isolation-bypass.md)): 借贷协议中的隔离模式绕过 (Scallop)。
 
