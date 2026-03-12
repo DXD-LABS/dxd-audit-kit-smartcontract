@@ -16,8 +16,10 @@ This repository contains public security audit reports produced by DXDLABS.
 - `tools/` – configuration and examples of analysis tools used (Slither, Foundry, etc.).
 - `docs/` – professional audit services and additional documentation.
 - `docs/usage-guide.md` – step-by-step install and usage guide.
-- `scorecard/` – BVSS Security Scorecard Tool (CLI + interactive Web, integrates vuln-db & static-analysis).
-- `vuln-db/` – YAML vulnerability database and parser.
+- `prover-examples/` – Formal verification examples using Move Prover.
+- `secure-patterns/` – Research-based Sui design patterns (2025-2026).
+- `scorecard/` – BVSS Security Scorecard tool (CLI + Interactive Web, integrated with vuln-db & static-analysis).
+- `vuln-db/` – YAML format vulnerability database and parser.
 - `tests/` – Move PoC modules and unit/integration tests for vuln-db.
 
 ## Vuln DB + PoC Tests
@@ -122,8 +124,9 @@ For more details, please see our [Professional Audit Services](docs/professional
 
 A collection of security patterns and common vulnerabilities for Sui Move.
 
-### Safe Patterns (`resources/move/safe/`)
-- `btcfi-mint-redeem-safe.move`: Secure pattern for BTCfi (Liquid BTC) on Sui.
+### Pattern An toàn (`resources/move/safe/`)
+
+- `btcfi-mint-redeem-safe.move`: Pattern an toàn cho BTCfi (Liquid BTC) trên Sui.
 - `capability-safe.move`: Best practices for using Capabilities to control permissions.
 - `coin-management-safe.move`: Secure patterns for handling Coins, splitting, and merging.
 - `coin-split-merge-safe.move`: Safe pattern for split/merge Coin in Sui.
@@ -140,6 +143,7 @@ A collection of security patterns and common vulnerabilities for Sui Move.
 - `upgrade-policy-safe.move`: Enforce policy during package upgrade.
 
 ### Vulnerable Samples (`resources/move/vulnerable/`)
+
 - `btcfi-balance-overflow.move`: Custom balance logic leading to overflow/underflow vulnerabilities.
 - `capability-abuse.move`: Example of permission bypass via public reference to Capabilities.
 - `coin-overflow-merge.move`: Custom balance merge leading to u64 overflow.
@@ -177,6 +181,17 @@ A collection of security patterns and common vulnerabilities for Sui Move.
 - [Object-Centric Design](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/move/sui-patterns/object-centric-pattern.md)
 - [Emergency & Time Patterns](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/move/sui-patterns/emergency-time-patterns.md)
 - [Upgrade & Archival Patterns](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/move/sui-patterns/upgrade-archival-patterns.md)
+
+### Research-Based Sui Design Patterns (2025-2026) (`secure-patterns/`)
+- **[Access Control](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_access_control.yaml)**: Fine-grained permissions via capabilities.
+- **[Time Incentivization](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_time_incentivization.yaml)**: Time-based rewards using `sui::clock`.
+- **[Escapability](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_escapability.yaml)**: Guaranteed user exit mechanisms.
+- **[Transaction Blocks](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_transaction_blocks.yaml)**: Atomic multi-step operations.
+- **[Gas Storage Fund](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_gas_fund.yaml)**: Managing liveness for shared objects.
+- **[Witness Pattern](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_witness.yaml)**: Type-safe generic constraints.
+
+### Sui Developer Resources
+- **[Sui Developer Resources 2025-2026](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/sui-resources.md)**: Curated list of docs, videos, and communities.
 - `report-examples/example-move-lending-audit-report.md` ([Multi](resources/move/report-examples/example-move-lending-audit-report.md)): Example audit report for a lending protocol on Sui.
 - `security-scorecard-template.md` ([Multi](resources/move/security-scorecard-template.md)): Template for summarizing audit findings with scoring.
 - `weekly-security-tip-teaser.md` ([Multi](resources/move/weekly-security-tip-teaser.md)): Upcoming weekly security tips for Move/Sui.

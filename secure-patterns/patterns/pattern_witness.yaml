@@ -1,0 +1,26 @@
+name: PATTERN-013 Witness Pattern
+date: 2026-03-12
+description: >
+  Using dummy structs (often with the `drop` ability) to enforce type-level 
+  constraints and ensure that certain functions can only be called once 
+  (e.g., One-Time Witness) or by specific modules. Essential for secure 
+  generic programming and module initialization.
+impact: "High (Ensures type safety, prevents re-initialization attacks)"
+severity: High
+code_snippet: |
+  struct WITNESS has drop {}
+
+  public fun init_module(witness: WITNESS) { 
+      /* Only callable once if using OTW */ 
+  }
+prover_spec: |
+  spec init_module {
+      // Ensuring the witness has the drop ability
+      pragma verify = true;
+  }
+references:
+  - https://docs.sui.io/concepts/sui-architecture
+  - https://adevarlabs.com/blog/sui-move-for-evm-devs-part-1
+  - Sam Blackshear Tips (Sui On Campus)
+sui_specific: true
+mitigation_for: "AGENT-014 Unaudited Library Vulnerability (via explicit type guards)"

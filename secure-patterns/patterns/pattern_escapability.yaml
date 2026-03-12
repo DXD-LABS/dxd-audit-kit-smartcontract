@@ -1,0 +1,27 @@
+name: PATTERN-010 Escapability Pattern
+date: 2026-03-12
+description: >
+  Providing users with a guaranteed mechanism to withdraw their funds or state, 
+  even when a protocol is in a paused or emergency state. 
+  This increases user trust and prevents "lock-in" by rogue agents or 
+  faulty governance mechanisms.
+impact: "High (Critical for user safety and trust in DeFi protocols)"
+severity: High
+code_snippet: |
+  struct Treasury has key { id: UID, balance: u64 }
+
+  public fun escape_withdraw(treasury: &mut Treasury): u64 {
+      let amount = treasury.balance;
+      treasury.balance = 0;
+      amount  // Transfer results in Coin
+  }
+prover_spec: |
+  spec escape_withdraw {
+      ensures result == old(treasury.balance);
+      ensures treasury.balance == 0;
+  }
+references:
+  - https://learn.backpack.exchange/en/sui-guide-2026
+  - Pattern-Oriented Ontology for Sui Move (2025)
+sui_specific: true
+mitigation_for: "AGENT-005 Rogue Agent Lock-in"

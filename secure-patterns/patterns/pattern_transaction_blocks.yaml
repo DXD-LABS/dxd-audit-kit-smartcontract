@@ -1,0 +1,22 @@
+name: PATTERN-011 Transaction Blocks Pattern
+date: 2026-03-12
+description: >
+  Batching multiple operations into a single transaction block to optimize gas usage, 
+  ensure atomicity, and enable complex workflows. This is a core feature of Sui 
+  that allows agents to execute multi-step intents safely.
+impact: "Medium (Optimization, Atomicity for multi-step agent actions)"
+severity: Medium
+code_snippet: |
+  // Entry function that batches multiple actions
+  public entry fun batch_actions(
+      ctx: &mut TxContext
+  ) {
+      action1(ctx);
+      action2(ctx);
+  }
+references:
+  - https://docs.sui.io/concepts/sui-architecture
+  - https://laikalabs.ai/blog/sui-2026-guide
+  - MoveTalk Workshop: Transaction Blocks
+sui_specific: true
+mitigation_for: "AGENT-010 Multi-Agent Consensus Failure"

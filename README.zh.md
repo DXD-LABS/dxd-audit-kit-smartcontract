@@ -14,8 +14,10 @@
 - `resources/move/tests/` – Move 安全片段测试。
 - `tools/` – 所使用的分析工具（Slither、Foundry 等）的配置和示例。
 - `docs/` – 专业审计服务与补充文档。
-- `docs/usage-guide.md` – 安装与使用指南。
-- `scorecard/` – BVSS 安全记分牌工具 (CLI + Web 仪表板，集成 vuln-db & static-analysis)。
+- `docs/usage-guide.md` – 逐步安装和使用指南。
+- `prover-examples/` – Move Prover 形式化验证示例。
+- `secure-patterns/` – 基于研究的 Sui 设计模式 (2025-2026)。
+- `scorecard/` – BVSS 安全计分卡工具（CLI + 交互式 Web，集成 vuln-db 和 static-analysis）。
 - `vuln-db/` – YAML 格式的漏洞数据库与解析器。
 - `tests/` – vuln-db 的 Move PoC 模块与单元/集成测试。
 
@@ -32,6 +34,7 @@
 Sui Move 的安全模式和常见漏洞集合。
 
 ### 安全模式 (`resources/move/safe/`)
+
 - `btcfi-mint-redeem-safe.move`: Sui 上 BTCfi (Liquid BTC) 的安全模式。
 - `capability-safe.move`: 使用 Capability 控制权限的最佳实践。
 - `coin-management-safe.move`: 处理代币、拆分和合并的安全模式。
@@ -48,6 +51,7 @@ Sui Move 的安全模式和常见漏洞集合。
 - `shared-object-safe.move`: 共享对象的安全管理和访问控制。
 
 ### 漏洞示例 (`resources/move/vulnerable/`)
+
 - `btcfi-balance-overflow.move`: 自定义余额逻辑导致溢出/欠载漏洞。
 - `capability-abuse.move`: 通过公开引用 Capability 绕过权限控制的示例。
 - `coin-overflow-merge.move`: 自定义余额合并导致 u64 溢出。
@@ -63,41 +67,55 @@ Sui Move 的安全模式和常见漏洞集合。
 - `resource-leak.move`: 对象 ID 泄漏和导致存储膨胀的示例。
 
 ### 升级与迁移 (`resources/move/upgrade-migration/`)
+
 - `package-upgrade-best-practices.md` ([Multi](resources/move/upgrade-migration/package-upgrade-best-practices.md)): 安全包升级和版本控制的最佳实践。
 - `solidity-to-move-migration-guide.md` ([Multi](resources/move/upgrade-migration/solidity-to-move-migration-guide.md)): EVM 开发者迁移到 Move/Sui 的基本提示。
 
 ### 迁移与升级陷阱 (`resources/move/migration-upgrade/`)
+
 - `solidity-to-move-migration-pitfalls.md` ([Multi](resources/move/migration-upgrade/solidity-to-move-migration-pitfalls.md)): 从 Solidity 迁移到 Move 的常见错误。
 - `package-upgrade-pitfalls.md` ([Multi](resources/move/migration-upgrade/package-upgrade-pitfalls.md)): Move 包升级期间的常见陷阱。
 
 ### 检查清单 (`resources/move/checklists/`)
+
 - `move-audit-checklist.md`: 审计 Sui Move 智能合约的全面检查清单。
 - `move-defi-checklist.md`: DeFi（闪电贷、借贷、DEX）和 NFT/Kiosk 的专用检查清单。
 - `move-btcfi-checklist.md` ([Multi](resources/move/checklists/move-btcfi-checklist.md)): BTCfi (Liquid BTC) 协议的安全检查清单。
 - `move-btcfi-edge-cases.md` ([Multi](resources/move/checklists/move-btcfi-edge-cases.md)): Sui 上 BTCfi 的边缘案例检查清单。
 - `quick-audit-template.md` ([Multi](resources/move/checklists/quick-audit-template.md)): 每日快速审计模板（5-10 分钟）。
 
-### Sui Secure Design Patterns
-- [Capability Pattern](resources/move/sui-patterns/capability-witness-pattern.md)
-- [Object-Centric Design](resources/move/sui-patterns/object-centric-pattern.md)
-- [Emergency & Time Patterns](resources/move/sui-patterns/emergency-time-patterns.md)
-- [Upgrade & Archival Patterns](resources/move/sui-patterns/upgrade-archival-patterns.md)
+### 基于研究的 Sui 设计模式 (2025-2026) (`secure-patterns/`)
+
+- **[Access Control](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_access_control.yaml)**: 通过 capability 实现细粒度权限管理。
+- **[Time Incentivization](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_time_incentivization.yaml)**: 使用 `sui::clock` 实现基于时间的奖励/惩罚。
+- **[Escapability](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_escapability.yaml)**: 保证用户退出机制，增强 DeFi 安全性。
+- **[Transaction Blocks](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_transaction_blocks.yaml)**: 代理工作流的原子多步操作。
+- **[Gas Storage Fund](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_gas_fund.yaml)**: 管理共享对象的活跃性（Liveness）。
+- **[Witness Pattern](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_witness.yaml)**: 类型安全泛型约束。
+
+### Sui 开发者资源
+
+- **[Sui Developer Resources 2025-2026](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/sui-resources.md)**: 精选文档、视频和社区列表。
 
 ### 审计报告示例与最佳实践 (`resources/move/`)
+
 - `sui-dev-resource-hub.md` ([Multi](resources/move/sui-dev-resource-hub.md)): 为 Sui 开发者精选的必备资源中心。
 - `report-examples/example-move-lending-audit-report.md` ([Multi](resources/move/report-examples/example-move-lending-audit-report.md)): Sui 借贷协议审计报告示例。
 - `best-practices-summary.md` ([Multi](resources/move/best-practices-summary.md)): Move/Sui 安全最佳实践快速摘要。
 - `one-liner-tips.md` ([Multi](resources/move/one-liner-tips.md)): 适合 Move/Sui 开发者和审计员的病毒式安全提示。
 
 ### 审计工具与脚本 (`resources/move/tools-scripts/`)
+
 - `run-move-audit.sh`: 用于运行 Sui Move 分析器和测试的快速 Bash 脚本。
 - `one-click-audit.sh`: Move/Sui 一键审计启动脚本。
 - `generate-report-template.py`: 从发现结果自动填充审计报告模板的 Python 脚本。
 
 ### Tests (`resources/move/tests/`)
+
 - `safe-snippets-tests.move`: Move 安全片段测试（capability、flash loan、kiosk）。
 
 ### 真实审计案例 (`resources/move/real-cases/`)
+
 - `cetus-clmm-pool-vuln-2025.md` ([Multi](resources/move/real-cases/cetus-clmm-pool-vuln-2025.md)): 定价逻辑中的伪造代币漏洞 (Cetus 2025)。
 - `nemo-pricing-logic-vuln.md` ([Multi](resources/move/real-cases/nemo-pricing-logic-vuln.md)): USDC 池定价逻辑漏洞 (Nemo 2025)。
 - `cross-chain-token-compat.md` ([Multi](resources/move/real-cases/cross-chain-token-compat.md)): 跨链代币兼容性漏洞 (Sui 2024)。
@@ -106,6 +124,7 @@ Sui Move 的安全模式和常见漏洞集合。
 - `scallop-isolation-bypass.md` ([Multi](resources/move/real-cases/scallop-isolation-bypass.md)): 借贷协议中的隔离模式绕过 (Scallop)。
 
 ### 漏洞数据库 (`vuln-db/`)
+
 - `vulns/`: 以 YAML 格式分类的实际漏洞列表。
 - `summary.md`: 漏洞摘要，按损失 (Loss) 排序。
 - **2025 年典型黑客案例**:
@@ -128,7 +147,6 @@ Sui Move 的安全模式和常见漏洞集合。
 
 每份报告均遵循统一的结构：
 
-1. 概述（项目、范围、提交哈希、网络）。
 2. 执行摘要（风险表、主要发现）。
 3. 方法论。
 4. 风险分类。

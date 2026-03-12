@@ -1,0 +1,32 @@
+name: PATTERN-009 Time Incentivization Pattern
+date: 2026-03-12
+description: >
+  Managing rewards and penalties based on time using the `sui::clock` module. 
+  This pattern encourages long-term behaviors such as staking or vesting 
+  without relying on potentially unsafe external oracles for time. 
+  It is essential for DeFi and agentic payout mechanisms.
+impact: "Medium (Ensures correct timing of economic incentives, prevents premature claims)"
+severity: Medium
+code_snippet: |
+  use sui::clock::Clock;
+
+  struct Vesting has key { id: UID, start: u64, amount: u64 }
+
+  public fun release(vesting: &mut Vesting, clock: &Clock): u64 {
+      let elapsed = clock.timestamp_ms() - vesting.start;
+      let release = vesting.amount * (elapsed / 31536000000);  // Per year
+      vesting.amount = vesting.amount - release;
+      release
+  }
+prover_spec: |
+  spec release {
+      let elapsed = clock.timestamp_ms - vesting.start;
+      ensures result == vesting.amount * (elapsed / 31536000000);
+      ensures vesting.amount == old(vesting.amount) - result;
+  }
+references:
+  - https://docs.sui.io/concepts/sui-architecture
+  - https://bitget.com/academy/en/article-details/sui-move-guide-2026
+  - Pattern-Oriented Ontology for Sui Move (2025)
+sui_specific: true
+mitigation_for: "AGENT-012 BTCfi Oracle Manipulation (via time-based guards)"

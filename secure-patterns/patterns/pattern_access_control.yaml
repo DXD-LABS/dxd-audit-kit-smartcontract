@@ -1,0 +1,29 @@
+name: PATTERN-008 Access Control Pattern
+date: 2026-03-12
+description: >
+  Fine-grained permissions management using capabilities or custom objects in Sui Move. 
+  This pattern prevents unauthorized access to critical functions without relying on 
+  a single global admin, which could be a central point of failure or leakage. 
+  In agentic designs, it allows for delegated capabilities that can be easily revoked.
+impact: "High (Prevents unauthorized state changes, unauthorized tool calls by agents)"
+severity: High
+code_snippet: |
+  struct AccessToken has key { 
+      id: UID, 
+      permissions: vector<u8> 
+  }
+
+  public fun grant_access(token: &AccessToken, action: u8) {
+      assert!(vector::contains(&token.permissions, &action), E_NO_PERMISSION);
+  }
+prover_spec: |
+  spec grant_access {
+      ensures exists<AccessToken>(token.id) ==> 
+          vector::contains(token.permissions, action);
+  }
+references:
+  - https://docs.sui.io/concepts/sui-architecture
+  - https://adevarlabs.com/blog/move-for-evm-devs
+  - Pattern-Oriented Ontology for Sui Move (2025)
+sui_specific: true
+mitigation_for: "AGENT-003 Delegated Capability Misuse"

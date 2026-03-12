@@ -1,0 +1,21 @@
+name: PATTERN-012 Gas Storage Fund Pattern
+date: 2026-03-12
+description: >
+  Managing a dedicated gas fund for shared objects to ensure long-term 
+  maintainability and avoid "out-of-gas" errors during upgrades or 
+  heavy interactions. Essential for protocols with long-lived shared state.
+impact: "Low (Preventative maintenance, liveness assurance)"
+severity: Medium
+code_snippet: |
+  use sui::balance;
+
+  struct GasFund has key { id: UID, fund: Balance<SUI> }
+
+  public fun deposit_gas(fund: &mut GasFund, amount: Coin<SUI>) {
+      balance::join(&mut fund.fund, coin::into_balance(amount));
+  }
+references:
+  - https://docs.sui.io/concepts/sui-architecture
+  - Manifesto for Sui Codebases (Medium)
+sui_specific: true
+mitigation_for: "Upgrade Vulnerabilities (via ensuring upgrade gas)"

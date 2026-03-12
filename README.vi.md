@@ -15,7 +15,8 @@ Kho lưu trữ này chứa các báo cáo kiểm định bảo mật công khai 
 - `tools/` – Cấu hình và ví dụ về các công cụ phân tích được sử dụng (Slither, Foundry, v.v.).
 - `docs/` – Dịch vụ kiểm định chuyên nghiệp và tài liệu bổ sung.
 - `docs/usage-guide.md` – Hướng dẫn cài đặt và sử dụng chi tiết.
-- `scorecard/` – Công cụ Security Scorecard BVSS (CLI + Web tương tác, tích hợp vuln-db & static-analysis).
+- `prover-examples/` – Ví dụ về xác minh chính thức bằng Move Prover.
+- `secure-patterns/` – Các pattern thiết kế Sui dựa trên nghiên cứu (2025-2026).
 - `vuln-db/` – Cơ sở dữ liệu lỗ hổng dạng YAML và bộ parser.
 - `tests/` – Các module PoC Move và unit/integration tests cho vuln-db.
 
@@ -87,11 +88,22 @@ Tập hợp các pattern bảo mật và các lỗ hổng phổ biến cho Sui M
 ### Báo cáo Mẫu & Thực hành Tốt nhất (`resources/move/`)
 - `sui-dev-resource-hub.md` ([Multi](resources/move/sui-dev-resource-hub.md)): Trung tâm tài nguyên thiết yếu cho nhà phát triển Sui.
 
-### Sui Secure Design Patterns
+### Pattern Thiết kế Bảo mật Sui (Cơ bản)
 - [Capability Pattern](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/move/sui-patterns/capability-witness-pattern.md)
 - [Object-Centric Design](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/move/sui-patterns/object-centric-pattern.md)
 - [Emergency & Time Patterns](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/move/sui-patterns/emergency-time-patterns.md)
 - [Upgrade & Archival Patterns](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/move/sui-patterns/upgrade-archival-patterns.md)
+
+### Các Pattern Thiết kế Sui dựa trên Nghiên cứu (2025-2026) (`secure-patterns/`)
+- **[Access Control](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_access_control.yaml)**: Quản lý quyền chi tiết thông qua capability.
+- **[Time Incentivization](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_time_incentivization.yaml)**: Phần thưởng dựa trên thời gian sử dụng `sui::clock`.
+- **[Escapability](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_escapability.yaml)**: Cơ chế thoát hiểm đảm bảo cho người dùng.
+- **[Transaction Blocks](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_transaction_blocks.yaml)**: Các hoạt động đa bước nguyên tử.
+- **[Gas Storage Fund](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_gas_fund.yaml)**: Quản lý tính khả dụng cho shared object.
+- **[Witness Pattern](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/secure-patterns/patterns/pattern_witness.yaml)**: Ràng buộc generic an toàn kiểu dữ liệu.
+
+### Tài nguyên dành cho Nhà phát triển Sui
+- **[Sui Developer Resources 2025-2026](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/resources/sui-resources.md)**: Danh sách tài liệu, video và cộng đồng được chọn lọc.
 - `report-examples/example-move-lending-audit-report.md` ([Multi](resources/move/report-examples/example-move-lending-audit-report.md)): Báo cáo kiểm định mẫu cho protocol lending trên Sui.
 - `security-scorecard-template.md` ([Multi](resources/move/security-scorecard-template.md)): Mẫu Security Scorecard để tóm tắt kết quả kiểm định.
 - `weekly-security-tip-teaser.md` ([Multi](resources/move/weekly-security-tip-teaser.md)): Teaser cho chuỗi mẹo bảo mật hàng tuần sắp tới.
