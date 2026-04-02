@@ -1,0 +1,39 @@
+name: MS-011 Freeze Object Misuse
+name_vi: Lạm dụng Hàm Freeze Object
+name_zh: MS-011 冻结对象权限（Freeze Object）滥用漏洞
+date: "2026-02-15"
+loss: "Protocol Lock (DoS)"
+description: >
+  Improper use of `public_freeze_object` on mission-critical shared objects 
+  that require future mutability. Once frozen, an object can never be 
+  mutated or un-frozen, leading to permanent protocol paralysis if done 
+  on a state object or administrative capability.
+description_vi: >
+  Sử dụng sai hàm `public_freeze_object` trên các đối tượng dùng chung (shared objects) 
+  quan trọng cần có khả năng thay đổi trong tương lai. Khi đã bị đóng băng (frozen), 
+  một đối tượng không bao giờ có thể được sửa đổi hoặc giải đóng băng, dẫn đến việc 
+  giao thức bị tê liệt vĩnh viễn nếu thực hiện trên một đối tượng trạng thái hoặc 
+  capability quản trị.
+description_zh: >
+  在需要持续可变性的关键共享对象上错误地使用了 `public_freeze_object` 函数。
+  一旦被冻结，对象就无法再被修改或撤销冻结。如果在状态对象或管理权限（Capability）
+  对象上执行此操作，可能会导致整个协议陷入永久瘫痪。
+impact: "Medium (Denial of Service for protocol maintenance/upgrades)"
+impact_vi: "Trung bình (Từ chối dịch vụ cho việc bảo trì/nâng cấp giao thức)"
+impact_zh: "中 (对协议维护或升级造成拒绝服务效应)"
+severity: Medium
+code_vuln: |
+  /// ❌ VULNERABLE: Freezes the whole state object permanently
+  public fun vuln_admin_freeze(obj: ProtocolState) {
+      transfer::public_freeze_object(obj);
+  }
+code_fixed: |
+  /// ✅ FIXED: Avoid freezing mission-critical shared objects 
+  /// unless it is a final, intended decommissioning step.
+  public fun deactivate_protocol(obj: &mut ProtocolState) {
+      obj.is_active = false; // logic-based deactivation instead of freezing
+  }
+test_vector: "Attempt to call admin_freeze on a shared state object -> check if future txs fail."
+references:
+  - "https://docs.sui.io/concepts/sui-architecture"
+sui_specific: true

@@ -1,0 +1,43 @@
+name: MS-009 Resource Leak via Missing 'drop'
+name_vi: Rò rỉ Tài nguyên do Thiếu Ability 'drop'
+name_zh: MS-009 缺失 'drop' 权能导致的资源泄露
+date: "2026-02-15"
+loss: "Locked/Orphaned Resources"
+description: >
+  In Move, if a struct does not have the `drop` ability, it must be consumed or 
+  stored. Logical errors during struct unpacking where internal assets are 
+  'forgotten' or moved to a dynamic field that is never used can result in 
+  resource leaks. MoveScanner 2026 identified this as a byproduct of complex 
+  data migrations.
+description_vi: >
+  Trong Move, nếu một struct không có ability `drop`, nó phải được tiêu thụ hoặc 
+  lưu trữ. Các lỗi logic trong quá trình giải nén struct (unpacking) nơi các tài 
+  sản nội bộ bị "quên" hoặc di chuyển vào một dynamic field không bao giờ được 
+  sử dụng có thể dẫn đến rò rỉ tài nguyên. MoveScanner 2026 xác định đây là hệ quả 
+  của các quá trình di chuyển dữ liệu phức tạp.
+description_zh: >
+  在 Move 中，如果一个结构体没有 `drop` 权能，则它必须被消耗或存储。在结构体解包
+  （unpacking）过程中，如果由于逻辑错误导致内部资产被“遗忘”，或者被移动到从未使用的
+  动态字段（Dynamic Field）中，则会导致资源泄露。MoveScanner 2026 将其认定为
+  复杂数据迁移产生的一种副作用。
+impact: "Medium (Gradual state bloat or small per-user asset loss)"
+impact_vi: "Trung bình (Phình to trạng thái hoặc tổn thất tài sản nhỏ cho mỗi người dùng)"
+impact_zh: "中 (引发渐进式的状态膨胀或用户资产微量流失)"
+severity: Medium
+code_vuln: |
+  /// ❌ VULNERABLE: Unpacking complex struct but ignoring internal resource
+  public fun handle_migration(old: OldStruct) {
+      let OldStruct { id, data: _ } = old; // internal 'data' might be lost
+      object::delete(id);
+  }
+code_fixed: |
+  /// ✅ FIXED: Ensure all fields are properly consumed or moved to new storage
+  public fun handle_migration_safe(old: OldStruct, target: &mut NewVault) {
+      let OldStruct { id, data } = old;
+      vault::deposit(target, data);
+      object::delete(id);
+  }
+test_vector: "Verify if total supply of an internal asset decreases unexpectedly during migration calls."
+references:
+  - "https://docs.sui.io/concepts/sui-architecture"
+sui_specific: false

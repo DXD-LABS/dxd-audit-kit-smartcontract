@@ -1,0 +1,34 @@
+name: MS-008 Token Issuance Ability Misuse
+name_vi: Lạm dụng Ability trong Phát hành Token
+name_zh: MS-008 代币发行中的权能（Ability）滥用漏洞
+date: "2026-02-15"
+loss: "Hyper-inflation/Token Theft"
+description: >
+  Move's ability system (`store`, `drop`, `copy`, `key`) manages resource safety. 
+  If a token module incorrectly assigns the `copy` or `store` ability to a 
+  `TreasuryCap` or sensitive witness struct, an attacker may duplicate or 
+  transfer the minting power, leading to unauthorized token issuance.
+description_vi: >
+  Hệ thống ability của Move (`store`, `drop`, `copy`, `key`) quản lý sự an toàn 
+  của tài nguyên. Nếu một module token gán sai ability `copy` hoặc `store` cho 
+  một `TreasuryCap` hoặc một struct witness nhạy cảm, kẻ tấn công có thể nhân 
+  bản hoặc chuyển giao quyền đúc token, dẫn đến việc phát hành token trái phép.
+description_zh: >
+  Move 的权能系统（`store`、`drop`、`copy`、`key`）用于管理资源安全。如果代币
+  模块错误地将 `copy` 或 `store` 权能分配给 `TreasuryCap` 或敏感的 Witness 结构体，
+  攻击者可能会复制或转移“铸币权”，从而导致非法代币发行。
+impact: "Critical (Complete loss of token value and supply control)"
+impact_vi: "Nghiêm trọng (Mất hoàn toàn giá trị token và quyền kiểm soát nguồn cung)"
+impact_zh: "严重 (导致代币价值完全归零并失去对供应量的控制)"
+severity: Critical
+code_vuln: |
+  /// ❌ VULNERABLE: TreasuryCap has 'store' allowing it to be wrapped 
+  /// or traded on a marketplace illegally.
+  struct TreasuryCap<phantom T> has key, store { ... }
+code_fixed: |
+  /// ✅ FIXED: Prevent 'store' and 'copy' for sensitive cap objects
+  struct TreasuryCap<phantom T> has key { ... }
+test_vector: "Check Move bytecode for unexpected 'copy' or 'store' abilities on Capability structs."
+references:
+  - "https://docs.sui.io/concepts/sui-architecture"
+sui_specific: false

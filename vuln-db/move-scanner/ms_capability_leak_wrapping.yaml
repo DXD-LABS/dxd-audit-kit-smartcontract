@@ -1,0 +1,38 @@
+name: MS-004 Capability Leak via Object Wrapping
+name_vi: Lỗ hổng Rò rỉ Capability do Bao bọc Đối tượng (Object Wrapping)
+name_zh: MS-004 包装对象导致的权限（Capability）泄露
+date: "2026-02-15"
+loss: "Privilege Escalation"
+description: >
+  A sensitive Capability (e.g., AdminCap) is wrapped inside another object. 
+  If that container object is public or shared and the extraction logic is 
+  flawed, an attacker may extract the Capability and perform administrative 
+  actions meant only for the protocol owner.
+description_vi: >
+  Một Capability nhạy cảm (ví dụ: AdminCap) bị bao bọc (wrapped) bên trong một 
+  đối tượng khác. Nếu đối tượng chứa đó là công khai hoặc được chia sẻ và logic 
+  trích xuất bị lỗi, kẻ tấn công có thể trích xuất Capability đó và thực hiện 
+  các hành động quản trị vốn chỉ dành cho chủ sở hữu giao thức.
+description_zh: >
+  敏感的权限（例如 AdminCap）被包装在另一个对象内部。如果该容器对象是公共或共享的，
+  且提取逻辑存在漏洞，攻击者则可能提取该权限并执行仅限协议所有者使用的管理操作。
+impact: "Critical (Complete protocol compromise if admin keys are leaked)"
+impact_vi: "Nghiêm trọng (Giao thức bị chiếm quyền hoàn toàn nếu admin key bị lộ)"
+impact_zh: "严重 (如果管理私钥泄露，整个协议将被接管)"
+severity: Critical
+code_vuln: |
+  struct PublicContainer has key { id: UID, admin_cap: AdminCap }
+  /// ❌ VULNERABLE: No authorization check on extraction
+  public fun extract_admin_cap(container: &mut PublicContainer): AdminCap {
+      dynamic_field::remove(&mut container.id, b"admin_cap")
+  }
+code_fixed: |
+  /// ✅ FIXED: Use strict sender check or owner-only access
+  public fun extract_admin_cap_safe(container: &mut PublicContainer, ctx: &mut TxContext): AdminCap {
+      assert!(tx_context::sender(ctx) == @admin_address, E_UNAUTHORIZED);
+      dynamic_field::remove(&mut container.id, b"admin_cap")
+  }
+test_vector: "Try to extract AdminCap from a PublicContainer as a non-admin user."
+references:
+  - "https://docs.sui.io/concepts/sui-architecture"
+sui_specific: true

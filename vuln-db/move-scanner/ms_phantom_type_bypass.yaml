@@ -1,0 +1,42 @@
+name: MS-010 Phantom Type Safety Bypass
+name_vi: Lỗi Bỏ qua Bảo mật Kiểu Phantom (Phantom Type)
+name_zh: MS-010 虚型（Phantom Type）安全绕过漏洞
+date: "2026-02-15"
+loss: "Asset Substitution/Pool Theft"
+description: >
+  The `phantom` keyword in Move generics marks types that aren't stored 
+  internally but define permissions. If omitted, the Move compiler may 
+  allow unsound type substitutions in complex hierarchies, enabling an 
+  attacker to swap one token type for another in a generic vault or pool.
+description_vi: >
+  Từ khóa `phantom` trong Move generics đánh dấu các kiểu không được lưu trữ 
+  nội bộ nhưng dùng để xác định quyền hạn. Nếu bỏ qua, trình biên dịch Move 
+  có thể cho phép thay thế kiểu không an toàn trong các hệ thống phức tạp, 
+  cho phép kẻ tấn công hoán đổi một loại token này sang loại khác trong 
+  một vault hoặc pool generic.
+description_zh: >
+  Move 泛型中的 `phantom` 关键字标记了不出于内部存储目的、但定义权限的类型。
+  如果忽略该关键字，Move 编译器可能会在复杂的层级结构中允许不合理的类型替换，
+  从而使攻击者能够在泛型保管库（Vault）或资金池中将一种代币类型替换为另一种。
+impact: "High (Unauthorized asset extraction from DeFi pools)"
+impact_vi: "Cao (Trích xuất tài sản trái phép từ các bể DeFi)"
+impact_zh: "高 (在 DeFi 资金池中发生非法的资产提取)"
+severity: High
+code_vuln: |
+  /// ❌ VULNERABLE: Missing 'phantom' allowing compiler to perform 
+  /// certain type substitutions in complex generic hierarchies.
+  struct PoolVulnerable<T> has key {
+      id: UID,
+      balance: Balance<T>
+  }
+code_fixed: |
+  /// ✅ FIXED: Use 'phantom' when T is only used in a phantom context 
+  /// (like Balance<T> where T is just a tag).
+  struct PoolFixed<phantom T> has key {
+      id: UID,
+      balance: Balance<T>
+  }
+test_vector: "Try calling deposit_fixed with TypeA but claim it as TypeB via generic manipulation."
+references:
+  - "https://docs.sui.io/concepts/sui-architecture"
+sui_specific: false

@@ -1,0 +1,33 @@
+name: MS-009 Resource Leak (Missing Drop)
+date: "2026-02-15"
+loss: "Trapped Storage / Memory Leak"
+description: >
+  Move structs that do not have the `drop` or `store` abilities must be 
+  explicitly handled or "unpacked". If a module logic allows these structs 
+  to be created but fails to provide a path to consume or return them 
+  (e.g., in a conditional branch that aborts or ends prematurely), the 
+  resource becomes trapped in the transaction or state, potentially 
+  blocking further logic.
+impact: "Medium (Trapped resources, potential for DoS in specific flows)"
+severity: Medium
+code_vuln: |
+  struct InternalAsset { value: u64 } // No drop
+  
+  public fun handle_asset(condition: bool) {
+      let asset = InternalAsset { value: 100 };
+      if (condition) {
+          // ❌ VULNERABLE: If condition is true, we forget the asset
+      } else {
+          let InternalAsset { value: _ } = asset; // Correctly unpacked
+      }
+  }
+code_fixed: |
+  public fun handle_asset_safe(condition: bool) {
+      let asset = InternalAsset { value: 100 };
+      // ✅ FIXED: Ensure all paths consume the resource
+      let InternalAsset { value: _ } = asset;
+  }
+test_vector: "Write a function that creates a non-drop struct and attempt to let it go out of scope without unpacking."
+references:
+  - "https://docs.sui.io/concepts/sui-architecture"
+sui_specific: false

@@ -1,0 +1,3 @@
+[submodule "resources/lab/sui-vuln-lab"]
+	path = resources/lab/sui-vuln-lab
+	url = https://github.com/Monethic/sui-vuln-lab.git

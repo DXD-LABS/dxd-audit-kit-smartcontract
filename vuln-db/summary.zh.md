@@ -1,4 +1,4 @@
-# Sui Vuln Database Summary
+# Sui 漏洞库摘要 (Move)
 
 ## Cetus Spoof Token + Liquidity Math Overflow
 - Date: 2025-05-22
@@ -120,93 +120,93 @@ An on-chain smart contract accepted attested computation results without verifyi
 
 A smart contract accepted the same zero-knowledge intent proof multiple times because the nullifier registry was not checked on-chain. This allowed an attacker to replay the same zk-proof across multiple transactions, executing the same intent action more than once. The root cause is the absence of a nullifier uniqueness check before allowing action execution. Each zk-proof must consume a unique nullifier that is recorded on-chain and rejected on second submission.
 
-## MS-005 Arithmetic Bitwise Edge Case
+## MS-005 算术位运算（Bitwise）边缘案例
 - Date: 2026-02-15
 - Loss: State Corruption
 - Severity: Medium
-- Impact: Medium (Incorrect protocol data or permission logic)
+- Impact: 中 (协议数据不正确或权限逻辑失效)
 
-Errors in bitwise manipulation (shifts, masks) when packing/unpacking multiple  data points into a single 256-bit integer. Common mistakes include shifting  beyond 256 or using incorrect masks that overlap different data fields,  leading to corrupted object state.
+将多个数据点打包/解包到单个 256 位整数时，发生的位运算操（位移、掩码）错误。 常见错误包括位移超过 256 位，或使用的掩码不正确导致不同数据字段重叠，从而引发对象状态损坏。
 
-## MS-004 Capability Leak via Object Wrapping
+## MS-004 包装对象导致的权限（Capability）泄露
 - Date: 2026-02-15
 - Loss: Privilege Escalation
 - Severity: Critical
-- Impact: Critical (Complete protocol compromise if admin keys are leaked)
+- Impact: 严重 (如果管理私钥泄露，整个协议将被接管)
 
-A sensitive Capability (e.g., AdminCap) is wrapped inside another object.  If that container object is public or shared and the extraction logic is  flawed, an attacker may extract the Capability and perform administrative  actions meant only for the protocol owner.
+敏感的权限（例如 AdminCap）被包装在另一个对象内部。如果该容器对象是公共或共享的， 且提取逻辑存在漏洞，攻击者则可能提取该权限并执行仅限协议所有者使用的管理操作。
 
-## MS-003 Cross-Module Permission Defect
+## MS-003 跨模块权限缺陷
 - Date: 2026-02-15
 - Loss: Unauthorized Administrative Action
 - Severity: High
-- Impact: High (Unauthorized state mutations across protocol modules)
+- Impact: 高 (在不同协议模块间发生非法状态修改)
 
-When multiple modules interact (e.g., protocol core and periphery), a module  may trust another module's public functions without verifying the specific  caller's identity or capability. This is exacerbated by the misuse of 'friend'  functions that allow any 'friend' module to perform sensitive operations.
+当多个模块（例如协议核心与外围模块）交互时，一个模块可能会信任另一个模块的公共函数， 而未核查特定的调用者身份或权限（Capability）。过度使用 'friend' 函数会加剧此风险， 因为它允许任何 'friend' 模块执行敏感操作。
 
-## MS-006 Custom Math Lib Edge Case
+## MS-006 自定义数学库边缘案例
 - Date: 2026-02-15
 - Loss: Economic Extraction/DeFi Loss
 - Severity: High
-- Impact: High (Financial loss in DEX/Lending pools over time)
+- Impact: 高 (DEX/借贷池随时间推移而发生的财务损失)
 
-Many protocols use custom fixed-point math libraries (e.g., for interest rates,  bonding curves). These libraries may have edge cases in power/log functions  or precision rounding that can be exploited for small but cumulative  financial gain by an attacker.
+许多协议使用自定义的定点数学库（例如利率、联合曲线）。这些库在幂/对数函数或精度舍入方面 可能存在边缘案例，攻击者可以利用这些漏洞获取微小但持续累积的财务利益。
 
-## MS-002 Dynamic Field Double-Spend
+## MS-002 动态字段双花漏洞
 - Date: 2026-02-15
 - Loss: Asset Overwrite/Duplication
 - Severity: Critical
-- Impact: Critical (Unauthorized asset substitution or logic bypass)
+- Impact: 严重 (资产被非法替换或核心逻辑被绕过)
 
-Logical flaws in managing dynamic fields where a unique key is reused to bind  a new resource without verifying if the old one was consumed. In Sui, re-binding  the same name to a dynamic field overwrites the value, but if the old value  was a 'Balance' or 'Coin', it can lead to state inconsistency or fund loss.
+在管理动态字段时，由于重用唯一键来绑定新资源，而未核实旧资源是否已被消耗，导致逻辑缺陷。 在 Sui 中，将相同名称重新绑定到动态字段会覆盖其值，但如果旧值是 'Balance' 或 'Coin'， 则可能导致状态不一致或资金损失。
 
-## MS-012 Entry Function Over-exposure
+## MS-012 Entry 函数暴露过度漏洞
 - Date: 2026-02-15
 - Loss: Privilege Escalation/State Corruption
 - Severity: High
-- Impact: High (Unauthorized administrative state mutations)
+- Impact: 高 (引发非法的管理状态修改)
 
-Administrative or mission-critical initialization functions marked as  `entry` without proper `TxContext` sender verification. This allows any  user to call these functions directly from a transaction, potentially  re-initializing state or gaining unauthorized access.
+管理类或关键的初始化函数被标记为 `entry` 后，若没有进行严谨的 `TxContext`  发送者校验，将会导致漏洞。这使得任何用户都可以直接从一个交易中调用这些函数， 并可能重新初始化对象状态或获取未授权的访问权限。
 
-## MS-011 Freeze Object Misuse
+## MS-011 冻结对象权限（Freeze Object）滥用漏洞
 - Date: 2026-02-15
 - Loss: Protocol Lock (DoS)
 - Severity: Medium
-- Impact: Medium (Denial of Service for protocol maintenance/upgrades)
+- Impact: 中 (对协议维护或升级造成拒绝服务效应)
 
-Improper use of `public_freeze_object` on mission-critical shared objects  that require future mutability. Once frozen, an object can never be  mutated or un-frozen, leading to permanent protocol paralysis if done  on a state object or administrative capability.
+在需要持续可变性的关键共享对象上错误地使用了 `public_freeze_object` 函数。 一旦被冻结，对象就无法再被修改或撤销冻结。如果在状态对象或管理权限（Capability） 对象上执行此操作，可能会导致整个协议陷入永久瘫痪。
 
-## MS-007 Parallel Race via Object Dependency
+## MS-007 跨对象依赖引发的并行执行竞争漏洞
 - Date: 2026-02-15
 - Loss: Inconsistent Protocol State
 - Severity: High
-- Impact: High (Potential for invalid state or economic extraction under load)
+- Impact: 高 (在高负载下可能导致非法状态或发生经济榨取)
 
-Sui's high-speed parallel execution (Mysticeti) assumes transactions  operating on different objects can run concurrently. If a transaction  depends on multiple objects and a race condition is created where the  state of one object affects the logic of another in an unexpected order,  security invariant violations may occur.
+Sui 的高速并行执行机制（Mysticeti）假设对不同对象进行的操作可以并发运行。如果 一个交易依赖于多个对象，且由于执行顺序不可预测而产生竞态条件（即一个对象的状态 以非预期的方式影响另一个对象的逻辑），则可能导致安全不变性被违反。
 
-## MS-010 Phantom Type Safety Bypass
+## MS-010 虚型（Phantom Type）安全绕过漏洞
 - Date: 2026-02-15
 - Loss: Asset Substitution/Pool Theft
 - Severity: High
-- Impact: High (Unauthorized asset extraction from DeFi pools)
+- Impact: 高 (在 DeFi 资金池中发生非法的资产提取)
 
-The `phantom` keyword in Move generics marks types that aren't stored  internally but define permissions. If omitted, the Move compiler may  allow unsound type substitutions in complex hierarchies, enabling an  attacker to swap one token type for another in a generic vault or pool.
+Move 泛型中的 `phantom` 关键字标记了不出于内部存储目的、但定义权限的类型。 如果忽略该关键字，Move 编译器可能会在复杂的层级结构中允许不合理的类型替换， 从而使攻击者能够在泛型保管库（Vault）或资金池中将一种代币类型替换为另一种。
 
-## MS-001 Dynamic Field Resource Leak
+## MS-001 动态字段资源泄露漏洞
 - Date: 2026-02-15
 - Loss: Locked Objects (Unrecoverable storage)
 - Severity: High
-- Impact: High (Permanent fund loss for specific users, storage bloat)
+- Impact: 高 (引发特定用户的永久资金损失、链上存储膨胀)
 
-When a parent object is deleted or its ownership is wrapped, its dynamic fields  (DF) or dynamic object fields (DOF) are not automatically cleaned up. These  fields become "orphaned" on the blockchain, permanently locking the assets  or data they contain. MoveScanner found this is common in upgradeable  contracts where the old object is deprecated but fields aren't migrated.
+当父级对象被删除或其所有权被包装（wrapped）时，其动态字段（DF）或动态对象字段（DOF） 不会自动清除。这些字段在区块链上变为“孤儿”状态，永久锁定其包含的资产或数据。 MoveScanner 发现这在可升级合约中很常见，旧对象被弃用但相关字段未迁移。
 
-## MS-009 Resource Leak via Missing 'drop'
+## MS-009 缺失 'drop' 权能导致的资源泄露
 - Date: 2026-02-15
 - Loss: Locked/Orphaned Resources
 - Severity: Medium
-- Impact: Medium (Gradual state bloat or small per-user asset loss)
+- Impact: 中 (引发渐进式的状态膨胀或用户资产微量流失)
 
-In Move, if a struct does not have the `drop` ability, it must be consumed or  stored. Logical errors during struct unpacking where internal assets are  'forgotten' or moved to a dynamic field that is never used can result in  resource leaks. MoveScanner 2026 identified this as a byproduct of complex  data migrations.
+在 Move 中，如果一个结构体没有 `drop` 权能，则它必须被消耗或存储。在结构体解包 （unpacking）过程中，如果由于逻辑错误导致内部资产被“遗忘”，或者被移动到从未使用的 动态字段（Dynamic Field）中，则会导致资源泄露。MoveScanner 2026 将其认定为 复杂数据迁移产生的一种副作用。
 
 ## MS-009 Resource Leak (Missing Drop)
 - Date: 2026-02-15
@@ -216,13 +216,13 @@ In Move, if a struct does not have the `drop` ability, it must be consumed or  s
 
 Move structs that do not have the `drop` or `store` abilities must be  explicitly handled or "unpacked". If a module logic allows these structs  to be created but fails to provide a path to consume or return them  (e.g., in a conditional branch that aborts or ends prematurely), the  resource becomes trapped in the transaction or state, potentially  blocking further logic.
 
-## MS-008 Token Issuance Ability Misuse
+## MS-008 代币发行中的权能（Ability）滥用漏洞
 - Date: 2026-02-15
 - Loss: Hyper-inflation/Token Theft
 - Severity: Critical
-- Impact: Critical (Complete loss of token value and supply control)
+- Impact: 严重 (导致代币价值完全归零并失去对供应量的控制)
 
-Move's ability system (`store`, `drop`, `copy`, `key`) manages resource safety.  If a token module incorrectly assigns the `copy` or `store` ability to a  `TreasuryCap` or sensitive witness struct, an attacker may duplicate or  transfer the minting power, leading to unauthorized token issuance.
+Move 的权能系统（`store`、`drop`、`copy`、`key`）用于管理资源安全。如果代币 模块错误地将 `copy` 或 `store` 权能分配给 `TreasuryCap` 或敏感的 Witness 结构体， 攻击者可能会复制或转移“铸币权”，从而导致非法代币发行。
 
 ## AGENT-007 Verifiable Intent Failure
 - Date: 2025-12-07

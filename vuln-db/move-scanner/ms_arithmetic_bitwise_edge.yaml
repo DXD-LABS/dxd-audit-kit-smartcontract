@@ -1,0 +1,37 @@
+name: MS-005 Arithmetic Bitwise Edge Case
+name_vi: Lỗi Cận Biên Số học Bitwise
+name_zh: MS-005 算术位运算（Bitwise）边缘案例
+date: "2026-02-15"
+loss: "State Corruption"
+description: >
+  Errors in bitwise manipulation (shifts, masks) when packing/unpacking multiple 
+  data points into a single 256-bit integer. Common mistakes include shifting 
+  beyond 256 or using incorrect masks that overlap different data fields, 
+  leading to corrupted object state.
+description_vi: >
+  Các lỗi trong thao tác bitwise (dịch bit, mặt nạ bit) khi đóng gói/giải nén nhiều 
+  điểm dữ liệu vào một số nguyên 256-bit duy nhất. Các sai lầm phổ biến bao gồm dịch 
+  quá 256 bit hoặc sử dụng các mặt nạ không chính xác làm chồng lấn các trường dữ liệu 
+  khác nhau, dẫn đến trạng thái đối tượng bị hỏng.
+description_zh: >
+  将多个数据点打包/解包到单个 256 位整数时，发生的位运算操（位移、掩码）错误。
+  常见错误包括位移超过 256 位，或使用的掩码不正确导致不同数据字段重叠，从而引发对象状态损坏。
+impact: "Medium (Incorrect protocol data or permission logic)"
+impact_vi: "Trung bình (Dữ liệu giao thức hoặc logic phân quyền không chính xác)"
+impact_zh: "中 (协议数据不正确或权限逻辑失效)"
+severity: Medium
+code_vuln: |
+  /// ❌ VULNERABLE: Incorrect shift leading to data overlap
+  public fun pack_data(p1: u128, p2: u128): u256 {
+      ((p1 as u256) << 128) | (p2 as u256)
+  }
+code_fixed: |
+  /// ✅ FIXED: Use explicit masks and range checks for each field
+  public fun pack_data_safe(p1: u128, p2: u128): u256 {
+      assert!(p1 <= MAX_U128 && p2 <= MAX_U128, E_OVERFLOW);
+      ((p1 as u256) << 128) | (p2 as u256)
+  }
+test_vector: "Pack 129-bit value into 128-bit slot -> verify if it corrupts adjacent data."
+references:
+  - "https://docs.sui.io/concepts/sui-architecture"
+sui_specific: false

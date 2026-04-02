@@ -1,0 +1,43 @@
+name: MS-007 Parallel Race via Object Dependency
+name_vi: Lỗi Race Condition trong Thực thi Song song
+name_zh: MS-007 跨对象依赖引发的并行执行竞争漏洞
+date: "2026-02-15"
+loss: "Inconsistent Protocol State"
+description: >
+  Sui's high-speed parallel execution (Mysticeti) assumes transactions 
+  operating on different objects can run concurrently. If a transaction 
+  depends on multiple objects and a race condition is created where the 
+  state of one object affects the logic of another in an unexpected order, 
+  security invariant violations may occur.
+description_vi: >
+  Hệ thống thực thi song song tốc độ cao của Sui (Mysticeti) giả định các giao dịch 
+  hoạt động trên các đối tượng khác nhau có thể chạy đồng thời. Nếu một giao dịch 
+  phụ thuộc vào nhiều đối tượng và một tình trạng tranh chấp (race condition) được 
+  tạo ra - nơi trạng thái của một đối tượng ảnh hưởng đến logic của đối tượng khác 
+  theo thứ tự không mong đợi - các vi phạm bất biến bảo mật có thể xảy ra.
+description_zh: >
+  Sui 的高速并行执行机制（Mysticeti）假设对不同对象进行的操作可以并发运行。如果
+  一个交易依赖于多个对象，且由于执行顺序不可预测而产生竞态条件（即一个对象的状态
+  以非预期的方式影响另一个对象的逻辑），则可能导致安全不变性被违反。
+impact: "High (Potential for invalid state or economic extraction under load)"
+impact_vi: "Cao (Khả năng trạng thái không hợp lệ hoặc khai thác kinh tế dưới tải cao)"
+impact_zh: "高 (在高负载下可能导致非法状态或发生经济榨取)"
+severity: High
+code_vuln: |
+  /// ❌ VULNERABLE: Logic assumes obj_a is updated before obj_b
+  public fun sync_states(obj_a: &mut ObjA, obj_b: &mut ObjB) {
+      if (obj_a.is_active) {
+          obj_b.increment(); // Race: obj_a status may change concurrently
+      }
+  }
+code_fixed: |
+  /// ✅ FIXED: Use a single shared object or versioned state to ensure atomicity
+  public fun sync_states_atomic(sync_obj: &mut SharedSync) {
+      if (sync_obj.obj_a.is_active) {
+          sync_obj.obj_b.increment();
+      }
+  }
+test_vector: "Dispatch two competing transactions modifying obj_a and obj_b -> verify if obj_b hits inconsistent state."
+references:
+  - "https://docs.sui.io/concepts/sui-architecture"
+sui_specific: true

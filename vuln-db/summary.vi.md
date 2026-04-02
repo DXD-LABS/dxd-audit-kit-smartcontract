@@ -1,4 +1,4 @@
-# Sui Vuln Database Summary
+# Tổng hợp Lỗ hổng Sui (Move)
 
 ## Cetus Spoof Token + Liquidity Math Overflow
 - Date: 2025-05-22
@@ -120,93 +120,93 @@ An on-chain smart contract accepted attested computation results without verifyi
 
 A smart contract accepted the same zero-knowledge intent proof multiple times because the nullifier registry was not checked on-chain. This allowed an attacker to replay the same zk-proof across multiple transactions, executing the same intent action more than once. The root cause is the absence of a nullifier uniqueness check before allowing action execution. Each zk-proof must consume a unique nullifier that is recorded on-chain and rejected on second submission.
 
-## MS-005 Arithmetic Bitwise Edge Case
+## Lỗi Cận Biên Số học Bitwise
 - Date: 2026-02-15
 - Loss: State Corruption
 - Severity: Medium
-- Impact: Medium (Incorrect protocol data or permission logic)
+- Impact: Trung bình (Dữ liệu giao thức hoặc logic phân quyền không chính xác)
 
-Errors in bitwise manipulation (shifts, masks) when packing/unpacking multiple  data points into a single 256-bit integer. Common mistakes include shifting  beyond 256 or using incorrect masks that overlap different data fields,  leading to corrupted object state.
+Các lỗi trong thao tác bitwise (dịch bit, mặt nạ bit) khi đóng gói/giải nén nhiều  điểm dữ liệu vào một số nguyên 256-bit duy nhất. Các sai lầm phổ biến bao gồm dịch  quá 256 bit hoặc sử dụng các mặt nạ không chính xác làm chồng lấn các trường dữ liệu  khác nhau, dẫn đến trạng thái đối tượng bị hỏng.
 
-## MS-004 Capability Leak via Object Wrapping
+## Lỗ hổng Rò rỉ Capability do Bao bọc Đối tượng (Object Wrapping)
 - Date: 2026-02-15
 - Loss: Privilege Escalation
 - Severity: Critical
-- Impact: Critical (Complete protocol compromise if admin keys are leaked)
+- Impact: Nghiêm trọng (Giao thức bị chiếm quyền hoàn toàn nếu admin key bị lộ)
 
-A sensitive Capability (e.g., AdminCap) is wrapped inside another object.  If that container object is public or shared and the extraction logic is  flawed, an attacker may extract the Capability and perform administrative  actions meant only for the protocol owner.
+Một Capability nhạy cảm (ví dụ: AdminCap) bị bao bọc (wrapped) bên trong một  đối tượng khác. Nếu đối tượng chứa đó là công khai hoặc được chia sẻ và logic  trích xuất bị lỗi, kẻ tấn công có thể trích xuất Capability đó và thực hiện  các hành động quản trị vốn chỉ dành cho chủ sở hữu giao thức.
 
-## MS-003 Cross-Module Permission Defect
+## Lỗi Phân quyền Giữa Các Module (Cross-Module)
 - Date: 2026-02-15
 - Loss: Unauthorized Administrative Action
 - Severity: High
-- Impact: High (Unauthorized state mutations across protocol modules)
+- Impact: Cao (Thay đổi trạng thái trái phép trên các module giao thức)
 
-When multiple modules interact (e.g., protocol core and periphery), a module  may trust another module's public functions without verifying the specific  caller's identity or capability. This is exacerbated by the misuse of 'friend'  functions that allow any 'friend' module to perform sensitive operations.
+Khi nhiều module tương tác với nhau (ví dụ: module lõi và module ngoại vi), một  module có thể tin tưởng các hàm public của module khác mà không xác minh danh tính  hoặc capability của người gọi cụ thể. Điều này trở nên tồi tệ hơn do việc lạm dụng  hàm 'friend', cho phép bất kỳ module 'friend' nào thực hiện các hoạt động nhạy cảm.
 
-## MS-006 Custom Math Lib Edge Case
+## Lỗi Cận Biên ở Thư viện Toán học Tùy chỉnh (Custom Math Lib)
 - Date: 2026-02-15
 - Loss: Economic Extraction/DeFi Loss
 - Severity: High
-- Impact: High (Financial loss in DEX/Lending pools over time)
+- Impact: Cao (Tổn thất tài chính trong các bể DEX/Lending theo thời gian)
 
-Many protocols use custom fixed-point math libraries (e.g., for interest rates,  bonding curves). These libraries may have edge cases in power/log functions  or precision rounding that can be exploited for small but cumulative  financial gain by an attacker.
+Nhiều giao thức sử dụng các thư viện toán học dấu phẩy tĩnh (fixed-point) tùy chỉnh  (ví dụ: cho lãi suất, bonding curves). Các thư viện này có thể có các lỗi cận biên  trong các hàm lũy thừa/logarit hoặc làm tròn độ chính xác mà kẻ tấn công có thể  khai thác để trục lợi tài chính nhỏ nhưng tích lũy dần.
 
-## MS-002 Dynamic Field Double-Spend
+## Lỗ hổng Double-Spend ở Dynamic Field
 - Date: 2026-02-15
 - Loss: Asset Overwrite/Duplication
 - Severity: Critical
-- Impact: Critical (Unauthorized asset substitution or logic bypass)
+- Impact: Nghiêm trọng (Thay thế tài sản trái phép hoặc bỏ qua logic kiểm tra)
 
-Logical flaws in managing dynamic fields where a unique key is reused to bind  a new resource without verifying if the old one was consumed. In Sui, re-binding  the same name to a dynamic field overwrites the value, but if the old value  was a 'Balance' or 'Coin', it can lead to state inconsistency or fund loss.
+Lỗ hổng logic trong việc quản lý các dynamic field khi một khóa (key) duy nhất  được tái sử dụng để liên kết với tài nguyên mới mà không kiểm tra xem tài nguyên  cũ đã được tiêu thụ chưa. Trong Sui, việc gán lại cùng một tên cho một dynamic field  sẽ ghi đè lên giá trị cũ, nhưng nếu giá trị cũ là 'Balance' hoặc 'Coin', nó có thể  dẫn đến mất cân bằng trạng thái hoặc mất tiền.
 
-## MS-012 Entry Function Over-exposure
+## Lỗ hổng Phơi bày Hàm Entry (Entry Function Over-exposure)
 - Date: 2026-02-15
 - Loss: Privilege Escalation/State Corruption
 - Severity: High
-- Impact: High (Unauthorized administrative state mutations)
+- Impact: Cao (Thay đổi trạng thái quản trị trái phép)
 
-Administrative or mission-critical initialization functions marked as  `entry` without proper `TxContext` sender verification. This allows any  user to call these functions directly from a transaction, potentially  re-initializing state or gaining unauthorized access.
+Các hàm khởi tạo quản trị hoặc quan trọng được đánh dấu là `entry` mà không xác  minh `TxContext` sender một cách chính xác. Điều này cho phép bất kỳ người dùng  nào gọi trực tiếp các hàm này từ một giao dịch, có khả năng khởi tạo lại trạng  thái hoặc giành được truy cập trái phép.
 
-## MS-011 Freeze Object Misuse
+## Lạm dụng Hàm Freeze Object
 - Date: 2026-02-15
 - Loss: Protocol Lock (DoS)
 - Severity: Medium
-- Impact: Medium (Denial of Service for protocol maintenance/upgrades)
+- Impact: Trung bình (Từ chối dịch vụ cho việc bảo trì/nâng cấp giao thức)
 
-Improper use of `public_freeze_object` on mission-critical shared objects  that require future mutability. Once frozen, an object can never be  mutated or un-frozen, leading to permanent protocol paralysis if done  on a state object or administrative capability.
+Sử dụng sai hàm `public_freeze_object` trên các đối tượng dùng chung (shared objects)  quan trọng cần có khả năng thay đổi trong tương lai. Khi đã bị đóng băng (frozen),  một đối tượng không bao giờ có thể được sửa đổi hoặc giải đóng băng, dẫn đến việc  giao thức bị tê liệt vĩnh viễn nếu thực hiện trên một đối tượng trạng thái hoặc  capability quản trị.
 
-## MS-007 Parallel Race via Object Dependency
+## Lỗi Race Condition trong Thực thi Song song
 - Date: 2026-02-15
 - Loss: Inconsistent Protocol State
 - Severity: High
-- Impact: High (Potential for invalid state or economic extraction under load)
+- Impact: Cao (Khả năng trạng thái không hợp lệ hoặc khai thác kinh tế dưới tải cao)
 
-Sui's high-speed parallel execution (Mysticeti) assumes transactions  operating on different objects can run concurrently. If a transaction  depends on multiple objects and a race condition is created where the  state of one object affects the logic of another in an unexpected order,  security invariant violations may occur.
+Hệ thống thực thi song song tốc độ cao của Sui (Mysticeti) giả định các giao dịch  hoạt động trên các đối tượng khác nhau có thể chạy đồng thời. Nếu một giao dịch  phụ thuộc vào nhiều đối tượng và một tình trạng tranh chấp (race condition) được  tạo ra - nơi trạng thái của một đối tượng ảnh hưởng đến logic của đối tượng khác  theo thứ tự không mong đợi - các vi phạm bất biến bảo mật có thể xảy ra.
 
-## MS-010 Phantom Type Safety Bypass
+## Lỗi Bỏ qua Bảo mật Kiểu Phantom (Phantom Type)
 - Date: 2026-02-15
 - Loss: Asset Substitution/Pool Theft
 - Severity: High
-- Impact: High (Unauthorized asset extraction from DeFi pools)
+- Impact: Cao (Trích xuất tài sản trái phép từ các bể DeFi)
 
-The `phantom` keyword in Move generics marks types that aren't stored  internally but define permissions. If omitted, the Move compiler may  allow unsound type substitutions in complex hierarchies, enabling an  attacker to swap one token type for another in a generic vault or pool.
+Từ khóa `phantom` trong Move generics đánh dấu các kiểu không được lưu trữ  nội bộ nhưng dùng để xác định quyền hạn. Nếu bỏ qua, trình biên dịch Move  có thể cho phép thay thế kiểu không an toàn trong các hệ thống phức tạp,  cho phép kẻ tấn công hoán đổi một loại token này sang loại khác trong  một vault hoặc pool generic.
 
-## MS-001 Dynamic Field Resource Leak
+## Lỗ hổng Rò rỉ Tài nguyên ở Dynamic Field
 - Date: 2026-02-15
 - Loss: Locked Objects (Unrecoverable storage)
 - Severity: High
-- Impact: High (Permanent fund loss for specific users, storage bloat)
+- Impact: Cao (Mất tiền vĩnh viễn cho một số người dùng, phình to bộ nhớ lưu trữ)
 
-When a parent object is deleted or its ownership is wrapped, its dynamic fields  (DF) or dynamic object fields (DOF) are not automatically cleaned up. These  fields become "orphaned" on the blockchain, permanently locking the assets  or data they contain. MoveScanner found this is common in upgradeable  contracts where the old object is deprecated but fields aren't migrated.
+Khi một đối tượng cha bị xóa hoặc bị bao bọc (wrapped) quyền sở hữu, các dynamic  fields (DF) hoặc dynamic object fields (DOF) của nó không được tự động dọn dẹp.  Các trường này trở thành "mồ côi" trên blockchain, khóa vĩnh viễn các tài sản  hoặc dữ liệu mà chúng chứa. MoveScanner nhận thấy điều này phổ biến trong các  hợp đồng có thể nâng cấp, nơi đối tượng cũ bị loại bỏ nhưng các trường không được di chuyển.
 
-## MS-009 Resource Leak via Missing 'drop'
+## Rò rỉ Tài nguyên do Thiếu Ability 'drop'
 - Date: 2026-02-15
 - Loss: Locked/Orphaned Resources
 - Severity: Medium
-- Impact: Medium (Gradual state bloat or small per-user asset loss)
+- Impact: Trung bình (Phình to trạng thái hoặc tổn thất tài sản nhỏ cho mỗi người dùng)
 
-In Move, if a struct does not have the `drop` ability, it must be consumed or  stored. Logical errors during struct unpacking where internal assets are  'forgotten' or moved to a dynamic field that is never used can result in  resource leaks. MoveScanner 2026 identified this as a byproduct of complex  data migrations.
+Trong Move, nếu một struct không có ability `drop`, nó phải được tiêu thụ hoặc  lưu trữ. Các lỗi logic trong quá trình giải nén struct (unpacking) nơi các tài  sản nội bộ bị "quên" hoặc di chuyển vào một dynamic field không bao giờ được  sử dụng có thể dẫn đến rò rỉ tài nguyên. MoveScanner 2026 xác định đây là hệ quả  của các quá trình di chuyển dữ liệu phức tạp.
 
 ## MS-009 Resource Leak (Missing Drop)
 - Date: 2026-02-15
@@ -216,13 +216,13 @@ In Move, if a struct does not have the `drop` ability, it must be consumed or  s
 
 Move structs that do not have the `drop` or `store` abilities must be  explicitly handled or "unpacked". If a module logic allows these structs  to be created but fails to provide a path to consume or return them  (e.g., in a conditional branch that aborts or ends prematurely), the  resource becomes trapped in the transaction or state, potentially  blocking further logic.
 
-## MS-008 Token Issuance Ability Misuse
+## Lạm dụng Ability trong Phát hành Token
 - Date: 2026-02-15
 - Loss: Hyper-inflation/Token Theft
 - Severity: Critical
-- Impact: Critical (Complete loss of token value and supply control)
+- Impact: Nghiêm trọng (Mất hoàn toàn giá trị token và quyền kiểm soát nguồn cung)
 
-Move's ability system (`store`, `drop`, `copy`, `key`) manages resource safety.  If a token module incorrectly assigns the `copy` or `store` ability to a  `TreasuryCap` or sensitive witness struct, an attacker may duplicate or  transfer the minting power, leading to unauthorized token issuance.
+Hệ thống ability của Move (`store`, `drop`, `copy`, `key`) quản lý sự an toàn  của tài nguyên. Nếu một module token gán sai ability `copy` hoặc `store` cho  một `TreasuryCap` hoặc một struct witness nhạy cảm, kẻ tấn công có thể nhân  bản hoặc chuyển giao quyền đúc token, dẫn đến việc phát hành token trái phép.
 
 ## AGENT-007 Verifiable Intent Failure
 - Date: 2025-12-07

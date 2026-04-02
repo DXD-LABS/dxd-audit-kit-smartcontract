@@ -1,0 +1,42 @@
+name: MS-001 Dynamic Field Resource Leak
+name_vi: Lỗ hổng Rò rỉ Tài nguyên ở Dynamic Field
+name_zh: MS-001 动态字段资源泄露漏洞
+date: "2026-02-15"
+loss: "Locked Objects (Unrecoverable storage)"
+description: >
+  When a parent object is deleted or its ownership is wrapped, its dynamic fields 
+  (DF) or dynamic object fields (DOF) are not automatically cleaned up. These 
+  fields become "orphaned" on the blockchain, permanently locking the assets 
+  or data they contain. MoveScanner found this is common in upgradeable 
+  contracts where the old object is deprecated but fields aren't migrated.
+description_vi: >
+  Khi một đối tượng cha bị xóa hoặc bị bao bọc (wrapped) quyền sở hữu, các dynamic 
+  fields (DF) hoặc dynamic object fields (DOF) của nó không được tự động dọn dẹp. 
+  Các trường này trở thành "mồ côi" trên blockchain, khóa vĩnh viễn các tài sản 
+  hoặc dữ liệu mà chúng chứa. MoveScanner nhận thấy điều này phổ biến trong các 
+  hợp đồng có thể nâng cấp, nơi đối tượng cũ bị loại bỏ nhưng các trường không được di chuyển.
+description_zh: >
+  当父级对象被删除或其所有权被包装（wrapped）时，其动态字段（DF）或动态对象字段（DOF）
+  不会自动清除。这些字段在区块链上变为“孤儿”状态，永久锁定其包含的资产或数据。
+  MoveScanner 发现这在可升级合约中很常见，旧对象被弃用但相关字段未迁移。
+impact: "High (Permanent fund loss for specific users, storage bloat)"
+impact_vi: "Cao (Mất tiền vĩnh viễn cho một số người dùng, phình to bộ nhớ lưu trữ)"
+impact_zh: "高 (引发特定用户的永久资金损失、链上存储膨胀)"
+severity: High
+code_vuln: |
+  public fun delete_parent(parent: Parent, ctx: &mut TxContext) {
+      let Parent { id } = parent;
+      // ❌ VULNERABLE: id is deleted, but dynamic fields attached to it remain
+      object::delete(id);
+  }
+code_fixed: |
+  public fun delete_parent_safe(parent: Parent, ctx: &mut TxContext) {
+      let Parent { id } = parent;
+      // ✅ FIXED: Explicitly remove dynamic fields before deleting ID
+      let field_value: u64 = dynamic_field::remove(&mut id, b"field_key");
+      object::delete(id);
+  }
+test_vector: "Attach DF to object -> delete object -> check if DF is still accessible via ID (it remains on-chain but unreachable)."
+references:
+  - "https://docs.sui.io/concepts/sui-architecture"
+sui_specific: true

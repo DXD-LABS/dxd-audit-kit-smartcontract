@@ -1,10 +1,18 @@
-﻿# Vuln DB (Sui/Move)
+# Vuln DB (Sui/Move)
 
 该目录用于存放 Move/Sui 真实漏洞的 YAML 记录，以及生成 summary 的解析器。
 
 ## 结构
 
-- `vulns/` - 每个漏洞一个 YAML 文件。
+### 目录
+- [常用漏洞 (Common)](vulns/)
+- [MoveScanner 2026 (新增)](move-scanner/)
+
+### 汇总报告 (自动生成)
+- [Summary (英语)](summary.md)
+- [Summary (中文)](summary.zh.md)
+- [Summary (越南语)](summary.vi.md)
+
 - `parser.py` - 解析所有 YAML 并生成 `summary.md`。
 - `requirements.txt` - 解析器所需的 Python 依赖。
 

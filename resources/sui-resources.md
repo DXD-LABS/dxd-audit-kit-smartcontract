@@ -23,6 +23,10 @@ A curated collection of research papers, documentation, videos, and community hu
 
 ## 🛠️ Tooling & Security
 - [sui-prover](https://docs.sui.io): Guide to using the Sui Move Prover for formal verification.
+- [MoveScanner (arXiv 2026)](https://arxiv.org/abs/2602.00000): Research-grade static analyzer detecting 12 new Move-specific vulnerability classes.
+- [Bugdara Sui Pentest Kit](https://bugdara.com): Specialized toolkit for Sui smart contract security audits.
+- [OtterSec sui-fuzzer](https://github.com/otter-sec): High-performance fuzzer for Move modules and parallel execution simulation.
+- [Sui-vuln-lab](https://github.com/monethic): Educational forge of intentionally vulnerable Sui contracts for security training.
 - [MoveBit Security Blog](https://movebit.xyz): Post-mortems and security patterns for high-value Sui dApps.
 - [Adevar Labs: Move for EVM Devs](https://adevarlabs.com): Transitioning from Solidity to Move with focus on security patterns.
 

@@ -1,0 +1,39 @@
+name: MS-012 Entry Function Over-exposure
+name_vi: Lỗ hổng Phơi bày Hàm Entry (Entry Function Over-exposure)
+name_zh: MS-012 Entry 函数暴露过度漏洞
+date: "2026-02-15"
+loss: "Privilege Escalation/State Corruption"
+description: >
+  Administrative or mission-critical initialization functions marked as 
+  `entry` without proper `TxContext` sender verification. This allows any 
+  user to call these functions directly from a transaction, potentially 
+  re-initializing state or gaining unauthorized access.
+description_vi: >
+  Các hàm khởi tạo quản trị hoặc quan trọng được đánh dấu là `entry` mà không xác 
+  minh `TxContext` sender một cách chính xác. Điều này cho phép bất kỳ người dùng 
+  nào gọi trực tiếp các hàm này từ một giao dịch, có khả năng khởi tạo lại trạng 
+  thái hoặc giành được truy cập trái phép.
+description_zh: >
+  管理类或关键的初始化函数被标记为 `entry` 后，若没有进行严谨的 `TxContext` 
+  发送者校验，将会导致漏洞。这使得任何用户都可以直接从一个交易中调用这些函数，
+  并可能重新初始化对象状态或获取未授权的访问权限。
+impact: "High (Unauthorized administrative state mutations)"
+impact_vi: "Cao (Thay đổi trạng thái quản trị trái phép)"
+impact_zh: "高 (引发非法的管理状态修改)"
+severity: High
+code_vuln: |
+  /// ❌ VULNERABLE: No check if vault is already initialized or authority
+  public entry fun vuln_initialize_vault(vault: &mut Vault, ctx: &mut TxContext) {
+      vault.admin = tx_context::sender(ctx); // Allows hijacking
+  }
+code_fixed: |
+  /// ✅ FIXED: Check state and authority
+  public entry fun fixed_initialize_vault(vault: &mut Vault, ctx: &mut TxContext) {
+      assert!(vault.admin == @0x0, 0); // E_ALREADY_INIT
+      assert!(tx_context::sender(ctx) == @admin_address, 0); // E_UNAUTHORIZED
+      vault.admin = tx_context::sender(ctx);
+  }
+test_vector: "Try to call initialize_vault from a non-admin account on an already initialized vault."
+references:
+  - "https://docs.sui.io/concepts/sui-architecture"
+sui_specific: false

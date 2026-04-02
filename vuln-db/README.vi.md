@@ -1,6 +1,13 @@
 # Vuln DB (Sui/Move)
 
-Thư mục này lưu các mô tả lỗ hổng Move/Sui thực tế ở dạng YAML và bộ parser để tạo summary.
+### Danh mục
+- [Lỗ hổng Phổ biến (Common)](vulns/)
+- [MoveScanner 2026 (Mới)](move-scanner/)
+
+### Báo cáo Tổng hợp (Tự động)
+- [Summary (Tiếng Anh)](summary.md)
+- [Summary (Tiếng Việt)](summary.vi.md)
+- [Summary (Tiếng Trung)](summary.zh.md)
 
 ## Cấu trúc
 

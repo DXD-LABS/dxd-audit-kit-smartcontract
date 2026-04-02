@@ -1,0 +1,37 @@
+name: MS-006 Custom Math Lib Edge Case
+name_vi: Lỗi Cận Biên ở Thư viện Toán học Tùy chỉnh (Custom Math Lib)
+name_zh: MS-006 自定义数学库边缘案例
+date: "2026-02-15"
+loss: "Economic Extraction/DeFi Loss"
+description: >
+  Many protocols use custom fixed-point math libraries (e.g., for interest rates, 
+  bonding curves). These libraries may have edge cases in power/log functions 
+  or precision rounding that can be exploited for small but cumulative 
+  financial gain by an attacker.
+description_vi: >
+  Nhiều giao thức sử dụng các thư viện toán học dấu phẩy tĩnh (fixed-point) tùy chỉnh 
+  (ví dụ: cho lãi suất, bonding curves). Các thư viện này có thể có các lỗi cận biên 
+  trong các hàm lũy thừa/logarit hoặc làm tròn độ chính xác mà kẻ tấn công có thể 
+  khai thác để trục lợi tài chính nhỏ nhưng tích lũy dần.
+description_zh: >
+  许多协议使用自定义的定点数学库（例如利率、联合曲线）。这些库在幂/对数函数或精度舍入方面
+  可能存在边缘案例，攻击者可以利用这些漏洞获取微小但持续累积的财务利益。
+impact: "High (Financial loss in DEX/Lending pools over time)"
+impact_vi: "Cao (Tổn thất tài chính trong các bể DEX/Lending theo thời gian)"
+impact_zh: "高 (DEX/借贷池随时间推移而发生的财务损失)"
+severity: High
+code_vuln: |
+  /// ❌ VULNERABLE: Fixed point math with poor precision at small scales
+  public fun calc_interest(amount: u64, rate: u64): u64 {
+      (amount * rate) / 10000 // Inaccurate for small amounts/rates
+  }
+code_fixed: |
+  /// ✅ FIXED: Use high precision scaling and safe rounding
+  public fun calc_interest_safe(amount: u128, rate: u128): u64 {
+      let result = (amount * rate) / SCALING_FACTOR;
+      (result as u64)
+  }
+test_vector: "Calculate interest for minimum possible deposit -> verify if it rounds to 0 incorrectly."
+references:
+  - "https://docs.sui.io/concepts/sui-architecture"
+sui_specific: false

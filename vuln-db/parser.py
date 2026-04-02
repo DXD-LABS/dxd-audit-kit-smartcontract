@@ -2,7 +2,6 @@ import os
 import re
 import sys
 from glob import glob
-
 import yaml
 
 REQUIRED_FIELDS = [
@@ -24,6 +23,12 @@ SEVERITY_ORDER = {
     "Medium": 2,
     "Low": 3,
     "Informational": 4,
+}
+
+LANGUAGES = {
+    "en": {"suffix": "", "file": "summary.md", "title": "Sui Vuln Database Summary"},
+    "vi": {"suffix": "_vi", "file": "summary.vi.md", "title": "Tổng hợp Lỗ hổng Sui (Move)"},
+    "zh": {"suffix": "_zh", "file": "summary.zh.md", "title": "Sui 漏洞库摘要 (Move)"},
 }
 
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -57,7 +62,6 @@ def _severity_key(vuln):
 def _parse_loss(loss_str):
     if not loss_str or "N/A" in str(loss_str):
         return 0
-    # Extract numbers and multipliers (M for million, B for billion)
     match = re.search(r"\$?([\d.]+)\s*([MB]?)", str(loss_str), re.IGNORECASE)
     if match:
         value = float(match.group(1))
@@ -70,13 +74,20 @@ def _parse_loss(loss_str):
     return 0
 
 
-def generate_summary():
+def generate_summaries():
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    vuln_dir = os.path.join(base_dir, "vulns")
-    files = sorted(glob(os.path.join(vuln_dir, "*.yaml")))
-
+    vuln_dirs = [
+        os.path.join(base_dir, "vulns"),
+        os.path.join(base_dir, "move-scanner")
+    ]
+    
+    files = []
+    for d in vuln_dirs:
+        if os.path.exists(d):
+            files.extend(glob(os.path.join(d, "*.yaml")))
+            
     if not files:
-        raise RuntimeError("no YAML files found in vuln-db/vulns")
+        raise RuntimeError("no YAML files found in vuln-db/vulns or vuln-db/move-scanner")
 
     vulns = []
     for path in files:
@@ -88,27 +99,35 @@ def generate_summary():
         vulns.append(data)
 
     # Sort by loss descending, then by date descending
-    vulns.sort(key=lambda v: (_parse_loss(v.get("loss", "")), v.get("date", "")), reverse=True)
+    vulns.sort(key=lambda v: (_parse_loss(v.get("loss", "")), str(v.get("date", ""))), reverse=True)
 
-    lines = ["# Sui Vuln Database Summary", ""]
-    for vuln in vulns:
-        lines.append(f"## {vuln['name']}")
-        lines.append(f"- Date: {vuln['date']}")
-        lines.append(f"- Loss: {vuln['loss']}")
-        lines.append(f"- Severity: {vuln['severity']}")
-        lines.append(f"- Impact: {vuln['impact']}")
-        lines.append("")
-        lines.append(vuln["description"].strip())
-        lines.append("")
+    for lang_code, cfg in LANGUAGES.items():
+        suffix = cfg["suffix"]
+        lines = [f"# {cfg['title']}", ""]
+        
+        for vuln in vulns:
+            # Fallback logic for translated fields
+            name = vuln.get(f"name{suffix}") or vuln["name"]
+            description = vuln.get(f"description{suffix}") or vuln["description"]
+            impact = vuln.get(f"impact{suffix}") or vuln["impact"]
+            
+            lines.append(f"## {name}")
+            lines.append(f"- Date: {vuln['date']}")
+            lines.append(f"- Loss: {vuln['loss']}")
+            lines.append(f"- Severity: {vuln['severity']}")
+            lines.append(f"- Impact: {impact}")
+            lines.append("")
+            lines.append(description.strip())
+            lines.append("")
 
-    out_path = os.path.join(base_dir, "summary.md")
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines).rstrip() + "\n")
+        out_path = os.path.join(base_dir, cfg["file"])
+        with open(out_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines).rstrip() + "\n")
 
 
 if __name__ == "__main__":
     try:
-        generate_summary()
+        generate_summaries()
     except Exception as exc:
         print(str(exc), file=sys.stderr)
         sys.exit(1)

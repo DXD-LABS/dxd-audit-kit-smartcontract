@@ -1,0 +1,38 @@
+name: MS-003 Cross-Module Permission Defect
+name_vi: Lỗi Phân quyền Giữa Các Module (Cross-Module)
+name_zh: MS-003 跨模块权限缺陷
+date: "2026-02-15"
+loss: "Unauthorized Administrative Action"
+description: >
+  When multiple modules interact (e.g., protocol core and periphery), a module 
+  may trust another module's public functions without verifying the specific 
+  caller's identity or capability. This is exacerbated by the misuse of 'friend' 
+  functions that allow any 'friend' module to perform sensitive operations.
+description_vi: >
+  Khi nhiều module tương tác với nhau (ví dụ: module lõi và module ngoại vi), một 
+  module có thể tin tưởng các hàm public của module khác mà không xác minh danh tính 
+  hoặc capability của người gọi cụ thể. Điều này trở nên tồi tệ hơn do việc lạm dụng 
+  hàm 'friend', cho phép bất kỳ module 'friend' nào thực hiện các hoạt động nhạy cảm.
+description_zh: >
+  当多个模块（例如协议核心与外围模块）交互时，一个模块可能会信任另一个模块的公共函数，
+  而未核查特定的调用者身份或权限（Capability）。过度使用 'friend' 函数会加剧此风险，
+  因为它允许任何 'friend' 模块执行敏感操作。
+impact: "High (Unauthorized state mutations across protocol modules)"
+impact_vi: "Cao (Thay đổi trạng thái trái phép trên các module giao thức)"
+impact_zh: "高 (在不同协议模块间发生非法状态修改)"
+severity: High
+code_vuln: |
+  /// ❌ VULNERABLE: Friend function doesn't check if the contract 
+  /// context allows this specific operation.
+  public(friend) fun internal_mint(cap: &mut MintCap, amount: u64) {
+      // Logic without granular authorization
+  }
+code_fixed: |
+  /// ✅ FIXED: Use a Witness or specialized Capability to gate cross-module calls
+  public fun authorized_mint(witness: &MintWitness, cap: &mut MintCap, amount: u64) {
+      // Verify witness or capability before acting
+  }
+test_vector: "Try calling internal_mint from a malicious 'friend' module with unauthorized parameters."
+references:
+  - "https://docs.sui.io/concepts/sui-architecture"
+sui_specific: false

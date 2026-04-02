@@ -1,0 +1,44 @@
+name: MS-002 Dynamic Field Double-Spend
+name_vi: Lỗ hổng Double-Spend ở Dynamic Field
+name_zh: MS-002 动态字段双花漏洞
+date: "2026-02-15"
+loss: "Asset Overwrite/Duplication"
+description: >
+  Logical flaws in managing dynamic fields where a unique key is reused to bind 
+  a new resource without verifying if the old one was consumed. In Sui, re-binding 
+  the same name to a dynamic field overwrites the value, but if the old value 
+  was a 'Balance' or 'Coin', it can lead to state inconsistency or fund loss.
+description_vi: >
+  Lỗ hổng logic trong việc quản lý các dynamic field khi một khóa (key) duy nhất 
+  được tái sử dụng để liên kết với tài nguyên mới mà không kiểm tra xem tài nguyên 
+  cũ đã được tiêu thụ chưa. Trong Sui, việc gán lại cùng một tên cho một dynamic field 
+  sẽ ghi đè lên giá trị cũ, nhưng nếu giá trị cũ là 'Balance' hoặc 'Coin', nó có thể 
+  dẫn đến mất cân bằng trạng thái hoặc mất tiền.
+description_zh: >
+  在管理动态字段时，由于重用唯一键来绑定新资源，而未核实旧资源是否已被消耗，导致逻辑缺陷。
+  在 Sui 中，将相同名称重新绑定到动态字段会覆盖其值，但如果旧值是 'Balance' 或 'Coin'，
+  则可能导致状态不一致或资金损失。
+impact: "Critical (Unauthorized asset substitution or logic bypass)"
+impact_vi: "Nghiêm trọng (Thay thế tài sản trái phép hoặc bỏ qua logic kiểm tra)"
+impact_zh: "严重 (资产被非法替换或核心逻辑被绕过)"
+severity: Critical
+code_vuln: |
+  public fun deposit(vault: &mut Vault, amount: Balance<SUI>) {
+      // ❌ VULNERABLE: Overwrites without checking if field exists
+      dynamic_field::add(&mut vault.id, b"deposit", amount);
+  }
+code_fixed: |
+  public fun deposit_safe(vault: &mut Vault, amount: Balance<SUI>) {
+      // ✅ FIXED: Check and handle existing field first
+      if (dynamic_field::exists_(&vault.id, b"deposit")) {
+          let old_balance: Balance<SUI> = dynamic_field::remove(&mut vault.id, b"deposit");
+          balance::join(&mut old_balance, amount);
+          dynamic_field::add(&mut vault.id, b"deposit", old_balance);
+      } else {
+          dynamic_field::add(&mut vault.id, b"deposit", amount);
+      }
+  }
+test_vector: "Perform double deposit -> check if first deposit is overwritten and lost."
+references:
+  - "https://docs.sui.io/concepts/sui-architecture"
+sui_specific: true
