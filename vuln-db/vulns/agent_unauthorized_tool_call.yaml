@@ -1,25 +1,34 @@
+id: DXD-SUI-2025-020
 name: AGENT-001 Unauthorized Tool Call via Prompt Injection
 date: 2025-12-01
 loss: Simulated $10k–$100k+ in test env
-description: Attacker crafts adversarial prompt to make AI agent call unauthorized tool (e.g., transfer without user intent verification), bypassing guardrails.
+description: Attacker crafts adversarial prompt to make AI agent call unauthorized
+  tool (e.g., transfer without user intent verification), bypassing guardrails.
 impact: High (potential full wallet drain)
 severity: High
-code_vuln: |
-  public entry fun execute_tool_vulnerable(wallet: &mut AgentWallet, action_name: String, target: address, amount: u64, ctx: &mut TxContext) {
-      // Vulnerability: No check to see if the action is authorized or if intent is spoofed/injected!
-      let extracted = coin::split(&mut wallet.balance, amount, ctx);
-      transfer::public_transfer(extracted, target);
-  }
-code_fixed: |
-  public entry fun execute_tool_fixed(wallet: &mut AgentWallet, action_name: String, target: address, amount: u64, intent_verified: bool, ctx: &mut TxContext) {
-      // Mitigation: Require a verifiable proof that intent matches the user's actual request.
-      assert!(intent_verified == true, EUnauthorizedAction);
-      let extracted = coin::split(&mut wallet.balance, amount, ctx);
-      transfer::public_transfer(extracted, target);
-  }
+code_vuln: "public entry fun execute_tool_vulnerable(wallet: &mut AgentWallet, action_name:\
+  \ String, target: address, amount: u64, ctx: &mut TxContext) {\n    // Vulnerability:\
+  \ No check to see if the action is authorized or if intent is spoofed/injected!\n\
+  \    let extracted = coin::split(&mut wallet.balance, amount, ctx);\n    transfer::public_transfer(extracted,\
+  \ target);\n}\n"
+code_fixed: "public entry fun execute_tool_fixed(wallet: &mut AgentWallet, action_name:\
+  \ String, target: address, amount: u64, intent_verified: bool, ctx: &mut TxContext)\
+  \ {\n    // Mitigation: Require a verifiable proof that intent matches the user's\
+  \ actual request.\n    assert!(intent_verified == true, EUnauthorizedAction);\n\
+  \    let extracted = coin::split(&mut wallet.balance, amount, ctx);\n    transfer::public_transfer(extracted,\
+  \ target);\n}\n"
 test_vector: Prompt injection causes agent to bypass checks and send funds directly.
 references:
-  - https://arxiv.org/html/2601.04583v1
-  - https://www.immuniweb.com/vulnerabilities/prompt-injection/
-
+- https://arxiv.org/html/2601.04583v1
+- https://www.immuniweb.com/vulnerabilities/prompt-injection/
 sui_specific: true
+bvss:
+  impact: High
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required
+formal_spec: ../prover-examples/sources/agent_unauthorized_tool_prevent.move

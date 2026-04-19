@@ -1,18 +1,34 @@
+id: DXD-SUI-2025-026
 name: Shared Object Race in Mysticeti Parallel Execution
 date: 2025-06-01
 loss: N/A (Risk post-upgrade)
-description: Missing version/sequence check in shared object updates → race condition khi parallel tx mutate cùng object (Mysticeti tăng speed → higher risk).
+description: Missing version/sequence check in shared object updates → race condition
+  khi parallel tx mutate cùng object (Mysticeti tăng speed → higher risk).
 impact: Medium-High - Inconsistent state, DoS, hoặc value loss ở shared pools.
 severity: Medium
-code_vuln: |
-  fun update_shared(obj: &mut SharedObj) { obj.value += 1; }  // No version check
-code_fixed: |
-  assert!(obj.version == expected_version, E_RACE);
+code_vuln: 'fun update_shared(obj: &mut SharedObj) { obj.value += 1; }  // No version
+  check
+
+  '
+code_fixed: 'assert!(obj.version == expected_version, E_RACE);
+
   obj.value += 1;
+
   obj.version = obj.version + 1;
+
+  '
 test_vector: Two parallel tx call update_shared → inconsistent value.
 references:
-  - https://docs.sui.io/concepts/cryptography/mysticeti
-  - https://www.zellic.io/blog/sui-shared-object-safety
-  - https://www.halborn.com/blog/post/sui-shared-objects-race-conditions
+- https://docs.sui.io/concepts/cryptography/mysticeti
+- https://www.zellic.io/blog/sui-shared-object-safety
+- https://www.halborn.com/blog/post/sui-shared-objects-race-conditions
 sui_specific: true
+bvss:
+  impact: Medium
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Thousands
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required

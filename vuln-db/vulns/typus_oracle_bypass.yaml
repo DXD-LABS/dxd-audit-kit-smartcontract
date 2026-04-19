@@ -1,23 +1,31 @@
+id: DXD-SUI-2025-027
 name: Typus Oracle Authority Bypass
 date: 2025-10-15
 loss: $3.44M (SUI, USDC, xBTC, suiETH)
-description: Missing assert in custom oracle contract bypasses authorization checks → attacker calls update_v2 to set fake prices, manipulates TLP pools and drains funds. Unaudited oracle + lack of sender check.
-impact: Critical - Direct pool drain via price manip, 3rd major Sui exploit 2025 (sau Cetus & Nemo).
+description: Missing assert in custom oracle contract bypasses authorization checks
+  → attacker calls update_v2 to set fake prices, manipulates TLP pools and drains
+  funds. Unaudited oracle + lack of sender check.
+impact: Critical - Direct pool drain via price manip, 3rd major Sui exploit 2025 (sau
+  Cetus & Nemo).
 severity: Critical
-code_vuln: |
-  // Vulnerable: No auth check
-  public entry fun update_v2(...) {
-      // Update price without assert(ctx.sender() == admin)
-      oracle.price = new_price;
-  }
-code_fixed: |
-  public entry fun update_v2(...) {
-      assert!(ctx.sender() == oracle_admin, E_UNAUTHORIZED);
-      oracle.price = new_price;
-  }
-test_vector: Attacker calls update_v2 with fake price → swap at manipulated rate → drain liquidity.
+code_vuln: "// Vulnerable: No auth check\npublic entry fun update_v2(...) {\n    //\
+  \ Update price without assert(ctx.sender() == admin)\n    oracle.price = new_price;\n\
+  }\n"
+code_fixed: "public entry fun update_v2(...) {\n    assert!(ctx.sender() == oracle_admin,\
+  \ E_UNAUTHORIZED);\n    oracle.price = new_price;\n}\n"
+test_vector: Attacker calls update_v2 with fake price → swap at manipulated rate →
+  drain liquidity.
 references:
-  - https://www.halborn.com/blog/post/explained-the-typus-finance-hack-october-2025
-  - https://medium.com/@TypusFinance/typus-finance-tlp-oracle-exploit-post-mortem-report-response-plan-ce2d0800808b
-  - https://slowmist.com/blog/post/typus-finance-oracle-exploit-analysis
+- https://www.halborn.com/blog/post/explained-the-typus-finance-hack-october-2025
+- https://medium.com/@TypusFinance/typus-finance-tlp-oracle-exploit-post-mortem-report-response-plan-ce2d0800808b
+- https://slowmist.com/blog/post/typus-finance-oracle-exploit-analysis
 sui_specific: true
+bvss:
+  impact: Critical
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required

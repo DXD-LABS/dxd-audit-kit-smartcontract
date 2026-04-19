@@ -1,3 +1,4 @@
+id: DXD-MS-2026-008
 name: MS-007 Parallel Race via Object Dependency
 name_vi: Lỗi Race Condition trong Thực thi Song song
 name_zh: MS-007 跨对象依赖引发的并行执行竞争漏洞
@@ -41,3 +42,13 @@ test_vector: "Dispatch two competing transactions modifying obj_a and obj_b -> v
 references:
   - "https://docs.sui.io/concepts/sui-architecture"
 sui_specific: true
+
+bvss:
+  impact: 'High'
+  likelihood: 'Medium'
+  exploitability: 'Network'
+  economic_loss: 'Millions'
+  scope: 'Unchanged'
+  is_immutable: true
+  exploit_maturity: 'POC'
+  privileged_access: 'Not Required'

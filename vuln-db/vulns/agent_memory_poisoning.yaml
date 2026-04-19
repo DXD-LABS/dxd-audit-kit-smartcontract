@@ -1,29 +1,32 @@
+id: DXD-SUI-2025-012
 name: AGENT-005 Memory Poisoning Leading to Rogue Tx
 date: 2025-12-05
 loss: Simulated $1M in false contract approvals
-description: Adversarial input poisons agent memory (LLM context window or external RAG DB), leading to harmful on-chain transactions like approving malicious contracts.
+description: Adversarial input poisons agent memory (LLM context window or external
+  RAG DB), leading to harmful on-chain transactions like approving malicious contracts.
 impact: High
 severity: High
-code_vuln: |
-  public entry fun approve_contract_vulnerable(
-      agent: &mut AgentContext, target: address, ctx: &mut TxContext
-  ) {
-      if (agent.memory_poisoned) {
-          std::vector::push_back(&mut agent.approved_contracts, target);
-      } else {
-          assert!(tx_context::sender(ctx) == agent.owner, EInvalidState);
-          std::vector::push_back(&mut agent.approved_contracts, target);
-      }
-  }
-code_fixed: |
-  public entry fun approve_contract_fixed(
-      agent: &mut AgentContext, target: address, intent_verified: bool, ctx: &mut TxContext
-  ) {
-      assert!(tx_context::sender(ctx) == agent.owner || intent_verified, EInvalidState);
-      std::vector::push_back(&mut agent.approved_contracts, target);
-  }
-test_vector: Poison memory with adversarial prompt, forcing the agent to approve a malicious contract.
+code_vuln: "public entry fun approve_contract_vulnerable(\n    agent: &mut AgentContext,\
+  \ target: address, ctx: &mut TxContext\n) {\n    if (agent.memory_poisoned) {\n\
+  \        std::vector::push_back(&mut agent.approved_contracts, target);\n    } else\
+  \ {\n        assert!(tx_context::sender(ctx) == agent.owner, EInvalidState);\n \
+  \       std::vector::push_back(&mut agent.approved_contracts, target);\n    }\n\
+  }\n"
+code_fixed: "public entry fun approve_contract_fixed(\n    agent: &mut AgentContext,\
+  \ target: address, intent_verified: bool, ctx: &mut TxContext\n) {\n    assert!(tx_context::sender(ctx)\
+  \ == agent.owner || intent_verified, EInvalidState);\n    std::vector::push_back(&mut\
+  \ agent.approved_contracts, target);\n}\n"
+test_vector: Poison memory with adversarial prompt, forcing the agent to approve a
+  malicious contract.
 references:
-  - https://arxiv.org/html/2601.04583v1
-
+- https://arxiv.org/html/2601.04583v1
 sui_specific: true
+bvss:
+  impact: High
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required

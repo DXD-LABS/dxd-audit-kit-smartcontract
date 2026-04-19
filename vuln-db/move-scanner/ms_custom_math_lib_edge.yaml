@@ -1,3 +1,4 @@
+id: DXD-MS-2026-004
 name: MS-006 Custom Math Lib Edge Case
 name_vi: Lỗi Cận Biên ở Thư viện Toán học Tùy chỉnh (Custom Math Lib)
 name_zh: MS-006 自定义数学库边缘案例
@@ -35,3 +36,13 @@ test_vector: "Calculate interest for minimum possible deposit -> verify if it ro
 references:
   - "https://docs.sui.io/concepts/sui-architecture"
 sui_specific: false
+
+bvss:
+  impact: 'High'
+  likelihood: 'Medium'
+  exploitability: 'Network'
+  economic_loss: 'Millions'
+  scope: 'Unchanged'
+  is_immutable: true
+  exploit_maturity: 'POC'
+  privileged_access: 'Not Required'

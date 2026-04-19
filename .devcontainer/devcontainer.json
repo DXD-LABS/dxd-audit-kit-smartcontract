@@ -1,0 +1,19 @@
+{
+    "name": "DXD Audit Kit - Sui Move",
+    "build": {
+        "dockerfile": "../Dockerfile",
+        "context": ".."
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "mysten.move-analyzer",
+                "tamasfe.even-better-toml",
+                "ms-python.python",
+                "ms-python.vscode-pylint"
+            ]
+        }
+    },
+    "remoteUser": "root",
+    "workspaceFolder": "/repo"
+}

@@ -1,3 +1,4 @@
+id: DXD-MS-2026-012
 name: MS-009 Resource Leak (Missing Drop)
 date: "2026-02-15"
 loss: "Trapped Storage / Memory Leak"
@@ -31,3 +32,13 @@ test_vector: "Write a function that creates a non-drop struct and attempt to let
 references:
   - "https://docs.sui.io/concepts/sui-architecture"
 sui_specific: false
+
+bvss:
+  impact: 'Medium'
+  likelihood: 'Medium'
+  exploitability: 'Network'
+  economic_loss: 'Thousands'
+  scope: 'Unchanged'
+  is_immutable: true
+  exploit_maturity: 'POC'
+  privileged_access: 'Not Required'

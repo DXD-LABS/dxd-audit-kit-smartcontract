@@ -1,9 +1,40 @@
+id: DXD-SUI-2025-001
 name: AGENT-003 Permission Abuse in Delegated Execution
+name_vi: Lạm dụng Quyền hạn được ủy nhiệm trong AI Agent
 date: 2025-12-03
 loss: Simulated complete protocol takeover
-description: Agent misuses delegated capabilities (e.g., via kiosk or shared object) for unauthorized actions, performing administrative tasks instead of its scoped role.
-impact: Critical (Unauthorized admin access)
+description: >
+  Agent misuses delegated capabilities (e.g., via kiosk or shared object) for unauthorized 
+  actions, performing administrative tasks instead of its scoped role.
+description_vi: >
+  AI Agent lạm dụng các quyền (Capabilities) được ủy nhiệm (ví dụ: thông qua kiosk hoặc 
+  shared object) để thực hiện các hành động trái phép, thực hiện các tác vụ quản trị 
+  thay vì vai trò được giới hạn của nó.
+impact: >
+  Critical (Unauthorized admin access)
+impact_vi: >
+  Nghiêm trọng (Truy cập quản trị trái phép)
 severity: Critical
+root_cause: >
+  Over-privileged Capabilities. The vulnerability occurs when a capability intended 
+  for a low-value task is used for a high-value task due to a lack of granular 
+  scoping in the smart contract's authorization logic.
+root_cause_vi: >
+  Quyền hạn quá mức (Over-privileged). Lỗ hổng xảy ra khi một Capability được dự định 
+  cho một tác vụ giá trị thấp lại được sử dụng cho một tác vụ giá trị cao do thiếu 
+  phân tách phạm vi chi tiết trong logic xác thực của bộ hợp đồng thông minh.
+mitigation: >
+  Implement Scoped Capabilities or Intent-based verification where the capability 
+  only allows execution of a specific function or with specific object IDs.
+mitigation_vi: >
+  Triển khai Scoped Capabilities hoặc xác thực dựa trên ý định (Intent-based), trong đó 
+  Capability chỉ cho phép thực thi một hàm cụ thể hoặc với các ID đối tượng cụ thể.
+verification: >
+  Integration Tests: Attempt to perform an unauthorized action using a restricted 
+  agent capability and verify it aborts.
+verification_vi: >
+  Kiểm tra tích hợp (Integration Tests): Cố gắng thực hiện một hành động trái phép 
+  bằng cách sử dụng một Capability của Agent bị hạn chế và xác minh rằng nó bị hủy (abort).
 code_vuln: |
   public entry fun misuse_cap_vulnerable(
       agent: &mut AgentContext, target: address, amount: u64, ctx: &mut TxContext
@@ -23,6 +54,15 @@ code_fixed: |
   }
 test_vector: Pass a delegated AdminCap to an agent expecting it only to perform a specific action, but it abuses the cap.
 references:
-  - https://arxiv.org/html/2601.04583v1
-
+  - https://docs.sui.io/concepts/sui-move-concepts/capabilities
 sui_specific: true
+bvss:
+  impact: Critical
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required
+formal_spec: ../prover-examples/sources/agent_policy_guard.move

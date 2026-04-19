@@ -1,0 +1,1524 @@
+[
+  {
+    "id": "DXD-SUI-2025-002",
+    "name": "AGENT-004 Intent Spoofing / Mismatch",
+    "name_vi": "Giả mạo Ý định (Intent Spoofing) trong giao dịch của Agent",
+    "date": "2025-12-04",
+    "loss": "Simulated asset theft",
+    "description": "Off-chain agent intent mismatches on-chain execution. The function does not  verify the hash of the expected parameters.\n",
+    "description_vi": "Ý định của Agent ở phía off-chain không khớp với quá trình thực thi on-chain.  Hàm không xác minh giá trị hash của các tham số dự kiến.\n",
+    "impact": "High\n",
+    "impact_vi": "Cao\n",
+    "severity": "High",
+    "root_cause": "Cryptographic Mismatch between Intent and Execution. The off-chain AI agent signs  an 'Intent', but the on-chain execution function accepts individual parameters  without verifying they match the signed intent hash.\n",
+    "root_cause_vi": "Sự không khớp về mặt mật mã giữa Ý định và Thực thi. AI Agent off-chain ký một  'Ý định' (Intent), nhưng hàm thực thi on-chain lại chấp nhận các tham số riêng lẻ  mà không xác minh xem chúng có khớp với mã băm ý định đã ký hay không.\n",
+    "mitigation": "Hash all function parameters into an Intent struct on-chain and verify it  against the agent's signature.\n",
+    "mitigation_vi": "Băm tất cả các tham số hàm thành một struct Intent on-chain và xác minh nó  với chữ ký của Agent.\n",
+    "verification": "Cryptographic Audit: Ensure that every parameter used in state-changing logic  is included in the signature payload.\n",
+    "verification_vi": "Kiểm tra mật mã (Cryptographic Audit): Đảm bảo rằng mọi tham số được sử dụng trong  logic thay đổi trạng thái đều được bao gồm trong payload chữ ký.\n",
+    "code_vuln": "public entry fun execute_vulnerable(\n    wallet: &mut AgentWallet, target: address, amount: u64, offchain_intent_hash: vector<u8>, ctx: &mut TxContext\n) {\n    let extracted = coin::split(&mut wallet.balance, amount, ctx);\n    transfer::public_transfer(extracted, target);\n}\n",
+    "code_fixed": "public entry fun execute_fixed(\n    wallet: &mut AgentWallet, target: address, amount: u64, offchain_intent_hash: vector<u8>, ctx: &mut TxContext\n) {\n    let mut payload = vector::empty<u8>();\n    vector::append(&mut payload, bcs::to_bytes(&target));\n    vector::append(&mut payload, bcs::to_bytes(&amount));\n    let onchain_hash = hash::blake2b256(&payload);\n    assert!(onchain_hash == offchain_intent_hash, EIntentMismatch);\n    let extracted = coin::split(&mut wallet.balance, amount, ctx);\n    transfer::public_transfer(extracted, target);\n}\n",
+    "test_vector": "Supply false parameters while bypassing intent verification due to missing checks.",
+    "references": [
+      "https://arxiv.org/html/2601.04583v1"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Changed",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "formal_spec": "../prover-examples/sources/agent_intent_verification.move",
+    "bvss_score": 6.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2024-006",
+    "name": "Seal Misuse in Hot Potato Pattern",
+    "name_vi": "Lạm dụng cơ chế Seal (Sui Seal Pattern)",
+    "date": "2024-09-02",
+    "loss": "$0 (Privacy Exposure)",
+    "description": "Sensitive payloads were returned without proper sealing or with predictable keys, allowing unauthorized data recovery in AI apps.\n",
+    "description_vi": "Cơ chế Seal trong Sui (thường dùng trong UpgradeCap hoặc các đối tượng 'hot-potato')  được thiết kế để đảm bảo một hành động chỉ được thực hiện bởi một package cụ thể.  Lỗ hổng xảy ra khi logic kiểm tra seal bị thiếu hoặc không chính xác.\n",
+    "impact": "Medium - privacy exposure.",
+    "impact_vi": "Trung bình - rò rỉ quyền riêng tư.",
+    "severity": "Medium",
+    "root_cause": "Failure to verify the PackageID associated with a Seal object or allowing 'Hot Potato'  objects to be 'dropped' without returning them to their destination.\n",
+    "root_cause_vi": "Không xác minh PackageID được liên kết với đối tượng Seal hoặc cho phép các đối tượng  'Hot Potato' bị hủy (drop) mà không được trả lại module đích dự kiến.\n",
+    "mitigation": "Use 'Hot Potato' patterns (structs without drop or store abilities) correctly  to enforce control flow within a single transaction.\n",
+    "mitigation_vi": "Sử dụng các mẫu 'Hot Potato' (các struct không có khả năng drop hoặc store) một cách  chính xác để thực thi luồng kiểm soát trong một giao diện duy nhất.\n",
+    "verification": "Static Analysis: Check for structs without abilities that are passed as parameters  but not consumed or returned as intended.\n",
+    "verification_vi": "Phân tích tĩnh (Static Analysis): Kiểm tra các struct không có quyền hạn (abilities)  được truyền dưới dạng tham số nhưng không được tiêu thụ hoặc trả về như mong đợi.\n",
+    "code_vuln": "fun seal(data: vector<u8>, _key: u8): vector<u8> {\n    // returns plaintext\n    data\n}\n",
+    "code_fixed": "fun seal(data: vector<u8>, key: u8): vector<u8> {\n    // apply reversible masking with a secret key\n}\n",
+    "test_vector": {
+      "inputs": {
+        "data": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "key": 7
+      },
+      "expected_exploit": "Sealed output equals plaintext"
+    },
+    "references": [
+      "https://docs.sui.io/concepts/sui-move-concepts/one-time-witness"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Changed",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "formal_spec": "../prover-examples/sources/agent_owned_receipt.move",
+    "bvss_score": 6.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-016",
+    "name": "AGENT-013 Side-Channel Data Leak in Privacy-Protected Agent Memory",
+    "date": "2026-03-07",
+    "loss": "Simulated (privacy breach $500k+ class-action equivalent)",
+    "description": "An agent stores per-user memory (intent state, balances) using variable-size data structures. Even when guarded by zk/TEE wrappers, the on-chain gas consumption or dynamic field size varies based on secret data, creating a timing/size side-channel. An observer monitoring transaction gas or object byte growth can infer the contents of private agent memory (wallet balances, intent payload length, number of recent actions). Root cause: memory block size grows proportionally to sensitive data rather than being padded to a fixed constant-size block.\n",
+    "impact": "Critical (user data exposure, regulatory liability in private agents)",
+    "severity": "Critical",
+    "code_vuln": "// ❌ VULNERABLE: memory block size leaks data via gas/size side-channel\npublic fun store_agent_memory_vulnerable(\n    wallet: &mut AgentWallet,\n    memory_data: vector<u8>,  // Variable length — leaks data size\n    ctx: &mut TxContext,\n) {\n    // Dynamic field size grows with data — observable by on-chain size queries\n    dynamic_field::add(&mut wallet.id, b\"memory\", memory_data);\n}\n",
+    "code_fixed": "// ✅ FIXED: constant-size padding prevents size-based side-channel\nconst FIXED_BLOCK_SIZE: u64 = 256; // Fixed memory block size\n\npublic fun store_agent_memory_fixed(\n    wallet: &mut AgentWallet,\n    memory_data: vector<u8>,\n    ctx: &mut TxContext,\n) {\n    // Reject if data exceeds fixed block (caller must pre-chunk)\n    assert!(vector::length(&memory_data) <= FIXED_BLOCK_SIZE, E_OVERSIZED_MEMORY);\n    // Pad to fixed block size — constant gas and constant on-chain size\n    let mut padded = memory_data;\n    while (vector::length(&padded) < FIXED_BLOCK_SIZE) {\n        vector::push_back(&mut padded, 0u8);\n    };\n    // Only store commitment hash on-chain, not raw data\n    dynamic_field::add(&mut wallet.id, b\"memory_commit\",\n        hash::blake2b256(&padded));\n}\n",
+    "test_vector": {
+      "inputs": {
+        "memory_data_small": "0x01",
+        "memory_data_large": "0x",
+        "observer": "gas_cost_diff > 500_mist"
+      },
+      "expected_exploit": "Gas difference between small/large memory writes reveals data presence and approximate size"
+    },
+    "references": [
+      "https://arxiv.org/html/2601.04583v1",
+      "https://docs.sui.io/concepts/cryptography/zklogin",
+      "https://docs.sui.io/guides/developer/getting-started/nautilus"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "Critical",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 6.0,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-021",
+    "name": "AGENT-008 Privacy Leak via Unverified ZK-Intent in Agent Execution",
+    "date": "2026-03-07",
+    "loss": "Simulated ($100k+ in privacy-compromised assets)",
+    "description": "An agent executes a transaction based on a zk-proof intent but does not fully verify the proof fields, allowing sensitive data (user wallet state, off-chain memory, intent payload) to be exposed via on-chain dynamic fields or side-channels. The root cause is accepting a ZkIntentProof without asserting that no sensitive data is exposed through proof.public_inputs or leaked dynamic field writes. An attacker who can observe on-chain object state can extract the user's intent or balance information.\n",
+    "impact": "Critical (data exfil, user privacy breach in agentic economy)",
+    "severity": "Critical",
+    "code_vuln": "// ❌ VULNERABLE: proof accepted without field-level privacy check\npublic fun execute_zk_intent_vulnerable(\n    proof: &ZkIntentProof,\n    wallet: &mut AgentWallet,\n    ctx: &mut TxContext,\n) {\n    assert!(proof.is_valid, E_PROOF_INVALID);\n    // Missing: no check that proof.public_inputs does not expose wallet balance\n    // Dynamic field write leaks sensitive state to on-chain observers\n    dynamic_field::add(&mut wallet.id, b\"last_intent\", proof.public_inputs);\n    wallet.balance = wallet.balance - proof.amount;\n}\n",
+    "code_fixed": "// ✅ FIXED: full field verification + data exposure guard\npublic fun execute_zk_intent_fixed(\n    proof: &ZkIntentProof,\n    wallet: &mut AgentWallet,\n    ctx: &mut TxContext,\n) {\n    assert!(proof.is_valid, E_PROOF_INVALID);\n    // Guard: proof must not expose sensitive data in public inputs\n    assert!(!proof.exposes_sensitive_data, E_PRIVACY_VIOLATION);\n    // Only write a commitment hash, never raw public inputs\n    dynamic_field::add(&mut wallet.id, b\"last_intent_hash\",\n        hash::blake2b256(&proof.public_inputs));\n    wallet.balance = wallet.balance - proof.amount;\n}\n",
+    "test_vector": {
+      "inputs": {
+        "proof_is_valid": true,
+        "exposes_sensitive_data": true,
+        "public_inputs": "0xSECRET_WALLET_STATE"
+      },
+      "expected_exploit": "Sensitive wallet state written to on-chain dynamic field and observable by any reader"
+    },
+    "references": [
+      "https://arxiv.org/html/2602.04567v1",
+      "https://genai.owasp.org/resource/owasp-top-10-for-agentic-ai-v1-0/",
+      "https://docs.sui.io/concepts/cryptography/zklogin",
+      "https://docs.sui.io/guides/developer/getting-started/nautilus"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "Critical",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "formal_spec": "../prover-examples/sources/agent_zk_intent_privacy.move",
+    "bvss_score": 6.0,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-023",
+    "name": "Nautilus TEE Attestation Bypass",
+    "date": "2026-03-06",
+    "loss": "N/A (Theoretical — potential total fund loss)",
+    "description": "An on-chain smart contract accepted attested computation results without verifying the TEE attestation report. An attacker could fabricate a TEE quote or replay a stale attestation to submit fraudulent computation outputs on-chain, bypassing integrity guarantees. Missing checks include: attestation validity gate, freshness window (epoch-based), and report_data == committed_input_hash binding.\n",
+    "impact": "Critical — complete compromise of TEE-attested computation integrity.",
+    "severity": "Critical",
+    "references": [
+      "https://docs.sui.io/guides/developer/getting-started/nautilus",
+      "https://community.intel.com/t5/Intel-Software-Guard-Extensions/ct-p/software-guard-extensions"
+    ],
+    "code_vuln": "// ❌ VULNERABLE: no attestation check\npublic fun execute_attested(request: &ComputationRequest): ComputationResult {\n    ComputationResult {\n        output: request.expected_output,\n        attested: false,  // not verified!\n    }\n}\n",
+    "code_fixed": "// ✅ FIXED: attest_if guard, freshness check, hash binding\npublic fun execute_attested(\n    request: &ComputationRequest,\n    report: &AttestationReport,\n    current_epoch: u64,\n): ComputationResult {\n    assert!(report.is_valid, E_ATTESTATION_FAIL);\n    assert!(current_epoch - report.issued_epoch <= MAX_STALE_EPOCHS, E_STALE_ATTESTATION);\n    assert!(report.report_data == request.input_hash, E_HASH_MISMATCH);\n    ComputationResult { output: request.expected_output, attested: true }\n}\n",
+    "test_vector": {
+      "inputs": {
+        "report_is_valid": false,
+        "issued_epoch": 0,
+        "current_epoch": 100,
+        "report_data": "0xdeadbeef",
+        "input_hash": "0xcafebabe"
+      },
+      "expected_exploit": "Computation accepted without valid or matching attestation"
+    },
+    "bvss": {
+      "impact": "Critical",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "formal_spec": "../prover-examples/sources/nautilus_tee_attest.move",
+    "bvss_score": 6.0,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-MS-2026-002",
+    "name": "MS-004 Capability Leak via Object Wrapping",
+    "name_vi": "Lỗ hổng Rò rỉ Capability do Bao bọc Đối tượng (Object Wrapping)",
+    "name_zh": "MS-004 包装对象导致的权限（Capability）泄露",
+    "date": "2026-02-15",
+    "loss": "Privilege Escalation",
+    "description": "A sensitive Capability (e.g., AdminCap) is wrapped inside another object.  If that container object is public or shared and the extraction logic is  flawed, an attacker may extract the Capability and perform administrative  actions meant only for the protocol owner.\n",
+    "description_vi": "Một Capability nhạy cảm (ví dụ: AdminCap) bị bao bọc (wrapped) bên trong một  đối tượng khác. Nếu đối tượng chứa đó là công khai hoặc được chia sẻ và logic  trích xuất bị lỗi, kẻ tấn công có thể trích xuất Capability đó và thực hiện  các hành động quản trị vốn chỉ dành cho chủ sở hữu giao thức.\n",
+    "description_zh": "敏感的权限（例如 AdminCap）被包装在另一个对象内部。如果该容器对象是公共或共享的， 且提取逻辑存在漏洞，攻击者则可能提取该权限并执行仅限协议所有者使用的管理操作。\n",
+    "impact": "Critical (Complete protocol compromise if admin keys are leaked)",
+    "impact_vi": "Nghiêm trọng (Giao thức bị chiếm quyền hoàn toàn nếu admin key bị lộ)",
+    "impact_zh": "严重 (如果管理私钥泄露，整个协议将被接管)",
+    "severity": "Critical",
+    "code_vuln": "struct PublicContainer has key { id: UID, admin_cap: AdminCap }\n/// ❌ VULNERABLE: No authorization check on extraction\npublic fun extract_admin_cap(container: &mut PublicContainer): AdminCap {\n    dynamic_field::remove(&mut container.id, b\"admin_cap\")\n}\n",
+    "code_fixed": "/// ✅ FIXED: Use strict sender check or owner-only access\npublic fun extract_admin_cap_safe(container: &mut PublicContainer, ctx: &mut TxContext): AdminCap {\n    assert!(tx_context::sender(ctx) == @admin_address, E_UNAUTHORIZED);\n    dynamic_field::remove(&mut container.id, b\"admin_cap\")\n}\n",
+    "test_vector": "Try to extract AdminCap from a PublicContainer as a non-admin user.",
+    "references": [
+      "https://docs.sui.io/concepts/sui-architecture"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "Critical",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 6.0,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-MS-2026-005",
+    "name": "MS-002 Dynamic Field Double-Spend",
+    "name_vi": "Lỗ hổng Double-Spend ở Dynamic Field",
+    "name_zh": "MS-002 动态字段双花漏洞",
+    "date": "2026-02-15",
+    "loss": "Asset Overwrite/Duplication",
+    "description": "Logical flaws in managing dynamic fields where a unique key is reused to bind  a new resource without verifying if the old one was consumed. In Sui, re-binding  the same name to a dynamic field overwrites the value, but if the old value  was a 'Balance' or 'Coin', it can lead to state inconsistency or fund loss.\n",
+    "description_vi": "Lỗ hổng logic trong việc quản lý các dynamic field khi một khóa (key) duy nhất  được tái sử dụng để liên kết với tài nguyên mới mà không kiểm tra xem tài nguyên  cũ đã được tiêu thụ chưa. Trong Sui, việc gán lại cùng một tên cho một dynamic field  sẽ ghi đè lên giá trị cũ, nhưng nếu giá trị cũ là 'Balance' hoặc 'Coin', nó có thể  dẫn đến mất cân bằng trạng thái hoặc mất tiền.\n",
+    "description_zh": "在管理动态字段时，由于重用唯一键来绑定新资源，而未核实旧资源是否已被消耗，导致逻辑缺陷。 在 Sui 中，将相同名称重新绑定到动态字段会覆盖其值，但如果旧值是 'Balance' 或 'Coin'， 则可能导致状态不一致或资金损失。\n",
+    "impact": "Critical (Unauthorized asset substitution or logic bypass)",
+    "impact_vi": "Nghiêm trọng (Thay thế tài sản trái phép hoặc bỏ qua logic kiểm tra)",
+    "impact_zh": "严重 (资产被非法替换或核心逻辑被绕过)",
+    "severity": "Critical",
+    "code_vuln": "public fun deposit(vault: &mut Vault, amount: Balance<SUI>) {\n    // ❌ VULNERABLE: Overwrites without checking if field exists\n    dynamic_field::add(&mut vault.id, b\"deposit\", amount);\n}\n",
+    "code_fixed": "public fun deposit_safe(vault: &mut Vault, amount: Balance<SUI>) {\n    // ✅ FIXED: Check and handle existing field first\n    if (dynamic_field::exists_(&vault.id, b\"deposit\")) {\n        let old_balance: Balance<SUI> = dynamic_field::remove(&mut vault.id, b\"deposit\");\n        balance::join(&mut old_balance, amount);\n        dynamic_field::add(&mut vault.id, b\"deposit\", old_balance);\n    } else {\n        dynamic_field::add(&mut vault.id, b\"deposit\", amount);\n    }\n}\n",
+    "test_vector": "Perform double deposit -> check if first deposit is overwritten and lost.",
+    "references": [
+      "https://docs.sui.io/concepts/sui-architecture"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "Critical",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 6.0,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-MS-2026-013",
+    "name": "MS-008 Token Issuance Ability Misuse",
+    "name_vi": "Lạm dụng Ability trong Phát hành Token",
+    "name_zh": "MS-008 代币发行中的权能（Ability）滥用漏洞",
+    "date": "2026-02-15",
+    "loss": "Hyper-inflation/Token Theft",
+    "description": "Move's ability system (`store`, `drop`, `copy`, `key`) manages resource safety.  If a token module incorrectly assigns the `copy` or `store` ability to a  `TreasuryCap` or sensitive witness struct, an attacker may duplicate or  transfer the minting power, leading to unauthorized token issuance.\n",
+    "description_vi": "Hệ thống ability của Move (`store`, `drop`, `copy`, `key`) quản lý sự an toàn  của tài nguyên. Nếu một module token gán sai ability `copy` hoặc `store` cho  một `TreasuryCap` hoặc một struct witness nhạy cảm, kẻ tấn công có thể nhân  bản hoặc chuyển giao quyền đúc token, dẫn đến việc phát hành token trái phép.\n",
+    "description_zh": "Move 的权能系统（`store`、`drop`、`copy`、`key`）用于管理资源安全。如果代币 模块错误地将 `copy` 或 `store` 权能分配给 `TreasuryCap` 或敏感的 Witness 结构体， 攻击者可能会复制或转移“铸币权”，从而导致非法代币发行。\n",
+    "impact": "Critical (Complete loss of token value and supply control)",
+    "impact_vi": "Nghiêm trọng (Mất hoàn toàn giá trị token và quyền kiểm soát nguồn cung)",
+    "impact_zh": "严重 (导致代币价值完全归零并失去对供应量的控制)",
+    "severity": "Critical",
+    "code_vuln": "/// ❌ VULNERABLE: TreasuryCap has 'store' allowing it to be wrapped \n/// or traded on a marketplace illegally.\nstruct TreasuryCap<phantom T> has key, store { ... }\n",
+    "code_fixed": "/// ✅ FIXED: Prevent 'store' and 'copy' for sensitive cap objects\nstruct TreasuryCap<phantom T> has key { ... }\n",
+    "test_vector": "Check Move bytecode for unexpected 'copy' or 'store' abilities on Capability structs.",
+    "references": [
+      "https://docs.sui.io/concepts/sui-architecture"
+    ],
+    "sui_specific": false,
+    "bvss": {
+      "impact": "Critical",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 6.0,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-001",
+    "name": "AGENT-003 Permission Abuse in Delegated Execution",
+    "name_vi": "Lạm dụng Quyền hạn được ủy nhiệm trong AI Agent",
+    "date": "2025-12-03",
+    "loss": "Simulated complete protocol takeover",
+    "description": "Agent misuses delegated capabilities (e.g., via kiosk or shared object) for unauthorized  actions, performing administrative tasks instead of its scoped role.\n",
+    "description_vi": "AI Agent lạm dụng các quyền (Capabilities) được ủy nhiệm (ví dụ: thông qua kiosk hoặc  shared object) để thực hiện các hành động trái phép, thực hiện các tác vụ quản trị  thay vì vai trò được giới hạn của nó.\n",
+    "impact": "Critical (Unauthorized admin access)\n",
+    "impact_vi": "Nghiêm trọng (Truy cập quản trị trái phép)\n",
+    "severity": "Critical",
+    "root_cause": "Over-privileged Capabilities. The vulnerability occurs when a capability intended  for a low-value task is used for a high-value task due to a lack of granular  scoping in the smart contract's authorization logic.\n",
+    "root_cause_vi": "Quyền hạn quá mức (Over-privileged). Lỗ hổng xảy ra khi một Capability được dự định  cho một tác vụ giá trị thấp lại được sử dụng cho một tác vụ giá trị cao do thiếu  phân tách phạm vi chi tiết trong logic xác thực của bộ hợp đồng thông minh.\n",
+    "mitigation": "Implement Scoped Capabilities or Intent-based verification where the capability  only allows execution of a specific function or with specific object IDs.\n",
+    "mitigation_vi": "Triển khai Scoped Capabilities hoặc xác thực dựa trên ý định (Intent-based), trong đó  Capability chỉ cho phép thực thi một hàm cụ thể hoặc với các ID đối tượng cụ thể.\n",
+    "verification": "Integration Tests: Attempt to perform an unauthorized action using a restricted  agent capability and verify it aborts.\n",
+    "verification_vi": "Kiểm tra tích hợp (Integration Tests): Cố gắng thực hiện một hành động trái phép  bằng cách sử dụng một Capability của Agent bị hạn chế và xác minh rằng nó bị hủy (abort).\n",
+    "code_vuln": "public entry fun misuse_cap_vulnerable(\n    agent: &mut AgentContext, target: address, amount: u64, ctx: &mut TxContext\n) {\n    assert!(std::option::is_some(&agent.delegate_cap), EMisusedCap);\n    let extracted = coin::split(&mut agent.treasury, amount, ctx);\n    transfer::public_transfer(extracted, target);\n}\n",
+    "code_fixed": "public entry fun use_cap_fixed(\n    agent: &mut AgentContext, target: address, amount: u64, intent_verified: bool, ctx: &mut TxContext\n) {\n    assert!(std::option::is_some(&agent.delegate_cap), EMisusedCap);\n    assert!(intent_verified == true, EMisusedCap); \n    let extracted = coin::split(&mut agent.treasury, amount, ctx);\n    transfer::public_transfer(extracted, target);\n}\n",
+    "test_vector": "Pass a delegated AdminCap to an agent expecting it only to perform a specific action, but it abuses the cap.",
+    "references": [
+      "https://docs.sui.io/concepts/sui-move-concepts/capabilities"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "Critical",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "formal_spec": "../prover-examples/sources/agent_policy_guard.move",
+    "bvss_score": 6.0,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-027",
+    "name": "Typus Oracle Authority Bypass",
+    "date": "2025-10-15",
+    "loss": "$3.44M (SUI, USDC, xBTC, suiETH)",
+    "description": "Missing assert in custom oracle contract bypasses authorization checks → attacker calls update_v2 to set fake prices, manipulates TLP pools and drains funds. Unaudited oracle + lack of sender check.",
+    "impact": "Critical - Direct pool drain via price manip, 3rd major Sui exploit 2025 (sau Cetus & Nemo).",
+    "severity": "Critical",
+    "code_vuln": "// Vulnerable: No auth check\npublic entry fun update_v2(...) {\n    // Update price without assert(ctx.sender() == admin)\n    oracle.price = new_price;\n}\n",
+    "code_fixed": "public entry fun update_v2(...) {\n    assert!(ctx.sender() == oracle_admin, E_UNAUTHORIZED);\n    oracle.price = new_price;\n}\n",
+    "test_vector": "Attacker calls update_v2 with fake price → swap at manipulated rate → drain liquidity.",
+    "references": [
+      "https://www.halborn.com/blog/post/explained-the-typus-finance-hack-october-2025",
+      "https://medium.com/@TypusFinance/typus-finance-tlp-oracle-exploit-post-mortem-report-response-plan-ce2d0800808b",
+      "https://slowmist.com/blog/post/typus-finance-oracle-exploit-analysis"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "Critical",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 6.0,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-022",
+    "name": "Cetus Spoof Token + Liquidity Math Overflow",
+    "date": "2025-05-22",
+    "loss": "$223M (largest Sui hack 2025)",
+    "description": "Attacker deploys spoof tokens mimic legit → abuse flawed checked_shlw (shift limit 256 thay vì 192) → overflow in liquidity calc → mint huge LP with minimal deposit, drain pools (SUI/USDC etc.).",
+    "impact": "Critical - Pools emptied, TVL crash, $60M bridged out, $162M frozen by validators.",
+    "severity": "Critical",
+    "code_vuln": "fun checked_shlw(x: u256, shift: u8): u256 {\n    if (shift > 256) abort OVERFLOW;  // Wrong limit\n    x << shift\n}\n",
+    "code_fixed": "fun checked_shlw(x: u256, shift: u8): u256 {\n    if (shift > 192) abort OVERFLOW;  // Correct for u256 in Sui math\n    x << shift\n}\n",
+    "test_vector": "Deploy spoof token + large shift → liquidity inflate → drain via swap.",
+    "references": [
+      "https://www.elliptic.co/blog/cetus-protocol-hacked-for-more-than-200-million",
+      "https://www.halborn.com/blog/post/explained-the-cetus-hack-may-2025",
+      "https://dedaub.com/blog/cetus-overflow-analysis"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "Critical",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 6.0,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2024-003",
+    "name": "Fake Token Input Spoofing (General)",
+    "name_vi": "Lỗ hổng giả mạo Token đầu vào (Fake Token Spoofing)",
+    "date": "2024-12-01",
+    "loss": "Variable",
+    "description": "A protocol function accepts a generic token type `Coin<T>` or a specific struct `TreasuryCap<T>`  without verifying that `T` matches the platform's whitelist. An attacker can deploy a  malicious module with a token named similarly (e.g., \"SUI\") and use it to interact with  swap or lending pools, effectively \"stealing\" real assets by providing worthless fake tokens.\n",
+    "description_vi": "Một hàm của giao thức chấp nhận loại token generic `Coin<T>` hoặc một struct cụ thể `TreasuryCap<T>`  mà không xác thực liệu `T` có nằm trong danh sách trắng (whitelist) của nền tảng hay không.  Kẻ tấn công có thể triển khai một module độc hại với token có tên tương tự (ví dụ: \"SUI\")  và sử dụng nó để tương tác với các bể hoán đổi (swap) hoặc cho vay (lending), từ đó  \"đánh cắp\" tài sản thực bằng cách cung cấp các token giả không có giá trị.\n",
+    "root_cause": "Over-reliance on Generics without Type Constraint Validation. Developers coming from  Account-based models often forget that in Move, any user can define a type `T`.  A function `swap<T>` is a 'permissionless entry' unless `T` is strictly compared  against a set of trusted `TypeTag`s or `TypeName`s on-chain.\n",
+    "mitigation": "1. Use `sui::type_name::get<T>()` to compare against a registry of allowed types.  2. Use the 'Witness' pattern where users must provide an object that can only be  created by the legitimate token issuer.\n",
+    "verification": "Manual Audit: Check all functions accepting generic `Coin<T>` and trace if `T` is  validated against a configuration object or hardcoded whitelist.\n",
+    "impact": "High - Draining of liquidity pools, protocol insolvency.",
+    "severity": "High",
+    "code_vuln": "public fun swap_for_usdc<T>(pool: &mut Pool, input: Coin<T>, ctx: &mut TxContext) {\n    // Missing check: Is T == SUI?\n    let amount = coin::value(&input);\n    let usdc_out = calculate_out(amount);\n    let payment = coin::take(&mut pool.usdc_balance, usdc_out, ctx);\n    transfer::public_transfer(payment, tx_context::sender(ctx));\n    // Attacker just gave us fake tokens\n    balance::join(&mut pool.reserve, coin::into_balance(input));\n}\n",
+    "code_fixed": "public fun swap_for_usdc<T>(pool: &mut Pool, input: Coin<T>, ctx: &mut TxContext) {\n    assert!(type_name::get<T>() == type_name::get<SUI>(), EInvalidToken);\n    // OR use a witness pattern\n    // ...\n}\n",
+    "test_vector": "Create fake token, call swap, verify protocol accepts worthless token.",
+    "references": [
+      "https://docs.sui.io/concepts/sui-move-concepts/coins"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "High",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 6.0,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2024-002",
+    "name": "Vault Share Math Logic Error (Souffl3)",
+    "name_vi": "Lỗi logic tính toán cổ phần trong Vault (Souffl3)",
+    "date": "2024-11-20",
+    "loss": "$50k+ (Restricted)",
+    "description": "Incorrect rounding in share calculation logic. When calculating the amount of assets per share,  the contract rounded down for withdrawals or up for deposits in a way that favored the user,  allowing \"dust\" attacks where a user could repeatedly deposit and withdraw small amounts  to slowly drain the vault's underlying assets.\n",
+    "description_vi": "Lỗi làm tròn sai trong logic tính toán cổ phần (share). Khi tính toán lượng tài sản tương ứng  với mỗi cổ phần, hợp đồng đã làm tròn xuống khi rút tiền hoặc làm tròn lên khi nạp tiền theo cách  có lợi cho người dùng. Điều này cho phép thực hiện các cuộc tấn công \"bụi\" (dust attacks) - nơi người dùng  nạp và rút liên tục các khoản tiền cực nhỏ để bào mòn dần tài sản của Vault.\n",
+    "root_cause": "Legacy Solidity-style math in Move without accounting for directional rounding. In DeFi,  rounding should always favor the protocol (round down for user receipts, round up for user payments).  Failure to use a 'round_up' flag or a safe math library for shares led to precision loss leakage.\n",
+    "mitigation": "Implement a helper function for proportional math that accepts a `round_up` boolean. Always use  u128 for intermediate multiplications before division to prevent overflow.\n",
+    "verification": "Unit Tests: Mock a vault with low liquidity and high share price, then verify that micro-deposits  cannot result in effectively free shares.\n",
+    "impact": "Medium - Slow drain of vault funds over time via micro-transactions.",
+    "severity": "Medium",
+    "code_vuln": "public fun get_amount_by_shares(vault: &Vault, shares: u64): u64 {\n    let total_assets = balance::value(&vault.assets);\n    let total_shares = vault.total_shares;\n    if (total_shares == 0) return shares;\n    // Rounding down favors the user during withdrawal\n    (shares * total_assets) / total_shares\n}\n",
+    "code_fixed": "public fun get_amount_by_shares_safe(vault: &Vault, shares: u64, round_up: bool): u64 {\n    let total_assets = balance::value(&vault.assets);\n    let total_shares = vault.total_shares;\n    if (total_shares == 0) return shares;\n    let numerator = (shares as u128) * (total_assets as u128);\n    let denumerator = (total_shares as u128);\n    if (round_up && numerator % denumerator > 0) {\n        ((numerator / denumerator) + 1 as u64)\n    } else {\n        (numerator / denumerator as u64)\n    }\n}\n",
+    "test_vector": "Deposit small amount, verify rounding favor, repeat.",
+    "references": [
+      "https://github.com/souffl3/sui-contract-audits"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "High",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "formal_spec": "../prover-examples/sources/no_double_spend.move",
+    "bvss_score": 6.0,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2024-001",
+    "name": "Shared Object Access Control Bypass (BlueMove)",
+    "name_vi": "Lỗ hổng bỏ qua kiểm soát quyền truy cập Shared Object (BlueMove)",
+    "date": "2024-11-05",
+    "loss": "$250k+ (Restricted)",
+    "description": "The contract uses a Shared Object but fails to verify the caller's identity or the presence of an  admin capability within the function. Any user can call the `take()` or `withdraw()` function  on the shared object, draining its resources. In the BlueMove case, the lack of `OwnerCap`  validation in the DEX allowed unauthorized liquidity removal.\n",
+    "description_vi": "Hợp đồng sử dụng một Shared Object nhưng lại thiếu bước xác thực danh tính người gọi hoặc quyền Admin  trong hàm. Bất kỳ người dùng nào cũng có thể gọi hàm `take()` hoặc `withdraw()` trên shared object đó,  dẫn đến bị rút cạn tài sản. Trong trường hợp BlueMove, việc thiếu xác thực `OwnerCap`  trong sàn DEX đã cho phép kẻ tấn công rút thanh khoản trái phép.\n",
+    "root_cause": "Fundamental misunderstanding of Sui Object Ownership. The developer assumed that because an object  is 'Shared', it still implicitly respects permissions, whereas Shared Objects are publicly  accessible and require explicit 'Capability-based' or 'Address-based' access control within  the function logic.\n",
+    "mitigation": "Always require an `&AdminCap` or `&OwnerCap` as a parameter. Use standard patterns from  `secure-patterns/sources/access_control.move`.\n",
+    "verification": "Formal Verification: `sui move prove` with 'aborts_if' specs to ensure functions without  valid capabilities always fail.\n",
+    "impact": "High - Unauthorized fund withdrawal, total loss of shared object state authority.",
+    "severity": "High",
+    "code_vuln": "public fun withdraw_profits(vault: &mut Vault, ctx: &mut TxContext) {\n    let amount = vault.profits;\n    let coin = coin::extract(&mut vault.balance, amount, ctx);\n    transfer::public_transfer(coin, tx_context::sender(ctx));\n    vault.profits = 0;\n}\n",
+    "code_fixed": "public fun withdraw_profits(vault: &mut Vault, cap: &AdminCap, ctx: &mut TxContext) {\n    assert!(vault.admin_id == object::id(cap), EUnauthorized);\n    let amount = vault.profits;\n    let coin = coin::extract(&mut vault.balance, amount, ctx);\n    transfer::public_transfer(coin, tx_context::sender(ctx));\n    vault.profits = 0;\n}\n",
+    "test_vector": "Call withdrawal function without AdminCap or with dummy object.",
+    "references": [
+      "https://github.com/BlueMove/bluemove-sui-audit"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "High",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "formal_spec": "../prover-examples/sources/safe_transfer.move",
+    "bvss_score": 6.0,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2026-001",
+    "name": "AGENT-012 BTCfi Oracle Manipulation in Agent-Driven Trades",
+    "name_vi": "Lỗ hổng thao túng Oracle BTCfi trong giao dịch tự động của AI Agent",
+    "date": "2026-03-07",
+    "loss": "Simulated (oracle skew leading to $150k+ bad debt)",
+    "description": "An agent relies on a single BTCfi oracle feed (e.g., BTC/SUI price) for liquidation or collateral valuation decisions. An attacker manipulates the off-chain oracle price feed (e.g., via TWAP manipulation, stale data replay, or poisoning the oracle provider) causing the agent to execute a liquidation at a significantly skewed price. The on-chain contract accepts the oracle value without deviation bounds or multi-feed aggregation, creating bad debt or enabling the attacker to front-run liquidations at incorrect valuations.\n",
+    "description_vi": "Một AI Agent phụ thuộc vào một nguồn cấp dữ liệu oracle BTCfi duy nhất (ví dụ: giá BTC/SUI) để  đưa ra quyết định thanh lý hoặc định giá tài sản thế chấp. Kẻ tấn công thao túng nguồn cấp giá  oracle off-chain (ví dụ: thông qua thao túng TWAP, phát lại dữ liệu cũ hoặc đầu độc nhà cung cấp oracle)  khiến Agent thực hiện thanh lý ở mức giá bị sai lệch nghiêm trọng. Hợp đồng on-chain chấp nhận giá trị  oracle mà không có ngưỡng sai lệch hoặc cơ chế tổng hợp nhiều nguồn, tạo ra nợ xấu hoặc cho phép  kẻ tấn công trục lợi từ việc thanh lý sai giá.\n",
+    "root_cause": "Oracle Dependency Anti-pattern. The core issue is the 'Single Source of Truth' without  on-chain validation. In the context of Agentic DeFi (2026), AI agents often react faster  than human guardians, making oracle-skew vulnerabilities catastrophic if not guarded  by multi-feed consensus or TWAP checks.\n",
+    "mitigation": "1. Implement Multi-Oracle Aggregation (e.g., Pyth + Switchboard + Supra).  2. Add Heartbeat checks (staleness protection). 3. Implement Maximum Deviation Thresholds.\n",
+    "verification": "Simulation: Run an adversarial agent that pumps a low-liquidity oracle feed while  simultaneously triggering the liquidation function.\n",
+    "impact": "High (protocol bad debt, user fund loss, fits Sui BTCfi expansion 2026)",
+    "severity": "High",
+    "code_vuln": "// ❌ VULNERABLE: single oracle, no staleness or deviation check\npublic entry fun liquidate_vulnerable(\n    oracle: &OracleFeed,\n    vault: &mut LiquidationVault,\n    borrower: address,\n    ctx: &mut TxContext,\n) {\n    let price = oracle.btc_sui_price; // Single-source, unvalidated\n    let collateral_value = vault.collateral_amount * price;\n    // Liquidate if undercollateralized — price can be manipulated\n    if (collateral_value < vault.debt_amount) {\n        let seized = coin::split(&mut vault.collateral, vault.collateral_amount, ctx);\n        transfer::public_transfer(seized, ctx.sender());\n    }\n}\n",
+    "code_fixed": "// ✅ FIXED: multi-oracle aggregation + deviation bound + staleness check\npublic entry fun liquidate_fixed(\n    oracle_a: &OracleFeed,\n    oracle_b: &OracleFeed,\n    vault: &mut LiquidationVault,\n    current_epoch: u64,\n    ctx: &mut TxContext,\n) {\n    // Staleness: both feeds must be fresh\n    assert!(current_epoch - oracle_a.last_updated <= MAX_STALE_EPOCHS, E_STALE_PRICE);\n    assert!(current_epoch - oracle_b.last_updated <= MAX_STALE_EPOCHS, E_STALE_PRICE);\n    // Deviation guard: feeds must agree within 5%\n    let avg_price = (oracle_a.btc_sui_price + oracle_b.btc_sui_price) / 2;\n    let deviation = if (oracle_a.btc_sui_price > oracle_b.btc_sui_price) {\n        oracle_a.btc_sui_price - oracle_b.btc_sui_price\n    } else {\n        oracle_b.btc_sui_price - oracle_a.btc_sui_price\n    };\n    assert!(deviation * 10000 / avg_price <= MAX_DEVIATION_BPS, E_PRICE_DEVIATION);\n    let collateral_value = vault.collateral_amount * avg_price;\n    if (collateral_value < vault.debt_amount) {\n        let seized = coin::split(&mut vault.collateral, vault.collateral_amount, ctx);\n        transfer::public_transfer(seized, ctx.sender());\n    }\n}\n",
+    "test_vector": {
+      "inputs": {
+        "oracle_a_price": 200000,
+        "oracle_b_price": 100000,
+        "deviation_pct": 50,
+        "max_deviation_bps": 500
+      },
+      "expected_exploit": "Liquidation executes at 2x normal price via poisoned oracle_a; bad debt created"
+    },
+    "references": [
+      "https://docs.sui.io/concepts/sui-architecture",
+      "https://pyth.network/docs/best-practices"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "formal_spec": "../prover-examples/sources/agent_btcfi_oracle_bounds.move",
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-011",
+    "name": "AGENT-011 NFT/Kiosk Bypass in Agent-Controlled Assets",
+    "date": "2026-03-07",
+    "loss": "Simulated ($10k+ in kiosk-locked NFT assets)",
+    "description": "An agent that receives a KioskOwnerCap for a scoped workflow can bypass NFT ownership checks by performing an unauthorized transfer via the kiosk API without verifying the receiver matches the expected owner. Sui's Kiosk model enforces purchase/transfer policies, but an agent holding the cap and executing a custom bypass path (e.g., via dynamic fields or unlocked place/take cycles) can extract NFTs from the kiosk without completing a legitimate sale. Root cause: missing assert that kiosk owner == permitted agent address and that transfer policy rules are enforced before item extraction.\n",
+    "impact": "Medium-High (NFT drain in agentic gaming, RWA, and digital asset protocols)",
+    "severity": "High",
+    "code_vuln": "// ❌ VULNERABLE: agent transfers NFT out of kiosk without owner match or policy check\npublic entry fun transfer_nft_vulnerable(\n    kiosk: &mut Kiosk,\n    cap: &KioskOwnerCap,\n    item_id: ID,\n    recipient: address,\n    ctx: &mut TxContext,\n) {\n    // Takes the item ignoring transfer policy — no policy enforcement\n    let nft: NftAsset = kiosk::take(kiosk, cap, item_id);\n    transfer::public_transfer(nft, recipient);\n}\n",
+    "code_fixed": "// ✅ FIXED: owner match + policy enforcement before extraction\npublic entry fun transfer_nft_fixed(\n    kiosk: &mut Kiosk,\n    cap: &KioskOwnerCap,\n    policy: &TransferPolicy<NftAsset>,\n    item_id: ID,\n    recipient: address,\n    ctx: &mut TxContext,\n) {\n    // Verify cap belongs to the expected agent/owner\n    assert!(kiosk::has_access(kiosk, cap), E_OWNER_MISMATCH);\n    // Process transfer through policy (royalties, rules, etc.)\n    let (nft, transfer_request) = kiosk::purchase(kiosk, item_id,\n        coin::zero<SUI>(ctx));\n    transfer_policy::confirm_request(policy, transfer_request);\n    transfer::public_transfer(nft, recipient);\n}\n",
+    "test_vector": {
+      "inputs": {
+        "kiosk_owner": "0xOWNER",
+        "agent_address": "0xROGUE_AGENT",
+        "item_id": "0xNFT_ID",
+        "recipient": "0xATTACKER"
+      },
+      "expected_exploit": "NFT extracted from kiosk bypassing transfer policy; recipient is attacker"
+    },
+    "references": [
+      "https://docs.sui.io/standards/kiosk",
+      "https://docs.sui.io/standards/kiosk-apps",
+      "https://arxiv.org/html/2601.04583v1"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-013",
+    "name": "AGENT-010 Multi-Agent Consensus Failure via Byzantine Rogue Agent",
+    "date": "2026-03-07",
+    "loss": "Simulated (multi-agent drain $200k+)",
+    "description": "In a multi-agent workflow, a rogue (Byzantine) agent injects faulty votes or approvals into a shared consensus object without signature verification. The contract tallies unverified votes and grants approval even when the cryptographically-verified threshold is not met. This allows the rogue agent to trigger a shared vault drain, unauthorized treasury sweep, or intent execution below quorum. Root cause: the vote counter accepts any caller's vote without verifying an agent signature or membership proof.\n",
+    "impact": "High (ecosystem-wide if agent swarms control large treasuries)",
+    "severity": "High",
+    "code_vuln": "// ❌ VULNERABLE: votes accepted without signature verification\npublic entry fun cast_vote_vulnerable(\n    consensus: &mut SwarmConsensus,\n    approve: bool,\n    ctx: &mut TxContext,\n) {\n    // Anyone can call — no agent identity or signature check\n    if (approve) { consensus.approve_count = consensus.approve_count + 1 };\n    if (consensus.approve_count >= consensus.threshold) {\n        consensus.approved = true; // Threshold met by rogue actors\n    }\n}\n\npublic entry fun execute_if_approved_vulnerable(\n    consensus: &SwarmConsensus,\n    vault: &mut SwarmVault,\n    target: address,\n    ctx: &mut TxContext,\n) {\n    assert!(consensus.approved, E_NOT_APPROVED);\n    let extracted = coin::split(&mut vault.balance, vault.drain_amount, ctx);\n    transfer::public_transfer(extracted, target);\n}\n",
+    "code_fixed": "// ✅ FIXED: verified_votes counter gated by per-agent signature check\npublic entry fun cast_vote_fixed(\n    consensus: &mut SwarmConsensus,\n    approve: bool,\n    agent_sig: vector<u8>,\n    ctx: &mut TxContext,\n) {\n    let sender = tx_context::sender(ctx);\n    // Verify agent is a registered member with valid signature\n    assert!(table::contains(&consensus.registered_agents, sender), E_UNKNOWN_AGENT);\n    let msg = bcs::to_bytes(&approve);\n    assert!(ed25519::ed25519_verify(&agent_sig, &sender_pubkey(consensus, sender), &msg),\n            E_INVALID_SIGNATURE);\n    if (approve) { consensus.verified_votes = consensus.verified_votes + 1 };\n    if (consensus.verified_votes >= consensus.threshold) {\n        consensus.approved = true;\n    }\n}\n",
+    "test_vector": {
+      "inputs": {
+        "rogue_agents": 3,
+        "threshold": 5,
+        "total_registered": 7,
+        "verified_votes_after_rogue": 3
+      },
+      "expected_exploit": "consensus.approved set to true with only 3 unverified votes out of threshold=5"
+    },
+    "references": [
+      "https://arxiv.org/html/2601.04583v1",
+      "https://docs.sui.io/concepts/object-ownership/shared"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-018",
+    "name": "AGENT-009 TEE Tampering in Nautilus-Attested Agent Compute",
+    "date": "2026-03-07",
+    "loss": "Simulated (TEE breach leading to $50k+ rogue tx)",
+    "description": "An adversary tampers with a Nautilus TEE enclave via side-channel or weak attestation (e.g., replaying a stale attestation report, injecting a fabricated quote). The on-chain contract then accepts rogue off-chain compute outputs — altered AI inference results — triggering unauthorized transfers or intent spoofing. Missing checks include: attestation validity gate, freshness window (epoch-based), and report_data == input_hash binding. This extends the existing nautilus_tee_bypass.yaml with an active tampering vector (not just bypass) and a quantified PoC.\n",
+    "impact": "High (cascading failures in verifiable agents, rogue on-chain tx)",
+    "severity": "High",
+    "code_vuln": "// ❌ VULNERABLE: accepts compute result without verifying TEE attestation\npublic fun accept_compute_vulnerable(\n    result: ComputeResult,\n    vault: &mut AgentVault,\n    ctx: &mut TxContext,\n) {\n    // No attestation check — rogue/tampered output accepted as truth\n    if (result.action == ACTION_TRANSFER) {\n        let extracted = coin::split(&mut vault.balance, result.amount, ctx);\n        transfer::public_transfer(extracted, result.target);\n    }\n}\n",
+    "code_fixed": "// ✅ FIXED: full attestation + freshness + hash-binding before accepting result\npublic fun accept_compute_fixed(\n    result: ComputeResult,\n    report: &AttestationReport,\n    expected_input_hash: vector<u8>,\n    current_epoch: u64,\n    vault: &mut AgentVault,\n    ctx: &mut TxContext,\n) {\n    assert!(report.is_valid, E_ATTESTATION_FAIL);\n    assert!(current_epoch - report.issued_epoch <= MAX_STALE_EPOCHS, E_STALE_ATTESTATION);\n    assert!(report.report_data == expected_input_hash, E_HASH_MISMATCH);\n    if (result.action == ACTION_TRANSFER) {\n        let extracted = coin::split(&mut vault.balance, result.amount, ctx);\n        transfer::public_transfer(extracted, result.target);\n    }\n}\n",
+    "test_vector": {
+      "inputs": {
+        "report_is_valid": false,
+        "issued_epoch": 0,
+        "current_epoch": 200,
+        "report_data": "0xdeadbeef",
+        "expected_input_hash": "0xcafebabe",
+        "action": "ACTION_TRANSFER",
+        "amount": 50000
+      },
+      "expected_exploit": "Rogue compute result triggers unauthorized vault transfer without valid attestation"
+    },
+    "references": [
+      "https://docs.sui.io/guides/developer/getting-started/nautilus",
+      "https://community.intel.com/t5/Intel-Software-Guard-Extensions/ct-p/software-guard-extensions",
+      "https://arxiv.org/html/2601.04583v1"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-019",
+    "name": "AGENT-014 Unaudited Lib Dependency in Agent Modules",
+    "date": "2026-03-07",
+    "loss": "Simulated ($300k+ via lib vuln cascade)",
+    "description": "An agent module imports a third-party Move library (e.g., a zk helper or TEE SDK) that has not been audited and contains a backdoor: a public init function that mints an AdminCap accessible to any caller. On deployment or first use, an attacker calls the backdoor to extract the AdminCap and gain full admin control over the agent module (drain treasury, upgrade packages, modify agent policies). Root cause: no verification that imported library packages are from audited, trusted sources before integration into the agent.\n",
+    "impact": "High (systemic if lib popular in agentic economy; full admin takeover)",
+    "severity": "High",
+    "code_vuln": "// ❌ VULNERABLE: imports unaudited lib that exposes backdoor AdminCap mint\n// (simulating a malicious third-party Move package)\nmodule agent_specific::bad_lib {\n    use sui::object::{Self, UID};\n    use sui::tx_context::TxContext;\n    use sui::transfer;\n\n    public struct BadAdminCap has key, store { id: UID }\n\n    // Backdoor: any caller can mint an AdminCap\n    public fun backdoor_mint_cap(ctx: &mut TxContext): BadAdminCap {\n        BadAdminCap { id: object::new(ctx) }\n    }\n}\n\n// Agent module consuming the unaudited lib\npublic entry fun use_lib_vulnerable(ctx: &mut TxContext) {\n    let cap = bad_lib::backdoor_mint_cap(ctx); // Attacker calls this directly\n    transfer::public_transfer(cap, tx_context::sender(ctx));\n}\n",
+    "code_fixed": "// ✅ FIXED: audit_verified flag + static rule prevents unaudited libs\npublic struct LibRegistry has key {\n    id: UID,\n    audit_verified: bool,\n    auditor: address,\n}\n\npublic entry fun register_lib(\n    registry: &mut LibRegistry,\n    auditor_sig: vector<u8>,\n    ctx: &mut TxContext,\n) {\n    let auditor = tx_context::sender(ctx);\n    // Only whitelisted auditors can mark lib as verified\n    assert!(is_whitelisted_auditor(auditor), E_UNVERIFIED_AUDITOR);\n    registry.audit_verified = true;\n    registry.auditor = auditor;\n}\n\npublic entry fun use_lib_fixed(\n    registry: &LibRegistry,\n    ctx: &mut TxContext,\n) {\n    // Abort if lib has not been audited and registered\n    assert!(registry.audit_verified, E_UNAUDITED_LIB);\n    // ... safe lib usage\n}\n",
+    "test_vector": {
+      "inputs": {
+        "lib_audit_verified": false,
+        "attacker_calls_backdoor": true
+      },
+      "expected_exploit": "Attacker mints AdminCap via backdoor_mint_cap and gains full admin control"
+    },
+    "references": [
+      "https://owasp.org/www-project-supply-chain-security/",
+      "https://arxiv.org/html/2601.04583v1",
+      "https://docs.sui.io/guides/developer/sui-101/move-package-management"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-030",
+    "name": "zk-Intent Proof Replay (Missing Nullifier)",
+    "date": "2026-03-06",
+    "loss": "N/A (High risk — dependent on TVL of protocol)",
+    "description": "A smart contract accepted the same zero-knowledge intent proof multiple times because the nullifier registry was not checked on-chain. This allowed an attacker to replay the same zk-proof across multiple transactions, executing the same intent action more than once. The root cause is the absence of a nullifier uniqueness check before allowing action execution. Each zk-proof must consume a unique nullifier that is recorded on-chain and rejected on second submission.\n",
+    "impact": "High — double-execution of intent, potential fund drain or state corruption.",
+    "severity": "High",
+    "references": [
+      "https://docs.sui.io/concepts/cryptography/zklogin",
+      "https://eprint.iacr.org/2021/1190"
+    ],
+    "code_vuln": "// ❌ VULNERABLE: no nullifier check, proof can be replayed\npublic fun execute_action(\n    proof: &ZkProof,\n    action: &mut ActionRecord,\n) {\n    assert!(proof.is_valid, E_PROOF_INVALID);\n    action.executed = true;\n}\n",
+    "code_fixed": "// ✅ FIXED: nullifier uniqueness enforced before execution\npublic fun execute_action(\n    proof: &ZkProof,\n    registry: &mut NullifierRegistry,\n    action: &mut ActionRecord,\n) {\n    assert!(proof.is_valid, E_PROOF_INVALID);\n    // Reject if nullifier already spent\n    assert!(\n        !table::contains(&registry.registry, proof.nullifier),\n        E_DOUBLE_SPEND\n    );\n    // Record nullifier as spent\n    table::add(&mut registry.registry, proof.nullifier, true);\n    action.intent_hash = proof.intent_hash;\n    action.executed = true;\n}\n",
+    "test_vector": {
+      "inputs": {
+        "proof_is_valid": true,
+        "nullifier": "0xabc123",
+        "already_spent": true
+      },
+      "expected_exploit": "Proof replayed — action executed twice with same nullifier"
+    },
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-MS-2026-003",
+    "name": "MS-003 Cross-Module Permission Defect",
+    "name_vi": "Lỗi Phân quyền Giữa Các Module (Cross-Module)",
+    "name_zh": "MS-003 跨模块权限缺陷",
+    "date": "2026-02-15",
+    "loss": "Unauthorized Administrative Action",
+    "description": "When multiple modules interact (e.g., protocol core and periphery), a module  may trust another module's public functions without verifying the specific  caller's identity or capability. This is exacerbated by the misuse of 'friend'  functions that allow any 'friend' module to perform sensitive operations.\n",
+    "description_vi": "Khi nhiều module tương tác với nhau (ví dụ: module lõi và module ngoại vi), một  module có thể tin tưởng các hàm public của module khác mà không xác minh danh tính  hoặc capability của người gọi cụ thể. Điều này trở nên tồi tệ hơn do việc lạm dụng  hàm 'friend', cho phép bất kỳ module 'friend' nào thực hiện các hoạt động nhạy cảm.\n",
+    "description_zh": "当多个模块（例如协议核心与外围模块）交互时，一个模块可能会信任另一个模块的公共函数， 而未核查特定的调用者身份或权限（Capability）。过度使用 'friend' 函数会加剧此风险， 因为它允许任何 'friend' 模块执行敏感操作。\n",
+    "impact": "High (Unauthorized state mutations across protocol modules)",
+    "impact_vi": "Cao (Thay đổi trạng thái trái phép trên các module giao thức)",
+    "impact_zh": "高 (在不同协议模块间发生非法状态修改)",
+    "severity": "High",
+    "code_vuln": "/// ❌ VULNERABLE: Friend function doesn't check if the contract \n/// context allows this specific operation.\npublic(friend) fun internal_mint(cap: &mut MintCap, amount: u64) {\n    // Logic without granular authorization\n}\n",
+    "code_fixed": "/// ✅ FIXED: Use a Witness or specialized Capability to gate cross-module calls\npublic fun authorized_mint(witness: &MintWitness, cap: &mut MintCap, amount: u64) {\n    // Verify witness or capability before acting\n}\n",
+    "test_vector": "Try calling internal_mint from a malicious 'friend' module with unauthorized parameters.",
+    "references": [
+      "https://docs.sui.io/concepts/sui-architecture"
+    ],
+    "sui_specific": false,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-MS-2026-004",
+    "name": "MS-006 Custom Math Lib Edge Case",
+    "name_vi": "Lỗi Cận Biên ở Thư viện Toán học Tùy chỉnh (Custom Math Lib)",
+    "name_zh": "MS-006 自定义数学库边缘案例",
+    "date": "2026-02-15",
+    "loss": "Economic Extraction/DeFi Loss",
+    "description": "Many protocols use custom fixed-point math libraries (e.g., for interest rates,  bonding curves). These libraries may have edge cases in power/log functions  or precision rounding that can be exploited for small but cumulative  financial gain by an attacker.\n",
+    "description_vi": "Nhiều giao thức sử dụng các thư viện toán học dấu phẩy tĩnh (fixed-point) tùy chỉnh  (ví dụ: cho lãi suất, bonding curves). Các thư viện này có thể có các lỗi cận biên  trong các hàm lũy thừa/logarit hoặc làm tròn độ chính xác mà kẻ tấn công có thể  khai thác để trục lợi tài chính nhỏ nhưng tích lũy dần.\n",
+    "description_zh": "许多协议使用自定义的定点数学库（例如利率、联合曲线）。这些库在幂/对数函数或精度舍入方面 可能存在边缘案例，攻击者可以利用这些漏洞获取微小但持续累积的财务利益。\n",
+    "impact": "High (Financial loss in DEX/Lending pools over time)",
+    "impact_vi": "Cao (Tổn thất tài chính trong các bể DEX/Lending theo thời gian)",
+    "impact_zh": "高 (DEX/借贷池随时间推移而发生的财务损失)",
+    "severity": "High",
+    "code_vuln": "/// ❌ VULNERABLE: Fixed point math with poor precision at small scales\npublic fun calc_interest(amount: u64, rate: u64): u64 {\n    (amount * rate) / 10000 // Inaccurate for small amounts/rates\n}\n",
+    "code_fixed": "/// ✅ FIXED: Use high precision scaling and safe rounding\npublic fun calc_interest_safe(amount: u128, rate: u128): u64 {\n    let result = (amount * rate) / SCALING_FACTOR;\n    (result as u64)\n}\n",
+    "test_vector": "Calculate interest for minimum possible deposit -> verify if it rounds to 0 incorrectly.",
+    "references": [
+      "https://docs.sui.io/concepts/sui-architecture"
+    ],
+    "sui_specific": false,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-MS-2026-006",
+    "name": "MS-012 Entry Function Over-exposure",
+    "name_vi": "Lỗ hổng Phơi bày Hàm Entry (Entry Function Over-exposure)",
+    "name_zh": "MS-012 Entry 函数暴露过度漏洞",
+    "date": "2026-02-15",
+    "loss": "Privilege Escalation/State Corruption",
+    "description": "Administrative or mission-critical initialization functions marked as  `entry` without proper `TxContext` sender verification. This allows any  user to call these functions directly from a transaction, potentially  re-initializing state or gaining unauthorized access.\n",
+    "description_vi": "Các hàm khởi tạo quản trị hoặc quan trọng được đánh dấu là `entry` mà không xác  minh `TxContext` sender một cách chính xác. Điều này cho phép bất kỳ người dùng  nào gọi trực tiếp các hàm này từ một giao dịch, có khả năng khởi tạo lại trạng  thái hoặc giành được truy cập trái phép.\n",
+    "description_zh": "管理类或关键的初始化函数被标记为 `entry` 后，若没有进行严谨的 `TxContext`  发送者校验，将会导致漏洞。这使得任何用户都可以直接从一个交易中调用这些函数， 并可能重新初始化对象状态或获取未授权的访问权限。\n",
+    "impact": "High (Unauthorized administrative state mutations)",
+    "impact_vi": "Cao (Thay đổi trạng thái quản trị trái phép)",
+    "impact_zh": "高 (引发非法的管理状态修改)",
+    "severity": "High",
+    "code_vuln": "/// ❌ VULNERABLE: No check if vault is already initialized or authority\npublic entry fun vuln_initialize_vault(vault: &mut Vault, ctx: &mut TxContext) {\n    vault.admin = tx_context::sender(ctx); // Allows hijacking\n}\n",
+    "code_fixed": "/// ✅ FIXED: Check state and authority\npublic entry fun fixed_initialize_vault(vault: &mut Vault, ctx: &mut TxContext) {\n    assert!(vault.admin == @0x0, 0); // E_ALREADY_INIT\n    assert!(tx_context::sender(ctx) == @admin_address, 0); // E_UNAUTHORIZED\n    vault.admin = tx_context::sender(ctx);\n}\n",
+    "test_vector": "Try to call initialize_vault from a non-admin account on an already initialized vault.",
+    "references": [
+      "https://docs.sui.io/concepts/sui-architecture"
+    ],
+    "sui_specific": false,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-MS-2026-008",
+    "name": "MS-007 Parallel Race via Object Dependency",
+    "name_vi": "Lỗi Race Condition trong Thực thi Song song",
+    "name_zh": "MS-007 跨对象依赖引发的并行执行竞争漏洞",
+    "date": "2026-02-15",
+    "loss": "Inconsistent Protocol State",
+    "description": "Sui's high-speed parallel execution (Mysticeti) assumes transactions  operating on different objects can run concurrently. If a transaction  depends on multiple objects and a race condition is created where the  state of one object affects the logic of another in an unexpected order,  security invariant violations may occur.\n",
+    "description_vi": "Hệ thống thực thi song song tốc độ cao của Sui (Mysticeti) giả định các giao dịch  hoạt động trên các đối tượng khác nhau có thể chạy đồng thời. Nếu một giao dịch  phụ thuộc vào nhiều đối tượng và một tình trạng tranh chấp (race condition) được  tạo ra - nơi trạng thái của một đối tượng ảnh hưởng đến logic của đối tượng khác  theo thứ tự không mong đợi - các vi phạm bất biến bảo mật có thể xảy ra.\n",
+    "description_zh": "Sui 的高速并行执行机制（Mysticeti）假设对不同对象进行的操作可以并发运行。如果 一个交易依赖于多个对象，且由于执行顺序不可预测而产生竞态条件（即一个对象的状态 以非预期的方式影响另一个对象的逻辑），则可能导致安全不变性被违反。\n",
+    "impact": "High (Potential for invalid state or economic extraction under load)",
+    "impact_vi": "Cao (Khả năng trạng thái không hợp lệ hoặc khai thác kinh tế dưới tải cao)",
+    "impact_zh": "高 (在高负载下可能导致非法状态或发生经济榨取)",
+    "severity": "High",
+    "code_vuln": "/// ❌ VULNERABLE: Logic assumes obj_a is updated before obj_b\npublic fun sync_states(obj_a: &mut ObjA, obj_b: &mut ObjB) {\n    if (obj_a.is_active) {\n        obj_b.increment(); // Race: obj_a status may change concurrently\n    }\n}\n",
+    "code_fixed": "/// ✅ FIXED: Use a single shared object or versioned state to ensure atomicity\npublic fun sync_states_atomic(sync_obj: &mut SharedSync) {\n    if (sync_obj.obj_a.is_active) {\n        sync_obj.obj_b.increment();\n    }\n}\n",
+    "test_vector": "Dispatch two competing transactions modifying obj_a and obj_b -> verify if obj_b hits inconsistent state.",
+    "references": [
+      "https://docs.sui.io/concepts/sui-architecture"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-MS-2026-009",
+    "name": "MS-010 Phantom Type Safety Bypass",
+    "name_vi": "Lỗi Bỏ qua Bảo mật Kiểu Phantom (Phantom Type)",
+    "name_zh": "MS-010 虚型（Phantom Type）安全绕过漏洞",
+    "date": "2026-02-15",
+    "loss": "Asset Substitution/Pool Theft",
+    "description": "The `phantom` keyword in Move generics marks types that aren't stored  internally but define permissions. If omitted, the Move compiler may  allow unsound type substitutions in complex hierarchies, enabling an  attacker to swap one token type for another in a generic vault or pool.\n",
+    "description_vi": "Từ khóa `phantom` trong Move generics đánh dấu các kiểu không được lưu trữ  nội bộ nhưng dùng để xác định quyền hạn. Nếu bỏ qua, trình biên dịch Move  có thể cho phép thay thế kiểu không an toàn trong các hệ thống phức tạp,  cho phép kẻ tấn công hoán đổi một loại token này sang loại khác trong  một vault hoặc pool generic.\n",
+    "description_zh": "Move 泛型中的 `phantom` 关键字标记了不出于内部存储目的、但定义权限的类型。 如果忽略该关键字，Move 编译器可能会在复杂的层级结构中允许不合理的类型替换， 从而使攻击者能够在泛型保管库（Vault）或资金池中将一种代币类型替换为另一种。\n",
+    "impact": "High (Unauthorized asset extraction from DeFi pools)",
+    "impact_vi": "Cao (Trích xuất tài sản trái phép từ các bể DeFi)",
+    "impact_zh": "高 (在 DeFi 资金池中发生非法的资产提取)",
+    "severity": "High",
+    "code_vuln": "/// ❌ VULNERABLE: Missing 'phantom' allowing compiler to perform \n/// certain type substitutions in complex generic hierarchies.\nstruct PoolVulnerable<T> has key {\n    id: UID,\n    balance: Balance<T>\n}\n",
+    "code_fixed": "/// ✅ FIXED: Use 'phantom' when T is only used in a phantom context \n/// (like Balance<T> where T is just a tag).\nstruct PoolFixed<phantom T> has key {\n    id: UID,\n    balance: Balance<T>\n}\n",
+    "test_vector": "Try calling deposit_fixed with TypeA but claim it as TypeB via generic manipulation.",
+    "references": [
+      "https://docs.sui.io/concepts/sui-architecture"
+    ],
+    "sui_specific": false,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-MS-2026-010",
+    "name": "MS-001 Dynamic Field Resource Leak",
+    "name_vi": "Lỗ hổng Rò rỉ Tài nguyên ở Dynamic Field",
+    "name_zh": "MS-001 动态字段资源泄露漏洞",
+    "date": "2026-02-15",
+    "loss": "Locked Objects (Unrecoverable storage)",
+    "description": "When a parent object is deleted or its ownership is wrapped, its dynamic fields  (DF) or dynamic object fields (DOF) are not automatically cleaned up. These  fields become \"orphaned\" on the blockchain, permanently locking the assets  or data they contain. MoveScanner found this is common in upgradeable  contracts where the old object is deprecated but fields aren't migrated.\n",
+    "description_vi": "Khi một đối tượng cha bị xóa hoặc bị bao bọc (wrapped) quyền sở hữu, các dynamic  fields (DF) hoặc dynamic object fields (DOF) của nó không được tự động dọn dẹp.  Các trường này trở thành \"mồ côi\" trên blockchain, khóa vĩnh viễn các tài sản  hoặc dữ liệu mà chúng chứa. MoveScanner nhận thấy điều này phổ biến trong các  hợp đồng có thể nâng cấp, nơi đối tượng cũ bị loại bỏ nhưng các trường không được di chuyển.\n",
+    "description_zh": "当父级对象被删除或其所有权被包装（wrapped）时，其动态字段（DF）或动态对象字段（DOF） 不会自动清除。这些字段在区块链上变为“孤儿”状态，永久锁定其包含的资产或数据。 MoveScanner 发现这在可升级合约中很常见，旧对象被弃用但相关字段未迁移。\n",
+    "impact": "High (Permanent fund loss for specific users, storage bloat)",
+    "impact_vi": "Cao (Mất tiền vĩnh viễn cho một số người dùng, phình to bộ nhớ lưu trữ)",
+    "impact_zh": "高 (引发特定用户的永久资金损失、链上存储膨胀)",
+    "severity": "High",
+    "code_vuln": "public fun delete_parent(parent: Parent, ctx: &mut TxContext) {\n    let Parent { id } = parent;\n    // ❌ VULNERABLE: id is deleted, but dynamic fields attached to it remain\n    object::delete(id);\n}\n",
+    "code_fixed": "public fun delete_parent_safe(parent: Parent, ctx: &mut TxContext) {\n    let Parent { id } = parent;\n    // ✅ FIXED: Explicitly remove dynamic fields before deleting ID\n    let field_value: u64 = dynamic_field::remove(&mut id, b\"field_key\");\n    object::delete(id);\n}\n",
+    "test_vector": "Attach DF to object -> delete object -> check if DF is still accessible via ID (it remains on-chain but unreachable).",
+    "references": [
+      "https://docs.sui.io/concepts/sui-architecture"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-015",
+    "name": "AGENT-006 Shared Object Race in Multi-Agent Workflow",
+    "date": "2025-12-06",
+    "loss": "Simulated extraction race conditions",
+    "description": "Multiple agents accessing a shared object (e.g., treasury vault) sequentially without atomic operations exploit race conditions.",
+    "impact": "High",
+    "severity": "High",
+    "code_vuln": "public entry fun prepare_extraction_vulnerable(treasury: &mut SharedTreasury) {\n    treasury.extraction_locked = true;\n}\npublic entry fun execute_extraction_vulnerable(\n    treasury: &mut SharedTreasury, amount: u64, target: address, ctx: &mut TxContext\n) {\n    assert!(treasury.extraction_locked == true, ERaceConditionExploited);\n    let extracted = coin::split(&mut treasury.balance, amount, ctx);\n    transfer::public_transfer(extracted, target);\n    treasury.extraction_locked = false; // Reset\n}\n",
+    "code_fixed": "public struct ExtractionTicket { amount: u64 }\npublic fun prepare_extraction_fixed(treasury: &mut SharedTreasury, amount: u64): ExtractionTicket {\n    treasury.extraction_locked = true;\n    ExtractionTicket { amount }\n}\npublic fun execute_extraction_fixed(\n    treasury: &mut SharedTreasury, ticket: ExtractionTicket, target: address, ctx: &mut TxContext\n) {\n    let ExtractionTicket { amount } = ticket;\n    assert!(treasury.extraction_locked == true, ERaceConditionExploited);\n    let extracted = coin::split(&mut treasury.balance, amount, ctx);\n    transfer::public_transfer(extracted, target);\n    treasury.extraction_locked = false; // Reset\n}\n",
+    "test_vector": "Trigger race condition by making agent B modify vault state immediately after agent A prepares it.",
+    "references": [
+      "https://arxiv.org/html/2601.04583v1"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-012",
+    "name": "AGENT-005 Memory Poisoning Leading to Rogue Tx",
+    "date": "2025-12-05",
+    "loss": "Simulated $1M in false contract approvals",
+    "description": "Adversarial input poisons agent memory (LLM context window or external RAG DB), leading to harmful on-chain transactions like approving malicious contracts.",
+    "impact": "High",
+    "severity": "High",
+    "code_vuln": "public entry fun approve_contract_vulnerable(\n    agent: &mut AgentContext, target: address, ctx: &mut TxContext\n) {\n    if (agent.memory_poisoned) {\n        std::vector::push_back(&mut agent.approved_contracts, target);\n    } else {\n        assert!(tx_context::sender(ctx) == agent.owner, EInvalidState);\n        std::vector::push_back(&mut agent.approved_contracts, target);\n    }\n}\n",
+    "code_fixed": "public entry fun approve_contract_fixed(\n    agent: &mut AgentContext, target: address, intent_verified: bool, ctx: &mut TxContext\n) {\n    assert!(tx_context::sender(ctx) == agent.owner || intent_verified, EInvalidState);\n    std::vector::push_back(&mut agent.approved_contracts, target);\n}\n",
+    "test_vector": "Poison memory with adversarial prompt, forcing the agent to approve a malicious contract.",
+    "references": [
+      "https://arxiv.org/html/2601.04583v1"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-017",
+    "name": "AGENT-002 Rogue Agent Spend Limit Bypass",
+    "date": "2025-12-02",
+    "loss": "Simulated $50k+ in test env",
+    "description": "Agent bypasses its spend limit through multi-step workflows or memory poisoning. If an agent's tracked spending is stored off-chain or poorly managed on-chain, it can be reset or manipulated.",
+    "impact": "Medium to High",
+    "severity": "High",
+    "code_vuln": "public entry fun execute_workflow_step_vulnerable(\n    config: &mut AgentConfig, amount: u64, target: address, ctx: &mut TxContext\n) {\n    if (config.memory_tainted) { config.current_spent = 0; };\n    assert!(config.current_spent + amount <= config.spend_limit, EOverSpendLimit);\n    let extracted = coin::split(&mut config.treasury, amount, ctx);\n    transfer::public_transfer(extracted, target);\n    config.current_spent = config.current_spent + amount;\n}\n",
+    "code_fixed": "public entry fun execute_workflow_step_fixed(\n    config: &mut AgentConfig, amount: u64, target: address, ctx: &mut TxContext\n) {\n    assert!(config.current_spent + amount <= config.spend_limit, EOverSpendLimit);\n    let extracted = coin::split(&mut config.treasury, amount, ctx);\n    transfer::public_transfer(extracted, target);\n    config.current_spent = config.current_spent + amount;\n}\n",
+    "test_vector": "Poison memory to reset limits and drain funds exceeding the cap.",
+    "references": [
+      "https://arxiv.org/html/2601.04583v1"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "formal_spec": "../prover-examples/sources/agent_spend_limit_enforce.move",
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-020",
+    "name": "AGENT-001 Unauthorized Tool Call via Prompt Injection",
+    "date": "2025-12-01",
+    "loss": "Simulated $10k–$100k+ in test env",
+    "description": "Attacker crafts adversarial prompt to make AI agent call unauthorized tool (e.g., transfer without user intent verification), bypassing guardrails.",
+    "impact": "High (potential full wallet drain)",
+    "severity": "High",
+    "code_vuln": "public entry fun execute_tool_vulnerable(wallet: &mut AgentWallet, action_name: String, target: address, amount: u64, ctx: &mut TxContext) {\n    // Vulnerability: No check to see if the action is authorized or if intent is spoofed/injected!\n    let extracted = coin::split(&mut wallet.balance, amount, ctx);\n    transfer::public_transfer(extracted, target);\n}\n",
+    "code_fixed": "public entry fun execute_tool_fixed(wallet: &mut AgentWallet, action_name: String, target: address, amount: u64, intent_verified: bool, ctx: &mut TxContext) {\n    // Mitigation: Require a verifiable proof that intent matches the user's actual request.\n    assert!(intent_verified == true, EUnauthorizedAction);\n    let extracted = coin::split(&mut wallet.balance, amount, ctx);\n    transfer::public_transfer(extracted, target);\n}\n",
+    "test_vector": "Prompt injection causes agent to bypass checks and send funds directly.",
+    "references": [
+      "https://arxiv.org/html/2601.04583v1",
+      "https://www.immuniweb.com/vulnerabilities/prompt-injection/"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "formal_spec": "../prover-examples/sources/agent_unauthorized_tool_prevent.move",
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-024",
+    "name": "Nemo Economic Logic Exploit",
+    "date": "2025-09-08",
+    "loss": "$2.4M USDC",
+    "description": "Logic flaw in yield/bridge handling allows stolen funds bridged cross-chain (Arbitrum → Ethereum) before maintenance. Despite Move safety, protocol-level economic bug (yield split PT/YT abuse).",
+    "impact": "High - Cross-chain drain, TVL drop mạnh, dù language prevent reentrancy/overflow.",
+    "severity": "High",
+    "code_vuln": "// Vulnerable: No post-bridge verification\nfun repay_yield(...) {\n    bridge(stolen_funds, ...);\n    // No assert bridge success or verified\n}\n",
+    "code_fixed": "fun repay_yield(...) {\n    let bridged = bridge(stolen_funds, ...);\n    assert!(verified_bridge(bridged), E_BRIDGE_FAIL);\n    ...\n}\n",
+    "test_vector": "Bridge stolen USDC via Circle → external drain trước khi suspend contracts.",
+    "references": [
+      "https://www.coindesk.com/markets/2025/09/08/sui-based-yield-protocol-nemo-exploited-for-usd2-4m-in-usdc",
+      "https://finance.yahoo.com/news/nemo-protocol-loses-2-4m-163622264.html",
+      "https://x.com/PeckShieldAlert/status/1832698375635837332"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-028",
+    "name": "Unaudited Custom Library Dependency Inheritance",
+    "date": "2025-01-01",
+    "loss": "Multiple (Typus/Cetus-like)",
+    "description": "Reliance on unaudited/open-source libs (math libs như integer-mate) inherits bugs (rounding/overflow) → exploits in caller contracts.",
+    "impact": "High - Supply chain risk, common ở Sui DeFi dùng libs chưa audit.",
+    "severity": "High",
+    "code_vuln": "use third_party::unsafe_math::mul_div;  // Unaudited, bug in mul_div\n",
+    "code_fixed": "use sui::math;  // Built-in audited\n",
+    "test_vector": "Lib bug trigger overflow in caller → pool manip/drain.",
+    "references": [
+      "https://slowmist.com/blog/post/sui-exploit-2025-report",
+      "https://www.halborn.com/blog/post/explained-the-typus-finance-hack-october-2025"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2024-005",
+    "name": "Upgradable Package State Corruption (Migration)",
+    "name_vi": "Lỗi hỏng trạng thái khi nâng cấp Package (Migration)",
+    "date": "2024-12-30",
+    "loss": "Variable",
+    "description": "Protocol implements an upgrade mechanism with a `migrate` function to update shared  object states after a package upgrade. If the `migrate` function is not properly  protected by checking for the `UpgradeCap` or a specific version-bound admin  capability, any user can trigger the migration prematurely or multiple times,  leading to state corruption, data loss, or unauthorized privilege escalation.\n",
+    "description_vi": "Giao thức triển khai cơ chế nâng cấp với hàm `migrate` để cập nhật trạng thái của  các shared object sau khi nâng cấp package. Nếu hàm `migrate` không được bảo vệ đúng cách  (không kiểm tra `UpgradeCap` hoặc một quyền admin cụ thể), bất kỳ người dùng nào cũng có thể  kích hoạt quá trình chuyển đổi dữ liệu sớm hoặc nhiều lần. Điều này dẫn đến hỏng trạng thái,  mất dữ liệu hoặc leo thang đặc quyền trái phép.\n",
+    "root_cause": "Lack of access control on the 'Administrative Bridge' (migration function). In Sui,  upgrades change the package ID, but not the Shared Object ID. The common pitfall is  forgetting that even if the new package is 'safe', the bridge function to transition  old data to new logic is a major attack vector if left public.\n",
+    "mitigation": "1. Always protect `migrate` functions with `&UpgradeCap`.  2. Implement a 'Version Guard' inside the object to ensure migration only runs once  for each version jump.\n",
+    "verification": "Manual Audit: Search for any public functions named `migrate` or `init_version` and ensure  they take a restrictively owned Capability.\n",
+    "impact": "High - Irreversible state corruption, potential protocol takeover.",
+    "severity": "High",
+    "code_vuln": "public fun migrate(vault: &mut Vault, ctx: &mut TxContext) {\n    // Missing check: is the caller the one holding UpgradeCap?\n    // Or checking if the version has already been migrated.\n    vault.version = vault.version + 1;\n    vault.admin_cap_id = @0x...; // Change admin accidentally/maliciously\n}\n",
+    "code_fixed": "public fun migrate(vault: &mut Vault, cap: &UpgradeCap, ctx: &mut TxContext) {\n    // Ensure the UpgradeCap is actually for this package\n    // and potentially check the version in vault.\n    assert!(vault.version == current_version() - 1, EAlreadyMigrated);\n    vault.version = current_version();\n}\n",
+    "test_vector": "Caller without UpgradeCap triggers migrate function, verifies state change.",
+    "references": [
+      "https://docs.sui.io/concepts/sui-move-concepts/packages/upgrade"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2024-004",
+    "name": "Dynamic Field Name Collision/Overwrite (Typus)",
+    "name_vi": "Ghi đè/Xung đột tên Dynamic Field (Typus)",
+    "date": "2024-12-15",
+    "loss": "$N/A (Prevented/Found in Audit)",
+    "description": "Protocol uses dynamic fields to store user-specific state or configuration. If the  field name is predictable (e.g., uses a simple salt or just the user's address) and  the protocol provides a way to \"re-initialize\" or \"migrate\" fields without checking  if they already exist or belong to the caller, an attacker can overwrite another  user's data or platform configuration by forcing a name collision.\n",
+    "description_vi": "Giao thức sử dụng các dynamic field để lưu trữ trạng thái hoặc cấu hình riêng biệt cho người dùng.  Nếu tên trường (field name) có thể dự đoán được (ví dụ: sử dụng một giá trị salt đơn giản hoặc  chỉ là địa chỉ của người dùng) và giao thức cho phép \"khởi tạo lại\" hoặc \"di chuyển\" các trường  mà không kiểm tra xem chúng đã tồn tại hay thuộc về người gọi hay chưa, kẻ tấn công có thể ghi đè  lên dữ liệu hoặc cấu hình của người dùng khác bằng cách tạo ra sự trùng lặp tên (collision).\n",
+    "impact": "High - State corruption, potential unauthorized access to other users' collateral or positions.",
+    "impact_vi": "Cao - Làm hỏng trạng thái, có khả năng truy cập trái phép vào tài sản thế chấp hoặc vị thế của người dùng khác.",
+    "severity": "High",
+    "root_cause": "Using predictable or non-namespaced keys for dynamic fields in a shared context.  In Sui Move, dynamic_field keys can be any type. If two features use the same key  type (e.g., u64 representing an ID) without a wrapper struct (Namespacing),  they will collide.\n",
+    "root_cause_vi": "Sử dụng các khóa (keys) có thể dự đoán được hoặc không phân không gian tên (non-namespaced)  cho các dynamic field trong ngữ cảnh chia sẻ. Trong Sui Move, các khóa dynamic_field  có thể là bất kỳ kiểu dữ liệu nào. Nếu hai tính năng sử dụng cùng một kiểu khóa  (ví dụ: kiểu u64 đại diện cho một ID) mà không có struct bao bọc (Namespacing),  chúng sẽ bị xung đột.\n",
+    "mitigation": "Always wrap dynamic field keys in unique, module-defined structs (Namespacing).  Check for existence before adding, and ensure the caller has authority over  the target field.\n",
+    "mitigation_vi": "Luôn bao bọc các khóa dynamic field trong các struct duy nhất được định nghĩa trong module  (Namespacing). Kiểm tra sự tồn tại trước khi thêm và đảm bảo người gọi có quyền đối với  trường mục tiêu.\n",
+    "verification": "Tooling: Use move-scanner with the dynamic_field_collision rule.  Manual: Inspect dynamic_field::add and borrow_mut calls for generic key types.\n",
+    "verification_vi": "Công cụ: Sử dụng move-scanner với quy tắc dynamic_field_collision.  Thủ công: Kiểm tra các lệnh gọi dynamic_field::add và borrow_mut để tìm các kiểu khóa chung.\n",
+    "code_vuln": "public fun set_user_config<V: store>(obj: &mut Account, name: String, val: V) {\n    // Missing check: does this field already exist?\n    if (dynamic_field::exists_(&obj.id, name)) {\n        let field = dynamic_field::borrow_mut<String, V>(&mut obj.id, name);\n        *field = val; // Overwrite without checking owner!\n    };\n}\n",
+    "code_fixed": "public fun set_user_config<V: store>(obj: &mut Account, name: String, val: V, ctx: &TxContext) {\n    assert!(obj.owner == tx_context::sender(ctx), ENotOwner);\n    // Proceed with safe update...\n}\n",
+    "test_vector": "Hacker calls setter with a name used by a Victim, attempts to overwrite configuration.",
+    "references": [
+      "https://docs.sui.io/concepts/sui-move-concepts/dynamic-fields"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "formal_spec": "../prover-examples/sources/no_double_spend_transfer.move",
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-025",
+    "name": "Oracle Manipulation via Stale Price",
+    "date": "2024-11-03",
+    "loss": "$0 (Theoretical)",
+    "description": "A lending market accepted stale oracle prices without enforcing a freshness window, allowing flash loan price skew and under-collateralized borrowing.\n",
+    "impact": "High - bad debt and insolvency risk.",
+    "severity": "High",
+    "references": [
+      "https://docs.sui.io/concepts/defi/oracles"
+    ],
+    "code_vuln": "fun get_price(price: u64, last_updated: u64, now: u64): u64 {\n    // missing staleness guard\n    price\n}\n",
+    "code_fixed": "fun get_price(price: u64, last_updated: u64, now: u64): u64 {\n    if (now - last_updated > MAX_STALE_SECS) abort(STALE_PRICE);\n    price\n}\n",
+    "test_vector": {
+      "inputs": {
+        "price": 100,
+        "last_updated": 0,
+        "now": 1000
+      },
+      "expected_exploit": "Stale price accepted for borrow"
+    },
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Millions",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 5.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-MS-2026-001",
+    "name": "MS-005 Arithmetic Bitwise Edge Case",
+    "name_vi": "Lỗi Cận Biên Số học Bitwise",
+    "name_zh": "MS-005 算术位运算（Bitwise）边缘案例",
+    "date": "2026-02-15",
+    "loss": "State Corruption",
+    "description": "Errors in bitwise manipulation (shifts, masks) when packing/unpacking multiple  data points into a single 256-bit integer. Common mistakes include shifting  beyond 256 or using incorrect masks that overlap different data fields,  leading to corrupted object state.\n",
+    "description_vi": "Các lỗi trong thao tác bitwise (dịch bit, mặt nạ bit) khi đóng gói/giải nén nhiều  điểm dữ liệu vào một số nguyên 256-bit duy nhất. Các sai lầm phổ biến bao gồm dịch  quá 256 bit hoặc sử dụng các mặt nạ không chính xác làm chồng lấn các trường dữ liệu  khác nhau, dẫn đến trạng thái đối tượng bị hỏng.\n",
+    "description_zh": "将多个数据点打包/解包到单个 256 位整数时，发生的位运算操（位移、掩码）错误。 常见错误包括位移超过 256 位，或使用的掩码不正确导致不同数据字段重叠，从而引发对象状态损坏。\n",
+    "impact": "Medium (Incorrect protocol data or permission logic)",
+    "impact_vi": "Trung bình (Dữ liệu giao thức hoặc logic phân quyền không chính xác)",
+    "impact_zh": "中 (协议数据不正确或权限逻辑失效)",
+    "severity": "Medium",
+    "code_vuln": "/// ❌ VULNERABLE: Incorrect shift leading to data overlap\npublic fun pack_data(p1: u128, p2: u128): u256 {\n    ((p1 as u256) << 128) | (p2 as u256)\n}\n",
+    "code_fixed": "/// ✅ FIXED: Use explicit masks and range checks for each field\npublic fun pack_data_safe(p1: u128, p2: u128): u256 {\n    assert!(p1 <= MAX_U128 && p2 <= MAX_U128, E_OVERFLOW);\n    ((p1 as u256) << 128) | (p2 as u256)\n}\n",
+    "test_vector": "Pack 129-bit value into 128-bit slot -> verify if it corrupts adjacent data.",
+    "references": [
+      "https://docs.sui.io/concepts/sui-architecture"
+    ],
+    "sui_specific": false,
+    "bvss": {
+      "impact": "Medium",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Thousands",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 4.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-MS-2026-007",
+    "name": "MS-011 Freeze Object Misuse",
+    "name_vi": "Lạm dụng Hàm Freeze Object",
+    "name_zh": "MS-011 冻结对象权限（Freeze Object）滥用漏洞",
+    "date": "2026-02-15",
+    "loss": "Protocol Lock (DoS)",
+    "description": "Improper use of `public_freeze_object` on mission-critical shared objects  that require future mutability. Once frozen, an object can never be  mutated or un-frozen, leading to permanent protocol paralysis if done  on a state object or administrative capability.\n",
+    "description_vi": "Sử dụng sai hàm `public_freeze_object` trên các đối tượng dùng chung (shared objects)  quan trọng cần có khả năng thay đổi trong tương lai. Khi đã bị đóng băng (frozen),  một đối tượng không bao giờ có thể được sửa đổi hoặc giải đóng băng, dẫn đến việc  giao thức bị tê liệt vĩnh viễn nếu thực hiện trên một đối tượng trạng thái hoặc  capability quản trị.\n",
+    "description_zh": "在需要持续可变性的关键共享对象上错误地使用了 `public_freeze_object` 函数。 一旦被冻结，对象就无法再被修改或撤销冻结。如果在状态对象或管理权限（Capability） 对象上执行此操作，可能会导致整个协议陷入永久瘫痪。\n",
+    "impact": "Medium (Denial of Service for protocol maintenance/upgrades)",
+    "impact_vi": "Trung bình (Từ chối dịch vụ cho việc bảo trì/nâng cấp giao thức)",
+    "impact_zh": "中 (对协议维护或升级造成拒绝服务效应)",
+    "severity": "Medium",
+    "code_vuln": "/// ❌ VULNERABLE: Freezes the whole state object permanently\npublic fun vuln_admin_freeze(obj: ProtocolState) {\n    transfer::public_freeze_object(obj);\n}\n",
+    "code_fixed": "/// ✅ FIXED: Avoid freezing mission-critical shared objects \n/// unless it is a final, intended decommissioning step.\npublic fun deactivate_protocol(obj: &mut ProtocolState) {\n    obj.is_active = false; // logic-based deactivation instead of freezing\n}\n",
+    "test_vector": "Attempt to call admin_freeze on a shared state object -> check if future txs fail.",
+    "references": [
+      "https://docs.sui.io/concepts/sui-architecture"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "Medium",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Thousands",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 4.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-MS-2026-011",
+    "name": "MS-009 Resource Leak via Missing 'drop'",
+    "name_vi": "Rò rỉ Tài nguyên do Thiếu Ability 'drop'",
+    "name_zh": "MS-009 缺失 'drop' 权能导致的资源泄露",
+    "date": "2026-02-15",
+    "loss": "Locked/Orphaned Resources",
+    "description": "In Move, if a struct does not have the `drop` ability, it must be consumed or  stored. Logical errors during struct unpacking where internal assets are  'forgotten' or moved to a dynamic field that is never used can result in  resource leaks. MoveScanner 2026 identified this as a byproduct of complex  data migrations.\n",
+    "description_vi": "Trong Move, nếu một struct không có ability `drop`, nó phải được tiêu thụ hoặc  lưu trữ. Các lỗi logic trong quá trình giải nén struct (unpacking) nơi các tài  sản nội bộ bị \"quên\" hoặc di chuyển vào một dynamic field không bao giờ được  sử dụng có thể dẫn đến rò rỉ tài nguyên. MoveScanner 2026 xác định đây là hệ quả  của các quá trình di chuyển dữ liệu phức tạp.\n",
+    "description_zh": "在 Move 中，如果一个结构体没有 `drop` 权能，则它必须被消耗或存储。在结构体解包 （unpacking）过程中，如果由于逻辑错误导致内部资产被“遗忘”，或者被移动到从未使用的 动态字段（Dynamic Field）中，则会导致资源泄露。MoveScanner 2026 将其认定为 复杂数据迁移产生的一种副作用。\n",
+    "impact": "Medium (Gradual state bloat or small per-user asset loss)",
+    "impact_vi": "Trung bình (Phình to trạng thái hoặc tổn thất tài sản nhỏ cho mỗi người dùng)",
+    "impact_zh": "中 (引发渐进式的状态膨胀或用户资产微量流失)",
+    "severity": "Medium",
+    "code_vuln": "/// ❌ VULNERABLE: Unpacking complex struct but ignoring internal resource\npublic fun handle_migration(old: OldStruct) {\n    let OldStruct { id, data: _ } = old; // internal 'data' might be lost\n    object::delete(id);\n}\n",
+    "code_fixed": "/// ✅ FIXED: Ensure all fields are properly consumed or moved to new storage\npublic fun handle_migration_safe(old: OldStruct, target: &mut NewVault) {\n    let OldStruct { id, data } = old;\n    vault::deposit(target, data);\n    object::delete(id);\n}\n",
+    "test_vector": "Verify if total supply of an internal asset decreases unexpectedly during migration calls.",
+    "references": [
+      "https://docs.sui.io/concepts/sui-architecture"
+    ],
+    "sui_specific": false,
+    "bvss": {
+      "impact": "Medium",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Thousands",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 4.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-MS-2026-012",
+    "name": "MS-009 Resource Leak (Missing Drop)",
+    "date": "2026-02-15",
+    "loss": "Trapped Storage / Memory Leak",
+    "description": "Move structs that do not have the `drop` or `store` abilities must be  explicitly handled or \"unpacked\". If a module logic allows these structs  to be created but fails to provide a path to consume or return them  (e.g., in a conditional branch that aborts or ends prematurely), the  resource becomes trapped in the transaction or state, potentially  blocking further logic.\n",
+    "impact": "Medium (Trapped resources, potential for DoS in specific flows)",
+    "severity": "Medium",
+    "code_vuln": "struct InternalAsset { value: u64 } // No drop\n\npublic fun handle_asset(condition: bool) {\n    let asset = InternalAsset { value: 100 };\n    if (condition) {\n        // ❌ VULNERABLE: If condition is true, we forget the asset\n    } else {\n        let InternalAsset { value: _ } = asset; // Correctly unpacked\n    }\n}\n",
+    "code_fixed": "public fun handle_asset_safe(condition: bool) {\n    let asset = InternalAsset { value: 100 };\n    // ✅ FIXED: Ensure all paths consume the resource\n    let InternalAsset { value: _ } = asset;\n}\n",
+    "test_vector": "Write a function that creates a non-drop struct and attempt to let it go out of scope without unpacking.",
+    "references": [
+      "https://docs.sui.io/concepts/sui-architecture"
+    ],
+    "sui_specific": false,
+    "bvss": {
+      "impact": "Medium",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Thousands",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 4.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-014",
+    "name": "AGENT-007 Verifiable Intent Failure",
+    "date": "2025-12-07",
+    "loss": "Logic bypass mapping",
+    "description": "An agent executes a transaction without on-chain verifiable intent proof (e.g., ZK Proof or Multi-Signature verification missing).",
+    "impact": "Medium",
+    "severity": "Medium",
+    "code_vuln": "public entry fun execute_action_vulnerable(\n    wallet: &mut AgentWallet, target: address, amount: u64, ctx: &mut TxContext\n) {\n    let extracted = coin::split(&mut wallet.balance, amount, ctx);\n    transfer::public_transfer(extracted, target);\n}\n",
+    "code_fixed": "public fun execute_action_fixed(\n    wallet: &mut AgentWallet, target: address, amount: u64, proof: IntentProof, ctx: &mut TxContext\n) {\n    assert!(proof.is_valid, EMissingIntentProof);\n    let extracted = coin::split(&mut wallet.balance, amount, ctx);\n    transfer::public_transfer(extracted, target);\n}\n",
+    "test_vector": "Send a transaction omitting IntentProof entirely, relying on the function not checking it.",
+    "references": [
+      "https://arxiv.org/html/2601.04583v1"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "Medium",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Thousands",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 4.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-026",
+    "name": "Shared Object Race in Mysticeti Parallel Execution",
+    "date": "2025-06-01",
+    "loss": "N/A (Risk post-upgrade)",
+    "description": "Missing version/sequence check in shared object updates → race condition khi parallel tx mutate cùng object (Mysticeti tăng speed → higher risk).",
+    "impact": "Medium-High - Inconsistent state, DoS, hoặc value loss ở shared pools.",
+    "severity": "Medium",
+    "code_vuln": "fun update_shared(obj: &mut SharedObj) { obj.value += 1; }  // No version check\n",
+    "code_fixed": "assert!(obj.version == expected_version, E_RACE);\nobj.value += 1;\nobj.version = obj.version + 1;\n",
+    "test_vector": "Two parallel tx call update_shared → inconsistent value.",
+    "references": [
+      "https://docs.sui.io/concepts/cryptography/mysticeti",
+      "https://www.zellic.io/blog/sui-shared-object-safety",
+      "https://www.halborn.com/blog/post/sui-shared-objects-race-conditions"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "Medium",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Thousands",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 4.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2025-029",
+    "name": "Package Upgrade Abort via Capability Mismatch",
+    "date": "2024-07-14",
+    "loss": "$0 (Protocol Lock)",
+    "description": "Upgrade logic accepted mismatched capability versions, causing publish aborts or inconsistent upgrade state.\n",
+    "impact": "Medium - deployment failures and upgrade downtime.",
+    "severity": "Medium",
+    "references": [
+      "https://docs.sui.io/concepts/upgrade"
+    ],
+    "code_vuln": "fun can_upgrade(cap_version: u64, target_version: u64): bool {\n    // missing strict equality check\n    true\n}\n",
+    "code_fixed": "fun can_upgrade(cap_version: u64, target_version: u64): bool {\n    if (cap_version != target_version) abort(VERSION_MISMATCH);\n    true\n}\n",
+    "test_vector": {
+      "inputs": {
+        "cap_version": 1,
+        "target_version": 2
+      },
+      "expected_exploit": "Upgrade proceeds with invalid capability"
+    },
+    "bvss": {
+      "impact": "Medium",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Thousands",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "bvss_score": 4.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  },
+  {
+    "id": "DXD-SUI-2023-001",
+    "name": "HamsterWheel DoS Infinite Loop",
+    "name_vi": "Tấn công Từ chối Dịch vụ \"Hamsterwheel\" (Logic Gas Move)",
+    "date": "2023-06-19",
+    "loss": "$0 (Network Halt)",
+    "description": "A malicious control flow graph can force the verifier into a non-terminating loop, stalling validation and causing a denial of service.\n",
+    "description_vi": "Một loại tấn công DoS trong đó kẻ tấn công gửi các giao dịch gây ra vòng lặp vô hạn  hoặc tính toán cực kỳ tốn kém trong máy ảo Move. Điều này làm chậm mạng hoặc  khiến đối tượng bị khóa.\n",
+    "impact": "Critical - validator halt and potential network disruption.",
+    "impact_vi": "Nghiêm trọng - dừng validator và có khả năng gây gián đoạn mạng.",
+    "severity": "Critical",
+    "root_cause": "Unbounded loops or deep recursion that approaches the gas limit without  providing a way to 'checkpoint' or partition the work.\n",
+    "root_cause_vi": "Các vòng lặp không giới hạn hoặc đệ quy sâu tiệm cận giới hạn gas mà không  cung cấp cách thức để 'checkpoint' hoặc phân chia công việc.\n",
+    "mitigation": "1. Implement Pagination for all dynamic field iterations. 2. Set strict upper  bounds on collection sizes. 3. Avoid deep recursion.\n",
+    "mitigation_vi": "1. Triển khai Phân trang cho tất cả các lần lặp dynamic field. 2. Thiết lập  giới hạn trên nghiêm ngặt cho kích thước bộ sưu tập. 3. Tránh đệ quy sâu.\n",
+    "verification": "Stress Testing: Attempt to call the target function with maximum allowed  collection sizes and verify it stays well within gas limits.\n",
+    "verification_vi": "Kiểm tra căng thẳng (Stress Testing): Cố gắng gọi hàm mục tiêu với kích thước  bộ sưu tập tối đa được phép và xác minh nó nằm trong giới hạn gas.\n",
+    "code_vuln": "// Malicious bytecode structure causes unbounded verifier loop\nloop { if (false) break; }\n",
+    "code_fixed": "// Verifier patch enforces maximum loop depth and aborts\nif (loop_depth > MAX_DEPTH) abort(VERIFIER_LIMIT);\n",
+    "test_vector": {
+      "inputs": {
+        "loop_depth": 1000000
+      },
+      "expected_exploit": "Verifier hangs or exceeds limit"
+    },
+    "references": [
+      "https://www.certik.com/resources/blog/the-hamsterwheel-an-in-depth-exploration-of-a-novel-attack-vector-on-the-sui"
+    ],
+    "sui_specific": true,
+    "bvss": {
+      "impact": "High",
+      "likelihood": "Medium",
+      "exploitability": "Network",
+      "economic_loss": "Tens of Thousands",
+      "scope": "Unchanged",
+      "is_immutable": true,
+      "exploit_maturity": "POC",
+      "privileged_access": "Not Required"
+    },
+    "formal_spec": "../prover-examples/sources/agent_shared_object_consistency.move",
+    "bvss_score": 4.5,
+    "bvss_severity": "Medium",
+    "bvss_color": "🟡"
+  }
+]

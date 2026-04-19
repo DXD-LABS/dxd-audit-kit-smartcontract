@@ -1,61 +1,55 @@
+id: DXD-SUI-2025-018
 name: AGENT-009 TEE Tampering in Nautilus-Attested Agent Compute
 date: 2026-03-07
-loss: "Simulated (TEE breach leading to $50k+ rogue tx)"
-description: >
-  An adversary tampers with a Nautilus TEE enclave via side-channel or weak
-  attestation (e.g., replaying a stale attestation report, injecting a
-  fabricated quote). The on-chain contract then accepts rogue off-chain
-  compute outputs — altered AI inference results — triggering unauthorized
-  transfers or intent spoofing. Missing checks include: attestation validity
-  gate, freshness window (epoch-based), and report_data == input_hash binding.
-  This extends the existing nautilus_tee_bypass.yaml with an active tampering
-  vector (not just bypass) and a quantified PoC.
-impact: "High (cascading failures in verifiable agents, rogue on-chain tx)"
+loss: Simulated (TEE breach leading to $50k+ rogue tx)
+description: 'An adversary tampers with a Nautilus TEE enclave via side-channel or
+  weak attestation (e.g., replaying a stale attestation report, injecting a fabricated
+  quote). The on-chain contract then accepts rogue off-chain compute outputs — altered
+  AI inference results — triggering unauthorized transfers or intent spoofing. Missing
+  checks include: attestation validity gate, freshness window (epoch-based), and report_data
+  == input_hash binding. This extends the existing nautilus_tee_bypass.yaml with an
+  active tampering vector (not just bypass) and a quantified PoC.
+
+  '
+impact: High (cascading failures in verifiable agents, rogue on-chain tx)
 severity: High
-code_vuln: |
-  // ❌ VULNERABLE: accepts compute result without verifying TEE attestation
-  public fun accept_compute_vulnerable(
-      result: ComputeResult,
-      vault: &mut AgentVault,
-      ctx: &mut TxContext,
-  ) {
-      // No attestation check — rogue/tampered output accepted as truth
-      if (result.action == ACTION_TRANSFER) {
-          let extracted = coin::split(&mut vault.balance, result.amount, ctx);
-          transfer::public_transfer(extracted, result.target);
-      }
-  }
-code_fixed: |
-  // ✅ FIXED: full attestation + freshness + hash-binding before accepting result
-  public fun accept_compute_fixed(
-      result: ComputeResult,
-      report: &AttestationReport,
-      expected_input_hash: vector<u8>,
-      current_epoch: u64,
-      vault: &mut AgentVault,
-      ctx: &mut TxContext,
-  ) {
-      assert!(report.is_valid, E_ATTESTATION_FAIL);
-      assert!(current_epoch - report.issued_epoch <= MAX_STALE_EPOCHS, E_STALE_ATTESTATION);
-      assert!(report.report_data == expected_input_hash, E_HASH_MISMATCH);
-      if (result.action == ACTION_TRANSFER) {
-          let extracted = coin::split(&mut vault.balance, result.amount, ctx);
-          transfer::public_transfer(extracted, result.target);
-      }
-  }
+code_vuln: "// ❌ VULNERABLE: accepts compute result without verifying TEE attestation\n\
+  public fun accept_compute_vulnerable(\n    result: ComputeResult,\n    vault: &mut\
+  \ AgentVault,\n    ctx: &mut TxContext,\n) {\n    // No attestation check — rogue/tampered\
+  \ output accepted as truth\n    if (result.action == ACTION_TRANSFER) {\n      \
+  \  let extracted = coin::split(&mut vault.balance, result.amount, ctx);\n      \
+  \  transfer::public_transfer(extracted, result.target);\n    }\n}\n"
+code_fixed: "// ✅ FIXED: full attestation + freshness + hash-binding before accepting\
+  \ result\npublic fun accept_compute_fixed(\n    result: ComputeResult,\n    report:\
+  \ &AttestationReport,\n    expected_input_hash: vector<u8>,\n    current_epoch:\
+  \ u64,\n    vault: &mut AgentVault,\n    ctx: &mut TxContext,\n) {\n    assert!(report.is_valid,\
+  \ E_ATTESTATION_FAIL);\n    assert!(current_epoch - report.issued_epoch <= MAX_STALE_EPOCHS,\
+  \ E_STALE_ATTESTATION);\n    assert!(report.report_data == expected_input_hash,\
+  \ E_HASH_MISMATCH);\n    if (result.action == ACTION_TRANSFER) {\n        let extracted\
+  \ = coin::split(&mut vault.balance, result.amount, ctx);\n        transfer::public_transfer(extracted,\
+  \ result.target);\n    }\n}\n"
 test_vector:
   inputs:
     report_is_valid: false
     issued_epoch: 0
     current_epoch: 200
-    report_data: "0xdeadbeef"
-    expected_input_hash: "0xcafebabe"
+    report_data: '0xdeadbeef'
+    expected_input_hash: '0xcafebabe'
     action: ACTION_TRANSFER
     amount: 50000
-  expected_exploit: Rogue compute result triggers unauthorized vault transfer without valid attestation
+  expected_exploit: Rogue compute result triggers unauthorized vault transfer without
+    valid attestation
 references:
-  - https://docs.sui.io/guides/developer/getting-started/nautilus
-  - https://community.intel.com/t5/Intel-Software-Guard-Extensions/ct-p/software-guard-extensions
-  - https://arxiv.org/html/2601.04583v1
-
+- https://docs.sui.io/guides/developer/getting-started/nautilus
+- https://community.intel.com/t5/Intel-Software-Guard-Extensions/ct-p/software-guard-extensions
+- https://arxiv.org/html/2601.04583v1
 sui_specific: true
+bvss:
+  impact: High
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required

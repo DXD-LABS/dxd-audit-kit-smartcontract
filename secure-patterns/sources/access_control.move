@@ -42,9 +42,22 @@ module dxd_audit::access_control {
 
     spec module {
         pragma verify = true;
+        pragma aborts_if_is_partial = false;
     }
 
+    /// Spec for issuing tokens: proves it never aborts if a valid AdminCap is provided
+    spec issue_token {
+        aborts_if false; // Prove that issue_token never aborts unexpectedly
+    }
+
+    /// Spec for access checking: proves it ONLY succeeds if the permission exists
     spec check_access {
+        aborts_if !vector::contains(token.permissions, action);
         ensures vector::contains(token.permissions, action);
+    }
+
+    /// Spec for revocation: proves the token is effectively consumed
+    spec revoke_token {
+        aborts_if false;
     }
 }

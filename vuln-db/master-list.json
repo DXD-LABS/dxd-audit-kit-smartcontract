@@ -1,0 +1,62 @@
+[
+  {
+    "id": "DXD-SUI-2024-001",
+    "name": "BlueMove NFT Marketplace Access Bypass",
+    "category": "ACC",
+    "file_path": "vulns/bluemove_access_bypass.yaml"
+  },
+  {
+    "id": "DXD-SUI-2024-002",
+    "name": "Vault Share Math Logic Error (Souffl3)",
+    "category": "MTH",
+    "file_path": "vulns/souffl3_math_error.yaml"
+  },
+  {
+    "id": "DXD-SUI-2024-003",
+    "name": "Fake Token Spoofing (DeepBook V1 Scenario)",
+    "category": "ACC",
+    "file_path": "vulns/fake_token_spoofing.yaml"
+  },
+  {
+    "id": "DXD-SUI-2024-004",
+    "name": "Dynamic Field Name Collision (Object Hijacking)",
+    "category": "SUI",
+    "file_path": "vulns/dynamic_field_collision.yaml"
+  },
+  {
+    "id": "DXD-SUI-2024-005",
+    "name": "Upgrade Migration State Corruption",
+    "category": "SUI",
+    "file_path": "vulns/upgrade_migration_corruption.yaml"
+  },
+  {
+    "id": "DXD-SUI-2025-001",
+    "name": "AGENT-003 Delegated Capability Misuse",
+    "category": "ACC",
+    "file_path": "vulns/agent_delegated_cap_misuse.yaml"
+  },
+  {
+    "id": "DXD-SUI-2025-002",
+    "name": "AGENT-004 Intent Spoofing / Mismatch",
+    "category": "LOG",
+    "file_path": "vulns/agent_intent_mismatch.yaml"
+  },
+  {
+    "id": "DXD-SUI-2026-001",
+    "name": "AGENT-012 BTCfi Oracle Manipulation",
+    "category": "ORC",
+    "file_path": "vulns/agent_btcfi_oracle_manip.yaml"
+  },
+  {
+    "id": "DXD-SUI-2024-006",
+    "name": "Seal Misuse in Hot Potato Pattern",
+    "category": "LOG",
+    "file_path": "vulns/seal_misuse.yaml"
+  },
+  {
+    "id": "DXD-SUI-2023-001",
+    "name": "HamsterWheel DoS Infinite Loop",
+    "category": "DOS",
+    "file_path": "vulns/hamsterwheel_dos.yaml"
+  }
+]

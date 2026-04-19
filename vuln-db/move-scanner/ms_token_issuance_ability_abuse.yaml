@@ -1,3 +1,4 @@
+id: DXD-MS-2026-013
 name: MS-008 Token Issuance Ability Misuse
 name_vi: Lạm dụng Ability trong Phát hành Token
 name_zh: MS-008 代币发行中的权能（Ability）滥用漏洞
@@ -32,3 +33,13 @@ test_vector: "Check Move bytecode for unexpected 'copy' or 'store' abilities on 
 references:
   - "https://docs.sui.io/concepts/sui-architecture"
 sui_specific: false
+
+bvss:
+  impact: 'Critical'
+  likelihood: 'Medium'
+  exploitability: 'Network'
+  economic_loss: 'Millions'
+  scope: 'Unchanged'
+  is_immutable: true
+  exploit_maturity: 'POC'
+  privileged_access: 'Not Required'

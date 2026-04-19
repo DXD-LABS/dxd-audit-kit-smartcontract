@@ -1,26 +1,30 @@
+id: DXD-SUI-2025-029
 name: Package Upgrade Abort via Capability Mismatch
 date: 2024-07-14
 loss: $0 (Protocol Lock)
-description: >
-  Upgrade logic accepted mismatched capability versions, causing publish aborts
-  or inconsistent upgrade state.
+description: 'Upgrade logic accepted mismatched capability versions, causing publish
+  aborts or inconsistent upgrade state.
+
+  '
 impact: Medium - deployment failures and upgrade downtime.
 severity: Medium
 references:
-  - https://docs.sui.io/concepts/upgrade
-code_vuln: |
-  fun can_upgrade(cap_version: u64, target_version: u64): bool {
-      // missing strict equality check
-      true
-  }
-code_fixed: |
-  fun can_upgrade(cap_version: u64, target_version: u64): bool {
-      if (cap_version != target_version) abort(VERSION_MISMATCH);
-      true
-  }
-
+- https://docs.sui.io/concepts/upgrade
+code_vuln: "fun can_upgrade(cap_version: u64, target_version: u64): bool {\n    //\
+  \ missing strict equality check\n    true\n}\n"
+code_fixed: "fun can_upgrade(cap_version: u64, target_version: u64): bool {\n    if\
+  \ (cap_version != target_version) abort(VERSION_MISMATCH);\n    true\n}\n"
 test_vector:
   inputs:
     cap_version: 1
     target_version: 2
   expected_exploit: Upgrade proceeds with invalid capability
+bvss:
+  impact: Medium
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Thousands
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required

@@ -1,13 +1,36 @@
-name: Seal/Decrypt Misuse Data Leak
+id: DXD-SUI-2024-006
+name: Seal Misuse in Hot Potato Pattern
+name_vi: Lạm dụng cơ chế Seal (Sui Seal Pattern)
 date: 2024-09-02
 loss: $0 (Privacy Exposure)
 description: >
   Sensitive payloads were returned without proper sealing or with predictable keys,
   allowing unauthorized data recovery in AI apps.
+description_vi: >
+  Cơ chế Seal trong Sui (thường dùng trong UpgradeCap hoặc các đối tượng 'hot-potato') 
+  được thiết kế để đảm bảo một hành động chỉ được thực hiện bởi một package cụ thể. 
+  Lỗ hổng xảy ra khi logic kiểm tra seal bị thiếu hoặc không chính xác.
 impact: Medium - privacy exposure.
+impact_vi: Trung bình - rò rỉ quyền riêng tư.
 severity: Medium
-references:
-  - https://docs.sui.io/concepts/privacy
+root_cause: >
+  Failure to verify the PackageID associated with a Seal object or allowing 'Hot Potato' 
+  objects to be 'dropped' without returning them to their destination.
+root_cause_vi: >
+  Không xác minh PackageID được liên kết với đối tượng Seal hoặc cho phép các đối tượng 
+  'Hot Potato' bị hủy (drop) mà không được trả lại module đích dự kiến.
+mitigation: >
+  Use 'Hot Potato' patterns (structs without drop or store abilities) correctly 
+  to enforce control flow within a single transaction.
+mitigation_vi: >
+  Sử dụng các mẫu 'Hot Potato' (các struct không có khả năng drop hoặc store) một cách 
+  chính xác để thực thi luồng kiểm soát trong một giao diện duy nhất.
+verification: >
+  Static Analysis: Check for structs without abilities that are passed as parameters 
+  but not consumed or returned as intended.
+verification_vi: >
+  Phân tích tĩnh (Static Analysis): Kiểm tra các struct không có quyền hạn (abilities) 
+  được truyền dưới dạng tham số nhưng không được tiêu thụ hoặc trả về như mong đợi.
 code_vuln: |
   fun seal(data: vector<u8>, _key: u8): vector<u8> {
       // returns plaintext
@@ -17,9 +40,21 @@ code_fixed: |
   fun seal(data: vector<u8>, key: u8): vector<u8> {
       // apply reversible masking with a secret key
   }
-
 test_vector:
   inputs:
     data: [1, 2, 3, 4]
     key: 7
   expected_exploit: Sealed output equals plaintext
+references:
+  - https://docs.sui.io/concepts/sui-move-concepts/one-time-witness
+sui_specific: true
+bvss:
+  impact: High
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Millions
+  scope: Changed
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required
+formal_spec: ../prover-examples/sources/agent_owned_receipt.move

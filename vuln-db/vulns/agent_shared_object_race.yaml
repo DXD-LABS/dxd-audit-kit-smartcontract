@@ -1,38 +1,36 @@
+id: DXD-SUI-2025-015
 name: AGENT-006 Shared Object Race in Multi-Agent Workflow
 date: 2025-12-06
 loss: Simulated extraction race conditions
-description: Multiple agents accessing a shared object (e.g., treasury vault) sequentially without atomic operations exploit race conditions.
+description: Multiple agents accessing a shared object (e.g., treasury vault) sequentially
+  without atomic operations exploit race conditions.
 impact: High
 severity: High
-code_vuln: |
-  public entry fun prepare_extraction_vulnerable(treasury: &mut SharedTreasury) {
-      treasury.extraction_locked = true;
-  }
-  public entry fun execute_extraction_vulnerable(
-      treasury: &mut SharedTreasury, amount: u64, target: address, ctx: &mut TxContext
-  ) {
-      assert!(treasury.extraction_locked == true, ERaceConditionExploited);
-      let extracted = coin::split(&mut treasury.balance, amount, ctx);
-      transfer::public_transfer(extracted, target);
-      treasury.extraction_locked = false; // Reset
-  }
-code_fixed: |
-  public struct ExtractionTicket { amount: u64 }
-  public fun prepare_extraction_fixed(treasury: &mut SharedTreasury, amount: u64): ExtractionTicket {
-      treasury.extraction_locked = true;
-      ExtractionTicket { amount }
-  }
-  public fun execute_extraction_fixed(
-      treasury: &mut SharedTreasury, ticket: ExtractionTicket, target: address, ctx: &mut TxContext
-  ) {
-      let ExtractionTicket { amount } = ticket;
-      assert!(treasury.extraction_locked == true, ERaceConditionExploited);
-      let extracted = coin::split(&mut treasury.balance, amount, ctx);
-      transfer::public_transfer(extracted, target);
-      treasury.extraction_locked = false; // Reset
-  }
-test_vector: Trigger race condition by making agent B modify vault state immediately after agent A prepares it.
+code_vuln: "public entry fun prepare_extraction_vulnerable(treasury: &mut SharedTreasury)\
+  \ {\n    treasury.extraction_locked = true;\n}\npublic entry fun execute_extraction_vulnerable(\n\
+  \    treasury: &mut SharedTreasury, amount: u64, target: address, ctx: &mut TxContext\n\
+  ) {\n    assert!(treasury.extraction_locked == true, ERaceConditionExploited);\n\
+  \    let extracted = coin::split(&mut treasury.balance, amount, ctx);\n    transfer::public_transfer(extracted,\
+  \ target);\n    treasury.extraction_locked = false; // Reset\n}\n"
+code_fixed: "public struct ExtractionTicket { amount: u64 }\npublic fun prepare_extraction_fixed(treasury:\
+  \ &mut SharedTreasury, amount: u64): ExtractionTicket {\n    treasury.extraction_locked\
+  \ = true;\n    ExtractionTicket { amount }\n}\npublic fun execute_extraction_fixed(\n\
+  \    treasury: &mut SharedTreasury, ticket: ExtractionTicket, target: address, ctx:\
+  \ &mut TxContext\n) {\n    let ExtractionTicket { amount } = ticket;\n    assert!(treasury.extraction_locked\
+  \ == true, ERaceConditionExploited);\n    let extracted = coin::split(&mut treasury.balance,\
+  \ amount, ctx);\n    transfer::public_transfer(extracted, target);\n    treasury.extraction_locked\
+  \ = false; // Reset\n}\n"
+test_vector: Trigger race condition by making agent B modify vault state immediately
+  after agent A prepares it.
 references:
-  - https://arxiv.org/html/2601.04583v1
-
+- https://arxiv.org/html/2601.04583v1
 sui_specific: true
+bvss:
+  impact: High
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required

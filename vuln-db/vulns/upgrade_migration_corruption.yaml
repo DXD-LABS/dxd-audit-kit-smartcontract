@@ -1,0 +1,58 @@
+id: DXD-SUI-2024-005
+name: Upgradable Package State Corruption (Migration)
+name_vi: Lỗi hỏng trạng thái khi nâng cấp Package (Migration)
+date: 2024-12-30
+loss: Variable
+description: >
+  Protocol implements an upgrade mechanism with a `migrate` function to update shared 
+  object states after a package upgrade. If the `migrate` function is not properly 
+  protected by checking for the `UpgradeCap` or a specific version-bound admin 
+  capability, any user can trigger the migration prematurely or multiple times, 
+  leading to state corruption, data loss, or unauthorized privilege escalation.
+description_vi: >
+  Giao thức triển khai cơ chế nâng cấp với hàm `migrate` để cập nhật trạng thái của 
+  các shared object sau khi nâng cấp package. Nếu hàm `migrate` không được bảo vệ đúng cách 
+  (không kiểm tra `UpgradeCap` hoặc một quyền admin cụ thể), bất kỳ người dùng nào cũng có thể 
+  kích hoạt quá trình chuyển đổi dữ liệu sớm hoặc nhiều lần. Điều này dẫn đến hỏng trạng thái, 
+  mất dữ liệu hoặc leo thang đặc quyền trái phép.
+root_cause: >
+  Lack of access control on the 'Administrative Bridge' (migration function). In Sui, 
+  upgrades change the package ID, but not the Shared Object ID. The common pitfall is 
+  forgetting that even if the new package is 'safe', the bridge function to transition 
+  old data to new logic is a major attack vector if left public.
+mitigation: >
+  1. Always protect `migrate` functions with `&UpgradeCap`. 
+  2. Implement a 'Version Guard' inside the object to ensure migration only runs once 
+  for each version jump.
+verification: >
+  Manual Audit: Search for any public functions named `migrate` or `init_version` and ensure 
+  they take a restrictively owned Capability.
+impact: High - Irreversible state corruption, potential protocol takeover.
+severity: High
+code_vuln: |
+  public fun migrate(vault: &mut Vault, ctx: &mut TxContext) {
+      // Missing check: is the caller the one holding UpgradeCap?
+      // Or checking if the version has already been migrated.
+      vault.version = vault.version + 1;
+      vault.admin_cap_id = @0x...; // Change admin accidentally/maliciously
+  }
+code_fixed: |
+  public fun migrate(vault: &mut Vault, cap: &UpgradeCap, ctx: &mut TxContext) {
+      // Ensure the UpgradeCap is actually for this package
+      // and potentially check the version in vault.
+      assert!(vault.version == current_version() - 1, EAlreadyMigrated);
+      vault.version = current_version();
+  }
+test_vector: Caller without UpgradeCap triggers migrate function, verifies state change.
+references:
+  - https://docs.sui.io/concepts/sui-move-concepts/packages/upgrade
+sui_specific: true
+bvss:
+  impact: High
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required

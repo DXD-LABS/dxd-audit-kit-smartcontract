@@ -7,6 +7,21 @@ Practical examples for Move Prover formal verification using MSL (Move Specifica
 ### Prerequisites
 
 - **Sui CLI**: `cargo install --locked sui --git https://github.com/MystenLabs/sui.git`
+
+### 🚀 One-Command Verification (Docker)
+The most reliable way to run formal verification. This uses the standardized `sui-audit-kit` environment with all dependencies (Z3, Boogie, .NET) pre-configured.
+
+```bash
+# Build the standardized image (from repo root)
+docker build -t sui-audit-kit .
+
+# Run the full formal verification suite
+docker run --rm -v $(pwd):/repo sui-audit-kit /bin/bash -c "cd prover-examples && sui move prove"
+```
+
+### Local Setup (Manual)
+If you prefer to run natively, you must manually install:
+
 - **Z3 Solver**:
   - Ubuntu: `sudo apt update && sudo apt install z3 libz3-dev`
   - Mac: `brew install z3`

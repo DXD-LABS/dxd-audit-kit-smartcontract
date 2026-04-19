@@ -1,56 +1,50 @@
+id: DXD-SUI-2025-016
 name: AGENT-013 Side-Channel Data Leak in Privacy-Protected Agent Memory
 date: 2026-03-07
-loss: "Simulated (privacy breach $500k+ class-action equivalent)"
-description: >
-  An agent stores per-user memory (intent state, balances) using variable-size
-  data structures. Even when guarded by zk/TEE wrappers, the on-chain gas
-  consumption or dynamic field size varies based on secret data, creating a
-  timing/size side-channel. An observer monitoring transaction gas or object
-  byte growth can infer the contents of private agent memory (wallet balances,
-  intent payload length, number of recent actions). Root cause: memory block
-  size grows proportionally to sensitive data rather than being padded to a
-  fixed constant-size block.
-impact: "Critical (user data exposure, regulatory liability in private agents)"
-severity: Critical
-code_vuln: |
-  // ❌ VULNERABLE: memory block size leaks data via gas/size side-channel
-  public fun store_agent_memory_vulnerable(
-      wallet: &mut AgentWallet,
-      memory_data: vector<u8>,  // Variable length — leaks data size
-      ctx: &mut TxContext,
-  ) {
-      // Dynamic field size grows with data — observable by on-chain size queries
-      dynamic_field::add(&mut wallet.id, b"memory", memory_data);
-  }
-code_fixed: |
-  // ✅ FIXED: constant-size padding prevents size-based side-channel
-  const FIXED_BLOCK_SIZE: u64 = 256; // Fixed memory block size
+loss: Simulated (privacy breach $500k+ class-action equivalent)
+description: 'An agent stores per-user memory (intent state, balances) using variable-size
+  data structures. Even when guarded by zk/TEE wrappers, the on-chain gas consumption
+  or dynamic field size varies based on secret data, creating a timing/size side-channel.
+  An observer monitoring transaction gas or object byte growth can infer the contents
+  of private agent memory (wallet balances, intent payload length, number of recent
+  actions). Root cause: memory block size grows proportionally to sensitive data rather
+  than being padded to a fixed constant-size block.
 
-  public fun store_agent_memory_fixed(
-      wallet: &mut AgentWallet,
-      memory_data: vector<u8>,
-      ctx: &mut TxContext,
-  ) {
-      // Reject if data exceeds fixed block (caller must pre-chunk)
-      assert!(vector::length(&memory_data) <= FIXED_BLOCK_SIZE, E_OVERSIZED_MEMORY);
-      // Pad to fixed block size — constant gas and constant on-chain size
-      let mut padded = memory_data;
-      while (vector::length(&padded) < FIXED_BLOCK_SIZE) {
-          vector::push_back(&mut padded, 0u8);
-      };
-      // Only store commitment hash on-chain, not raw data
-      dynamic_field::add(&mut wallet.id, b"memory_commit",
-          hash::blake2b256(&padded));
-  }
+  '
+impact: Critical (user data exposure, regulatory liability in private agents)
+severity: Critical
+code_vuln: "// ❌ VULNERABLE: memory block size leaks data via gas/size side-channel\n\
+  public fun store_agent_memory_vulnerable(\n    wallet: &mut AgentWallet,\n    memory_data:\
+  \ vector<u8>,  // Variable length — leaks data size\n    ctx: &mut TxContext,\n\
+  ) {\n    // Dynamic field size grows with data — observable by on-chain size queries\n\
+  \    dynamic_field::add(&mut wallet.id, b\"memory\", memory_data);\n}\n"
+code_fixed: "// ✅ FIXED: constant-size padding prevents size-based side-channel\n\
+  const FIXED_BLOCK_SIZE: u64 = 256; // Fixed memory block size\n\npublic fun store_agent_memory_fixed(\n\
+  \    wallet: &mut AgentWallet,\n    memory_data: vector<u8>,\n    ctx: &mut TxContext,\n\
+  ) {\n    // Reject if data exceeds fixed block (caller must pre-chunk)\n    assert!(vector::length(&memory_data)\
+  \ <= FIXED_BLOCK_SIZE, E_OVERSIZED_MEMORY);\n    // Pad to fixed block size — constant\
+  \ gas and constant on-chain size\n    let mut padded = memory_data;\n    while (vector::length(&padded)\
+  \ < FIXED_BLOCK_SIZE) {\n        vector::push_back(&mut padded, 0u8);\n    };\n\
+  \    // Only store commitment hash on-chain, not raw data\n    dynamic_field::add(&mut\
+  \ wallet.id, b\"memory_commit\",\n        hash::blake2b256(&padded));\n}\n"
 test_vector:
   inputs:
-    memory_data_small: "0x01"
-    memory_data_large: "0x" # 200-byte payload
-    observer: "gas_cost_diff > 500_mist"
-  expected_exploit: Gas difference between small/large memory writes reveals data presence and approximate size
+    memory_data_small: '0x01'
+    memory_data_large: 0x
+    observer: gas_cost_diff > 500_mist
+  expected_exploit: Gas difference between small/large memory writes reveals data
+    presence and approximate size
 references:
-  - https://arxiv.org/html/2601.04583v1
-  - https://docs.sui.io/concepts/cryptography/zklogin
-  - https://docs.sui.io/guides/developer/getting-started/nautilus
-
+- https://arxiv.org/html/2601.04583v1
+- https://docs.sui.io/concepts/cryptography/zklogin
+- https://docs.sui.io/guides/developer/getting-started/nautilus
 sui_specific: true
+bvss:
+  impact: Critical
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required

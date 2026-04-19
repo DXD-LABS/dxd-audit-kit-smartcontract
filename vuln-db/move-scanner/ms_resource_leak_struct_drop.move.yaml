@@ -1,3 +1,4 @@
+id: DXD-MS-2026-011
 name: MS-009 Resource Leak via Missing 'drop'
 name_vi: Rò rỉ Tài nguyên do Thiếu Ability 'drop'
 name_zh: MS-009 缺失 'drop' 权能导致的资源泄露
@@ -41,3 +42,13 @@ test_vector: "Verify if total supply of an internal asset decreases unexpectedly
 references:
   - "https://docs.sui.io/concepts/sui-architecture"
 sui_specific: false
+
+bvss:
+  impact: 'Medium'
+  likelihood: 'Medium'
+  exploitability: 'Network'
+  economic_loss: 'Thousands'
+  scope: 'Unchanged'
+  is_immutable: true
+  exploit_maturity: 'POC'
+  privileged_access: 'Not Required'

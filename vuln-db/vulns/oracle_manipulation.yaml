@@ -1,27 +1,31 @@
+id: DXD-SUI-2025-025
 name: Oracle Manipulation via Stale Price
 date: 2024-11-03
 loss: $0 (Theoretical)
-description: >
-  A lending market accepted stale oracle prices without enforcing a freshness window,
-  allowing flash loan price skew and under-collateralized borrowing.
+description: 'A lending market accepted stale oracle prices without enforcing a freshness
+  window, allowing flash loan price skew and under-collateralized borrowing.
+
+  '
 impact: High - bad debt and insolvency risk.
 severity: High
 references:
-  - https://docs.sui.io/concepts/defi/oracles
-code_vuln: |
-  fun get_price(price: u64, last_updated: u64, now: u64): u64 {
-      // missing staleness guard
-      price
-  }
-code_fixed: |
-  fun get_price(price: u64, last_updated: u64, now: u64): u64 {
-      if (now - last_updated > MAX_STALE_SECS) abort(STALE_PRICE);
-      price
-  }
-
+- https://docs.sui.io/concepts/defi/oracles
+code_vuln: "fun get_price(price: u64, last_updated: u64, now: u64): u64 {\n    //\
+  \ missing staleness guard\n    price\n}\n"
+code_fixed: "fun get_price(price: u64, last_updated: u64, now: u64): u64 {\n    if\
+  \ (now - last_updated > MAX_STALE_SECS) abort(STALE_PRICE);\n    price\n}\n"
 test_vector:
   inputs:
     price: 100
     last_updated: 0
     now: 1000
   expected_exploit: Stale price accepted for borrow
+bvss:
+  impact: High
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required

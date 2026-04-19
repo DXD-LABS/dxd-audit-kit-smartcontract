@@ -1,43 +1,44 @@
+id: DXD-SUI-2025-023
 name: Nautilus TEE Attestation Bypass
 date: 2026-03-06
 loss: N/A (Theoretical — potential total fund loss)
-description: >
-  An on-chain smart contract accepted attested computation results
-  without verifying the TEE attestation report. An attacker could
-  fabricate a TEE quote or replay a stale attestation to submit
-  fraudulent computation outputs on-chain, bypassing integrity guarantees.
-  Missing checks include: attestation validity gate, freshness window
-  (epoch-based), and report_data == committed_input_hash binding.
+description: 'An on-chain smart contract accepted attested computation results without
+  verifying the TEE attestation report. An attacker could fabricate a TEE quote or
+  replay a stale attestation to submit fraudulent computation outputs on-chain, bypassing
+  integrity guarantees. Missing checks include: attestation validity gate, freshness
+  window (epoch-based), and report_data == committed_input_hash binding.
+
+  '
 impact: Critical — complete compromise of TEE-attested computation integrity.
 severity: Critical
 references:
-  - https://docs.sui.io/guides/developer/getting-started/nautilus
-  - https://community.intel.com/t5/Intel-Software-Guard-Extensions/ct-p/software-guard-extensions
-code_vuln: |
-  // ❌ VULNERABLE: no attestation check
-  public fun execute_attested(request: &ComputationRequest): ComputationResult {
-      ComputationResult {
-          output: request.expected_output,
-          attested: false,  // not verified!
-      }
-  }
-code_fixed: |
-  // ✅ FIXED: attest_if guard, freshness check, hash binding
-  public fun execute_attested(
-      request: &ComputationRequest,
-      report: &AttestationReport,
-      current_epoch: u64,
-  ): ComputationResult {
-      assert!(report.is_valid, E_ATTESTATION_FAIL);
-      assert!(current_epoch - report.issued_epoch <= MAX_STALE_EPOCHS, E_STALE_ATTESTATION);
-      assert!(report.report_data == request.input_hash, E_HASH_MISMATCH);
-      ComputationResult { output: request.expected_output, attested: true }
-  }
+- https://docs.sui.io/guides/developer/getting-started/nautilus
+- https://community.intel.com/t5/Intel-Software-Guard-Extensions/ct-p/software-guard-extensions
+code_vuln: "// ❌ VULNERABLE: no attestation check\npublic fun execute_attested(request:\
+  \ &ComputationRequest): ComputationResult {\n    ComputationResult {\n        output:\
+  \ request.expected_output,\n        attested: false,  // not verified!\n    }\n\
+  }\n"
+code_fixed: "// ✅ FIXED: attest_if guard, freshness check, hash binding\npublic fun\
+  \ execute_attested(\n    request: &ComputationRequest,\n    report: &AttestationReport,\n\
+  \    current_epoch: u64,\n): ComputationResult {\n    assert!(report.is_valid, E_ATTESTATION_FAIL);\n\
+  \    assert!(current_epoch - report.issued_epoch <= MAX_STALE_EPOCHS, E_STALE_ATTESTATION);\n\
+  \    assert!(report.report_data == request.input_hash, E_HASH_MISMATCH);\n    ComputationResult\
+  \ { output: request.expected_output, attested: true }\n}\n"
 test_vector:
   inputs:
     report_is_valid: false
     issued_epoch: 0
     current_epoch: 100
-    report_data: "0xdeadbeef"
-    input_hash: "0xcafebabe"
+    report_data: '0xdeadbeef'
+    input_hash: '0xcafebabe'
   expected_exploit: Computation accepted without valid or matching attestation
+bvss:
+  impact: Critical
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required
+formal_spec: ../prover-examples/sources/nautilus_tee_attest.move

@@ -1,0 +1,57 @@
+id: DXD-SUI-2024-001
+name: Shared Object Access Control Bypass (BlueMove)
+name_vi: Lỗ hổng bỏ qua kiểm soát quyền truy cập Shared Object (BlueMove)
+date: 2024-11-05
+loss: $250k+ (Restricted)
+description: >
+  The contract uses a Shared Object but fails to verify the caller's identity or the presence of an 
+  admin capability within the function. Any user can call the `take()` or `withdraw()` function 
+  on the shared object, draining its resources. In the BlueMove case, the lack of `OwnerCap` 
+  validation in the DEX allowed unauthorized liquidity removal.
+description_vi: >
+  Hợp đồng sử dụng một Shared Object nhưng lại thiếu bước xác thực danh tính người gọi hoặc quyền Admin 
+  trong hàm. Bất kỳ người dùng nào cũng có thể gọi hàm `take()` hoặc `withdraw()` trên shared object đó, 
+  dẫn đến bị rút cạn tài sản. Trong trường hợp BlueMove, việc thiếu xác thực `OwnerCap` 
+  trong sàn DEX đã cho phép kẻ tấn công rút thanh khoản trái phép.
+root_cause: >
+  Fundamental misunderstanding of Sui Object Ownership. The developer assumed that because an object 
+  is 'Shared', it still implicitly respects permissions, whereas Shared Objects are publicly 
+  accessible and require explicit 'Capability-based' or 'Address-based' access control within 
+  the function logic.
+mitigation: >
+  Always require an `&AdminCap` or `&OwnerCap` as a parameter. Use standard patterns from 
+  `secure-patterns/sources/access_control.move`.
+verification: >
+  Formal Verification: `sui move prove` with 'aborts_if' specs to ensure functions without 
+  valid capabilities always fail.
+impact: High - Unauthorized fund withdrawal, total loss of shared object state authority.
+severity: High
+code_vuln: |
+  public fun withdraw_profits(vault: &mut Vault, ctx: &mut TxContext) {
+      let amount = vault.profits;
+      let coin = coin::extract(&mut vault.balance, amount, ctx);
+      transfer::public_transfer(coin, tx_context::sender(ctx));
+      vault.profits = 0;
+  }
+code_fixed: |
+  public fun withdraw_profits(vault: &mut Vault, cap: &AdminCap, ctx: &mut TxContext) {
+      assert!(vault.admin_id == object::id(cap), EUnauthorized);
+      let amount = vault.profits;
+      let coin = coin::extract(&mut vault.balance, amount, ctx);
+      transfer::public_transfer(coin, tx_context::sender(ctx));
+      vault.profits = 0;
+  }
+test_vector: Call withdrawal function without AdminCap or with dummy object.
+references:
+  - https://github.com/BlueMove/bluemove-sui-audit
+sui_specific: true
+bvss:
+  impact: High
+  likelihood: High
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required
+formal_spec: ../prover-examples/sources/safe_transfer.move

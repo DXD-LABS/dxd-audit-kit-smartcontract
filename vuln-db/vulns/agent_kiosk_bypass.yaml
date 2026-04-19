@@ -1,58 +1,52 @@
+id: DXD-SUI-2025-011
 name: AGENT-011 NFT/Kiosk Bypass in Agent-Controlled Assets
 date: 2026-03-07
-loss: "Simulated ($10k+ in kiosk-locked NFT assets)"
-description: >
-  An agent that receives a KioskOwnerCap for a scoped workflow can bypass
-  NFT ownership checks by performing an unauthorized transfer via the kiosk
-  API without verifying the receiver matches the expected owner. Sui's Kiosk
-  model enforces purchase/transfer policies, but an agent holding the cap and
-  executing a custom bypass path (e.g., via dynamic fields or unlocked place/take
-  cycles) can extract NFTs from the kiosk without completing a legitimate sale.
-  Root cause: missing assert that kiosk owner == permitted agent address and
-  that transfer policy rules are enforced before item extraction.
-impact: "Medium-High (NFT drain in agentic gaming, RWA, and digital asset protocols)"
+loss: Simulated ($10k+ in kiosk-locked NFT assets)
+description: 'An agent that receives a KioskOwnerCap for a scoped workflow can bypass
+  NFT ownership checks by performing an unauthorized transfer via the kiosk API without
+  verifying the receiver matches the expected owner. Sui''s Kiosk model enforces purchase/transfer
+  policies, but an agent holding the cap and executing a custom bypass path (e.g.,
+  via dynamic fields or unlocked place/take cycles) can extract NFTs from the kiosk
+  without completing a legitimate sale. Root cause: missing assert that kiosk owner
+  == permitted agent address and that transfer policy rules are enforced before item
+  extraction.
+
+  '
+impact: Medium-High (NFT drain in agentic gaming, RWA, and digital asset protocols)
 severity: High
-code_vuln: |
-  // ❌ VULNERABLE: agent transfers NFT out of kiosk without owner match or policy check
-  public entry fun transfer_nft_vulnerable(
-      kiosk: &mut Kiosk,
-      cap: &KioskOwnerCap,
-      item_id: ID,
-      recipient: address,
-      ctx: &mut TxContext,
-  ) {
-      // Takes the item ignoring transfer policy — no policy enforcement
-      let nft: NftAsset = kiosk::take(kiosk, cap, item_id);
-      transfer::public_transfer(nft, recipient);
-  }
-code_fixed: |
-  // ✅ FIXED: owner match + policy enforcement before extraction
-  public entry fun transfer_nft_fixed(
-      kiosk: &mut Kiosk,
-      cap: &KioskOwnerCap,
-      policy: &TransferPolicy<NftAsset>,
-      item_id: ID,
-      recipient: address,
-      ctx: &mut TxContext,
-  ) {
-      // Verify cap belongs to the expected agent/owner
-      assert!(kiosk::has_access(kiosk, cap), E_OWNER_MISMATCH);
-      // Process transfer through policy (royalties, rules, etc.)
-      let (nft, transfer_request) = kiosk::purchase(kiosk, item_id,
-          coin::zero<SUI>(ctx));
-      transfer_policy::confirm_request(policy, transfer_request);
-      transfer::public_transfer(nft, recipient);
-  }
+code_vuln: "// ❌ VULNERABLE: agent transfers NFT out of kiosk without owner match\
+  \ or policy check\npublic entry fun transfer_nft_vulnerable(\n    kiosk: &mut Kiosk,\n\
+  \    cap: &KioskOwnerCap,\n    item_id: ID,\n    recipient: address,\n    ctx: &mut\
+  \ TxContext,\n) {\n    // Takes the item ignoring transfer policy — no policy enforcement\n\
+  \    let nft: NftAsset = kiosk::take(kiosk, cap, item_id);\n    transfer::public_transfer(nft,\
+  \ recipient);\n}\n"
+code_fixed: "// ✅ FIXED: owner match + policy enforcement before extraction\npublic\
+  \ entry fun transfer_nft_fixed(\n    kiosk: &mut Kiosk,\n    cap: &KioskOwnerCap,\n\
+  \    policy: &TransferPolicy<NftAsset>,\n    item_id: ID,\n    recipient: address,\n\
+  \    ctx: &mut TxContext,\n) {\n    // Verify cap belongs to the expected agent/owner\n\
+  \    assert!(kiosk::has_access(kiosk, cap), E_OWNER_MISMATCH);\n    // Process transfer\
+  \ through policy (royalties, rules, etc.)\n    let (nft, transfer_request) = kiosk::purchase(kiosk,\
+  \ item_id,\n        coin::zero<SUI>(ctx));\n    transfer_policy::confirm_request(policy,\
+  \ transfer_request);\n    transfer::public_transfer(nft, recipient);\n}\n"
 test_vector:
   inputs:
-    kiosk_owner: "0xOWNER"
-    agent_address: "0xROGUE_AGENT"
-    item_id: "0xNFT_ID"
-    recipient: "0xATTACKER"
-  expected_exploit: NFT extracted from kiosk bypassing transfer policy; recipient is attacker
+    kiosk_owner: 0xOWNER
+    agent_address: 0xROGUE_AGENT
+    item_id: 0xNFT_ID
+    recipient: 0xATTACKER
+  expected_exploit: NFT extracted from kiosk bypassing transfer policy; recipient
+    is attacker
 references:
-  - https://docs.sui.io/standards/kiosk
-  - https://docs.sui.io/standards/kiosk-apps
-  - https://arxiv.org/html/2601.04583v1
-
+- https://docs.sui.io/standards/kiosk
+- https://docs.sui.io/standards/kiosk-apps
+- https://arxiv.org/html/2601.04583v1
 sui_specific: true
+bvss:
+  impact: High
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required

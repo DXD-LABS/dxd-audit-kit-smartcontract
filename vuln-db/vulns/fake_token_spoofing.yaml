@@ -1,0 +1,59 @@
+id: DXD-SUI-2024-003
+name: Fake Token Input Spoofing (General)
+name_vi: Lỗ hổng giả mạo Token đầu vào (Fake Token Spoofing)
+date: 2024-12-01
+loss: Variable
+description: >
+  A protocol function accepts a generic token type `Coin<T>` or a specific struct `TreasuryCap<T>` 
+  without verifying that `T` matches the platform's whitelist. An attacker can deploy a 
+  malicious module with a token named similarly (e.g., "SUI") and use it to interact with 
+  swap or lending pools, effectively "stealing" real assets by providing worthless fake tokens.
+description_vi: >
+  Một hàm của giao thức chấp nhận loại token generic `Coin<T>` hoặc một struct cụ thể `TreasuryCap<T>` 
+  mà không xác thực liệu `T` có nằm trong danh sách trắng (whitelist) của nền tảng hay không. 
+  Kẻ tấn công có thể triển khai một module độc hại với token có tên tương tự (ví dụ: "SUI") 
+  và sử dụng nó để tương tác với các bể hoán đổi (swap) hoặc cho vay (lending), từ đó 
+  "đánh cắp" tài sản thực bằng cách cung cấp các token giả không có giá trị.
+root_cause: >
+  Over-reliance on Generics without Type Constraint Validation. Developers coming from 
+  Account-based models often forget that in Move, any user can define a type `T`. 
+  A function `swap<T>` is a 'permissionless entry' unless `T` is strictly compared 
+  against a set of trusted `TypeTag`s or `TypeName`s on-chain.
+mitigation: >
+  1. Use `sui::type_name::get<T>()` to compare against a registry of allowed types. 
+  2. Use the 'Witness' pattern where users must provide an object that can only be 
+  created by the legitimate token issuer.
+verification: >
+  Manual Audit: Check all functions accepting generic `Coin<T>` and trace if `T` is 
+  validated against a configuration object or hardcoded whitelist.
+impact: High - Draining of liquidity pools, protocol insolvency.
+severity: High
+code_vuln: |
+  public fun swap_for_usdc<T>(pool: &mut Pool, input: Coin<T>, ctx: &mut TxContext) {
+      // Missing check: Is T == SUI?
+      let amount = coin::value(&input);
+      let usdc_out = calculate_out(amount);
+      let payment = coin::take(&mut pool.usdc_balance, usdc_out, ctx);
+      transfer::public_transfer(payment, tx_context::sender(ctx));
+      // Attacker just gave us fake tokens
+      balance::join(&mut pool.reserve, coin::into_balance(input));
+  }
+code_fixed: |
+  public fun swap_for_usdc<T>(pool: &mut Pool, input: Coin<T>, ctx: &mut TxContext) {
+      assert!(type_name::get<T>() == type_name::get<SUI>(), EInvalidToken);
+      // OR use a witness pattern
+      // ...
+  }
+test_vector: Create fake token, call swap, verify protocol accepts worthless token.
+references:
+  - https://docs.sui.io/concepts/sui-move-concepts/coins
+sui_specific: true
+bvss:
+  impact: High
+  likelihood: High
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required

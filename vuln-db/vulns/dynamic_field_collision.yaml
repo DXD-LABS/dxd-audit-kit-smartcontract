@@ -1,0 +1,72 @@
+id: DXD-SUI-2024-004
+name: Dynamic Field Name Collision/Overwrite (Typus)
+name_vi: Ghi đè/Xung đột tên Dynamic Field (Typus)
+date: 2024-12-15
+loss: $N/A (Prevented/Found in Audit)
+description: >
+  Protocol uses dynamic fields to store user-specific state or configuration. If the 
+  field name is predictable (e.g., uses a simple salt or just the user's address) and 
+  the protocol provides a way to "re-initialize" or "migrate" fields without checking 
+  if they already exist or belong to the caller, an attacker can overwrite another 
+  user's data or platform configuration by forcing a name collision.
+description_vi: >
+  Giao thức sử dụng các dynamic field để lưu trữ trạng thái hoặc cấu hình riêng biệt cho người dùng. 
+  Nếu tên trường (field name) có thể dự đoán được (ví dụ: sử dụng một giá trị salt đơn giản hoặc 
+  chỉ là địa chỉ của người dùng) và giao thức cho phép "khởi tạo lại" hoặc "di chuyển" các trường 
+  mà không kiểm tra xem chúng đã tồn tại hay thuộc về người gọi hay chưa, kẻ tấn công có thể ghi đè 
+  lên dữ liệu hoặc cấu hình của người dùng khác bằng cách tạo ra sự trùng lặp tên (collision).
+impact: High - State corruption, potential unauthorized access to other users' collateral or positions.
+impact_vi: Cao - Làm hỏng trạng thái, có khả năng truy cập trái phép vào tài sản thế chấp hoặc vị thế của người dùng khác.
+severity: High
+root_cause: >
+  Using predictable or non-namespaced keys for dynamic fields in a shared context. 
+  In Sui Move, dynamic_field keys can be any type. If two features use the same key 
+  type (e.g., u64 representing an ID) without a wrapper struct (Namespacing), 
+  they will collide.
+root_cause_vi: >
+  Sử dụng các khóa (keys) có thể dự đoán được hoặc không phân không gian tên (non-namespaced) 
+  cho các dynamic field trong ngữ cảnh chia sẻ. Trong Sui Move, các khóa dynamic_field 
+  có thể là bất kỳ kiểu dữ liệu nào. Nếu hai tính năng sử dụng cùng một kiểu khóa 
+  (ví dụ: kiểu u64 đại diện cho một ID) mà không có struct bao bọc (Namespacing), 
+  chúng sẽ bị xung đột.
+mitigation: >
+  Always wrap dynamic field keys in unique, module-defined structs (Namespacing). 
+  Check for existence before adding, and ensure the caller has authority over 
+  the target field.
+mitigation_vi: >
+  Luôn bao bọc các khóa dynamic field trong các struct duy nhất được định nghĩa trong module 
+  (Namespacing). Kiểm tra sự tồn tại trước khi thêm và đảm bảo người gọi có quyền đối với 
+  trường mục tiêu.
+verification: >
+  Tooling: Use move-scanner with the dynamic_field_collision rule. 
+  Manual: Inspect dynamic_field::add and borrow_mut calls for generic key types.
+verification_vi: >
+  Công cụ: Sử dụng move-scanner với quy tắc dynamic_field_collision. 
+  Thủ công: Kiểm tra các lệnh gọi dynamic_field::add và borrow_mut để tìm các kiểu khóa chung.
+code_vuln: |
+  public fun set_user_config<V: store>(obj: &mut Account, name: String, val: V) {
+      // Missing check: does this field already exist?
+      if (dynamic_field::exists_(&obj.id, name)) {
+          let field = dynamic_field::borrow_mut<String, V>(&mut obj.id, name);
+          *field = val; // Overwrite without checking owner!
+      };
+  }
+code_fixed: |
+  public fun set_user_config<V: store>(obj: &mut Account, name: String, val: V, ctx: &TxContext) {
+      assert!(obj.owner == tx_context::sender(ctx), ENotOwner);
+      // Proceed with safe update...
+  }
+test_vector: Hacker calls setter with a name used by a Victim, attempts to overwrite configuration.
+references:
+  - https://docs.sui.io/concepts/sui-move-concepts/dynamic-fields
+sui_specific: true
+bvss:
+  impact: High
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required
+formal_spec: ../prover-examples/sources/no_double_spend_transfer.move

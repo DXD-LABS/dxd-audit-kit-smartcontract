@@ -1,3 +1,4 @@
+id: DXD-MS-2026-010
 name: MS-001 Dynamic Field Resource Leak
 name_vi: Lỗ hổng Rò rỉ Tài nguyên ở Dynamic Field
 name_zh: MS-001 动态字段资源泄露漏洞
@@ -40,3 +41,13 @@ test_vector: "Attach DF to object -> delete object -> check if DF is still acces
 references:
   - "https://docs.sui.io/concepts/sui-architecture"
 sui_specific: true
+
+bvss:
+  impact: 'High'
+  likelihood: 'Medium'
+  exploitability: 'Network'
+  economic_loss: 'Millions'
+  scope: 'Unchanged'
+  is_immutable: true
+  exploit_maturity: 'POC'
+  privileged_access: 'Not Required'

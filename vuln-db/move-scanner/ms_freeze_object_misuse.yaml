@@ -1,3 +1,4 @@
+id: DXD-MS-2026-007
 name: MS-011 Freeze Object Misuse
 name_vi: Lạm dụng Hàm Freeze Object
 name_zh: MS-011 冻结对象权限（Freeze Object）滥用漏洞
@@ -37,3 +38,13 @@ test_vector: "Attempt to call admin_freeze on a shared state object -> check if 
 references:
   - "https://docs.sui.io/concepts/sui-architecture"
 sui_specific: true
+
+bvss:
+  impact: 'Medium'
+  likelihood: 'Medium'
+  exploitability: 'Network'
+  economic_loss: 'Thousands'
+  scope: 'Unchanged'
+  is_immutable: true
+  exploit_maturity: 'POC'
+  privileged_access: 'Not Required'

@@ -1,4 +1,6 @@
+id: DXD-SUI-2026-001
 name: AGENT-012 BTCfi Oracle Manipulation in Agent-Driven Trades
+name_vi: Lỗ hổng thao túng Oracle BTCfi trong giao dịch tự động của AI Agent
 date: 2026-03-07
 loss: "Simulated (oracle skew leading to $150k+ bad debt)"
 description: >
@@ -9,7 +11,104 @@ description: >
   at a significantly skewed price. The on-chain contract accepts the oracle
   value without deviation bounds or multi-feed aggregation, creating bad debt
   or enabling the attacker to front-run liquidations at incorrect valuations.
-  Root cause: single-source oracle with no staleness check or deviation guard.
+description_vi: >
+  Một AI Agent phụ thuộc vào một nguồn cấp dữ liệu oracle BTCfi duy nhất (ví dụ: giá BTC/SUI) để 
+  đưa ra quyết định thanh lý hoặc định giá tài sản thế chấp. Kẻ tấn công thao túng nguồn cấp giá 
+  oracle off-chain (ví dụ: thông qua thao túng TWAP, phát lại dữ liệu cũ hoặc đầu độc nhà cung cấp oracle) 
+  khiến Agent thực hiện thanh lý ở mức giá bị sai lệch nghiêm trọng. Hợp đồng on-chain chấp nhận giá trị 
+  oracle mà không có ngưỡng sai lệch hoặc cơ chế tổng hợp nhiều nguồn, tạo ra nợ xấu hoặc cho phép 
+  kẻ tấn công trục lợi từ việc thanh lý sai giá.
+root_cause: >
+  Oracle Dependency Anti-pattern. The core issue is the 'Single Source of Truth' without 
+  on-chain validation. In the context of Agentic DeFi (2026), AI agents often react faster 
+  than human guardians, making oracle-skew vulnerabilities catastrophic if not guarded 
+  by multi-feed consensus or TWAP checks.
+mitigation: >
+  1. Implement Multi-Oracle Aggregation (e.g., Pyth + Switchboard + Supra). 
+  2. Add Heartbeat checks (staleness protection). 3. Implement Maximum Deviation Thresholds.
+verification: >
+  Simulation: Run an adversarial agent that pumps a low-liquidity oracle feed while 
+  simultaneously triggering the liquidation function.
+impact: "High (protocol bad debt, user fund loss, fits Sui BTCfi expansion 2026)"
+severity: High
+code_vuln: |
+  // ❌ VULNERABLE: single oracle, no staleness or deviation check
+  public entry fun liquidate_vulnerable(
+      oracle: &OracleFeed,
+      vault: &mut LiquidationVault,
+      borrower: address,
+      ctx: &mut TxContext,
+  ) {
+      let price = oracle.btc_sui_price; // Single-source, unvalidated
+      let collateral_value = vault.collateral_amount * price;
+      // Liquidate if undercollateralized — price can be manipulated
+      if (collateral_value < vault.debt_amount) {
+          let seized = coin::split(&mut vault.collateral, vault.collateral_amount, ctx);
+          transfer::public_transfer(seized, ctx.sender());
+      }
+  }
+code_fixed: |
+  // ✅ FIXED: multi-oracle aggregation + deviation bound + staleness check
+  public entry fun liquidate_fixed(
+      oracle_a: &OracleFeed,
+      oracle_b: &OracleFeed,
+      vault: &mut LiquidationVault,
+      current_epoch: u64,
+      ctx: &mut TxContext,
+  ) {
+      // Staleness: both feeds must be fresh
+      assert!(current_epoch - oracle_a.last_updated <= MAX_STALE_EPOCHS, E_STALE_PRICE);
+      assert!(current_epoch - oracle_b.last_updated <= MAX_STALE_EPOCHS, E_STALE_PRICE);
+      // Deviation guard: feeds must agree within 5%
+      let avg_price = (oracle_a.btc_sui_price + oracle_b.btc_sui_price) / 2;
+      let deviation = if (oracle_a.btc_sui_price > oracle_b.btc_sui_price) {
+          oracle_a.btc_sui_price - oracle_b.btc_sui_price
+      } else {
+          oracle_b.btc_sui_price - oracle_a.btc_sui_price
+      };
+      assert!(deviation * 10000 / avg_price <= MAX_DEVIATION_BPS, E_PRICE_DEVIATION);
+      let collateral_value = vault.collateral_amount * avg_price;
+      if (collateral_value < vault.debt_amount) {
+          let seized = coin::split(&mut vault.collateral, vault.collateral_amount, ctx);
+          transfer::public_transfer(seized, ctx.sender());
+      }
+  }
+test_vector:
+  inputs:
+    oracle_a_price: 200000
+    oracle_b_price: 100000
+    deviation_pct: 50
+id: DXD-SUI-2026-001
+name: AGENT-012 BTCfi Oracle Manipulation in Agent-Driven Trades
+name_vi: Lỗ hổng thao túng Oracle BTCfi trong giao dịch tự động của AI Agent
+date: 2026-03-07
+loss: "Simulated (oracle skew leading to $150k+ bad debt)"
+description: >
+  An agent relies on a single BTCfi oracle feed (e.g., BTC/SUI price) for
+  liquidation or collateral valuation decisions. An attacker manipulates the
+  off-chain oracle price feed (e.g., via TWAP manipulation, stale data replay,
+  or poisoning the oracle provider) causing the agent to execute a liquidation
+  at a significantly skewed price. The on-chain contract accepts the oracle
+  value without deviation bounds or multi-feed aggregation, creating bad debt
+  or enabling the attacker to front-run liquidations at incorrect valuations.
+description_vi: >
+  Một AI Agent phụ thuộc vào một nguồn cấp dữ liệu oracle BTCfi duy nhất (ví dụ: giá BTC/SUI) để 
+  đưa ra quyết định thanh lý hoặc định giá tài sản thế chấp. Kẻ tấn công thao túng nguồn cấp giá 
+  oracle off-chain (ví dụ: thông qua thao túng TWAP, phát lại dữ liệu cũ hoặc đầu độc nhà cung cấp oracle) 
+  khiến Agent thực hiện thanh lý ở mức giá bị sai lệch nghiêm trọng. Hợp đồng on-chain chấp nhận giá trị 
+  oracle mà không có ngưỡng sai lệch hoặc cơ chế tổng hợp nhiều nguồn, tạo ra nợ xấu hoặc cho phép 
+  kẻ tấn công trục lợi từ việc thanh lý sai giá.
+root_cause: >
+  Oracle Dependency Anti-pattern. The core issue is the 'Single Source of Truth' without 
+  on-chain validation. In the context of Agentic DeFi (2026), AI agents often react faster 
+  than human guardians, making oracle-skew vulnerabilities catastrophic if not guarded 
+  by multi-feed consensus or TWAP checks.
+mitigation: >
+  1. Implement Multi-Oracle Aggregation (e.g., Pyth + Switchboard + Supra). 
+  2. Add Heartbeat checks (staleness protection). 3. Implement Maximum Deviation Thresholds.
+verification: >
+  Simulation: Run an adversarial agent that pumps a low-liquidity oracle feed while 
+  simultaneously triggering the liquidation function.
 impact: "High (protocol bad debt, user fund loss, fits Sui BTCfi expansion 2026)"
 severity: High
 code_vuln: |
@@ -63,6 +162,15 @@ test_vector:
   expected_exploit: Liquidation executes at 2x normal price via poisoned oracle_a; bad debt created
 references:
   - https://docs.sui.io/concepts/sui-architecture
-  - https://arxiv.org/html/2601.04583v1
-
+  - https://pyth.network/docs/best-practices
 sui_specific: true
+bvss:
+  impact: High
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required
+formal_spec: ../prover-examples/sources/agent_btcfi_oracle_bounds.move

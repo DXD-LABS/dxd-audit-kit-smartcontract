@@ -1,9 +1,39 @@
+id: DXD-SUI-2025-002
 name: AGENT-004 Intent Spoofing / Mismatch
+name_vi: Giả mạo Ý định (Intent Spoofing) trong giao dịch của Agent
 date: 2025-12-04
 loss: Simulated asset theft
-description: Off-chain agent intent mismatches on-chain execution. The function does not verify the hash of the expected parameters.
-impact: High
+description: >
+  Off-chain agent intent mismatches on-chain execution. The function does not 
+  verify the hash of the expected parameters.
+description_vi: >
+  Ý định của Agent ở phía off-chain không khớp với quá trình thực thi on-chain. 
+  Hàm không xác minh giá trị hash của các tham số dự kiến.
+impact: >
+  High
+impact_vi: >
+  Cao
 severity: High
+root_cause: >
+  Cryptographic Mismatch between Intent and Execution. The off-chain AI agent signs 
+  an 'Intent', but the on-chain execution function accepts individual parameters 
+  without verifying they match the signed intent hash.
+root_cause_vi: >
+  Sự không khớp về mặt mật mã giữa Ý định và Thực thi. AI Agent off-chain ký một 
+  'Ý định' (Intent), nhưng hàm thực thi on-chain lại chấp nhận các tham số riêng lẻ 
+  mà không xác minh xem chúng có khớp với mã băm ý định đã ký hay không.
+mitigation: >
+  Hash all function parameters into an Intent struct on-chain and verify it 
+  against the agent's signature.
+mitigation_vi: >
+  Băm tất cả các tham số hàm thành một struct Intent on-chain và xác minh nó 
+  với chữ ký của Agent.
+verification: >
+  Cryptographic Audit: Ensure that every parameter used in state-changing logic 
+  is included in the signature payload.
+verification_vi: >
+  Kiểm tra mật mã (Cryptographic Audit): Đảm bảo rằng mọi tham số được sử dụng trong 
+  logic thay đổi trạng thái đều được bao gồm trong payload chữ ký.
 code_vuln: |
   public entry fun execute_vulnerable(
       wallet: &mut AgentWallet, target: address, amount: u64, offchain_intent_hash: vector<u8>, ctx: &mut TxContext
@@ -26,5 +56,14 @@ code_fixed: |
 test_vector: Supply false parameters while bypassing intent verification due to missing checks.
 references:
   - https://arxiv.org/html/2601.04583v1
-
 sui_specific: true
+bvss:
+  impact: High
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Millions
+  scope: Changed
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required
+formal_spec: ../prover-examples/sources/agent_intent_verification.move

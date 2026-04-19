@@ -1,0 +1,62 @@
+id: DXD-SUI-2024-002
+name: Vault Share Math Logic Error (Souffl3)
+name_vi: Lỗi logic tính toán cổ phần trong Vault (Souffl3)
+date: 2024-11-20
+loss: $50k+ (Restricted)
+description: >
+  Incorrect rounding in share calculation logic. When calculating the amount of assets per share, 
+  the contract rounded down for withdrawals or up for deposits in a way that favored the user, 
+  allowing "dust" attacks where a user could repeatedly deposit and withdraw small amounts 
+  to slowly drain the vault's underlying assets.
+description_vi: >
+  Lỗi làm tròn sai trong logic tính toán cổ phần (share). Khi tính toán lượng tài sản tương ứng 
+  với mỗi cổ phần, hợp đồng đã làm tròn xuống khi rút tiền hoặc làm tròn lên khi nạp tiền theo cách 
+  có lợi cho người dùng. Điều này cho phép thực hiện các cuộc tấn công "bụi" (dust attacks) - nơi người dùng 
+  nạp và rút liên tục các khoản tiền cực nhỏ để bào mòn dần tài sản của Vault.
+root_cause: >
+  Legacy Solidity-style math in Move without accounting for directional rounding. In DeFi, 
+  rounding should always favor the protocol (round down for user receipts, round up for user payments). 
+  Failure to use a 'round_up' flag or a safe math library for shares led to precision loss leakage.
+mitigation: >
+  Implement a helper function for proportional math that accepts a `round_up` boolean. Always use 
+  u128 for intermediate multiplications before division to prevent overflow.
+verification: >
+  Unit Tests: Mock a vault with low liquidity and high share price, then verify that micro-deposits 
+  cannot result in effectively free shares.
+impact: Medium - Slow drain of vault funds over time via micro-transactions.
+severity: Medium
+code_vuln: |
+  public fun get_amount_by_shares(vault: &Vault, shares: u64): u64 {
+      let total_assets = balance::value(&vault.assets);
+      let total_shares = vault.total_shares;
+      if (total_shares == 0) return shares;
+      // Rounding down favors the user during withdrawal
+      (shares * total_assets) / total_shares
+  }
+code_fixed: |
+  public fun get_amount_by_shares_safe(vault: &Vault, shares: u64, round_up: bool): u64 {
+      let total_assets = balance::value(&vault.assets);
+      let total_shares = vault.total_shares;
+      if (total_shares == 0) return shares;
+      let numerator = (shares as u128) * (total_assets as u128);
+      let denumerator = (total_shares as u128);
+      if (round_up && numerator % denumerator > 0) {
+          ((numerator / denumerator) + 1 as u64)
+      } else {
+          (numerator / denumerator as u64)
+      }
+  }
+test_vector: Deposit small amount, verify rounding favor, repeat.
+references:
+  - https://github.com/souffl3/sui-contract-audits
+sui_specific: true
+bvss:
+  impact: High
+  likelihood: High
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required
+formal_spec: ../prover-examples/sources/no_double_spend.move

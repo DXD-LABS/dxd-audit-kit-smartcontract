@@ -4,23 +4,98 @@
 ![GitHub license](https://img.shields.io/github/license/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
 ![GitHub last commit](https://img.shields.io/github/last-commit/DXD-LABS/dxd-audit-kit-smartcontract?style=flat-square)
 ![Static Analysis](https://github.com/DXD-LABS/dxd-audit-kit-smartcontract/workflows/Move%20Static%20Analysis/badge.svg)
+![Sui CLI](https://img.shields.io/badge/Sui%20CLI-1.64.2-blue?style=flat-square&logo=sui)
 
 This repository contains public security audit reports produced by DXDLABS.
 
-## Structure
+## North Star
+A public-good security engine and the gold standard for Sui Move smart contract auditing, empowering developers with standardized secure patterns and automated verification tools.
 
-- `templates/` – report templates in English, Vietnamese, and Chinese.
-- `clients/<YYYY-MM>-<project-name>/` – audit reports for individual clients.
-- `resources/move/` – Move/Sui security patterns, vulnerable samples, and checklists.
-- `resources/move/tests/` – Move test suite for safe snippets.
-- `tools/` – configuration and examples of analysis tools used (Slither, Foundry, etc.).
-- `docs/` – professional audit services and additional documentation.
-- `docs/usage-guide.md` – step-by-step install and usage guide.
-- `prover-examples/` – Formal verification examples using Move Prover.
+## 5-minute Quickstart
+### Prerequisites
+- **Sui CLI**: Pinned to version `1.64.2` (Full compatibility).
+- **Python 3.10+**: For `vuln-db` parsing and automation.
+
+### Commands
+#### Local Setup
+```bash
+git clone https://github.com/DXD-LABS/dxd-audit-kit-smartcontract.git
+cd dxd-audit-kit-smartcontract
+./one-click-audit.sh  # Checks environment, runs tests, and generates summary
+```
+
+#### Formal Verification (Docker - Recommended)
+The gold standard for high-assurance audits. Run the full formal verification suite in a standardized environment:
+```bash
+docker build -t sui-audit-kit .
+docker run --rm -v $(pwd):/repo sui-audit-kit /bin/bash -c "cd prover-examples && sui move prove"
+```
+*Total verification coverage: 10+ core security invariants (No double-spend, repayment enforcement, etc.)*
+
+#### Local Setup
+```bash
+./one-click-audit.sh  # Basic unit tests and static analysis
+```
+
+#### Windows Native (PowerShell)
+For a direct Windows experience without WSL/Docker:
+1. Open PowerShell as **Administrator** and enable script execution (one-time):
+   ```powershell
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+   ```
+2. Run the audit:
+   ```powershell
+   ./one-click-audit.ps1
+   ```
+
+## Traceability & ID System
+To ensure professional audit standards, every vulnerability in this repository is assigned a unique tracking ID: **`DXD-SUI-YYYY-XXX`**.
+
+- **Source of Truth**: [master-list.json](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/vuln-db/master-list.json)
+- **Specification**: [ID_SYSTEM.md](file:///d:/DXD%20LABS/dxdlabs-audit-smartcontract/docs/ID_SYSTEM.md)
+
+| ID | Category | Description |
+| :--- | :--- | :--- |
+| `DXD-SUI-2024-001` | ACC | BlueMove Access Bypass |
+| `DXD-SUI-2026-001` | ORC | BTCfi Oracle Manipulation |
+
+Refer to the `vuln-db/` summary reports for full details.
+
+### Expected Output
+```text
+[+] Scan Complete: 0 vulnerabilities found in secure-patterns/
+[+] Summary: 15/15 checks passed.
+```
+
+## Repo Map
+
+### 🛡️ Security Standards
 - `secure-patterns/` – Research-based Sui design patterns (2025-2026).
-- `scorecard/` – BVSS Security Scorecard tool (CLI + Interactive Web, integrated with vuln-db & static-analysis).
-- `vuln-db/` – YAML format vulnerability database and parser.
-- `tests/` – Move PoC modules and unit/integration tests for vuln-db.
+- `resources/move/safe/` – Snippets for secure coin management, kiosks, and capabilities.
+
+### 🔍 Audit Artifacts
+- `vuln-db/` – Machine-readable vulnerability database (YAML).
+- `tests/` – Move PoC modules for security invariant testing.
+- `clients/` – Public audit reports for transparency.
+- `templates/` – Professional audit report templates (EN/VI/ZH).
+
+### 🛠️ Developer Tooling
+- `scorecard/` – BVSS Security Scorecard tool (CLI + Web).
+- `prover-examples/` – Formal verification examples using Move Prover.
+- `scripts/` – Infrastructure and environment management.
+- `vuln-db/` – Automated registry with links to formal proofs.
+
+## Who is this for?
+
+| Persona | Benefit | Recommended Start |
+| :--- | :--- | :--- |
+| **Builder** | Prevention of common vulnerabilities | [Secure Patterns](./secure-patterns/) |
+| **Auditor** | Standardized workflow & templates | [Vuln DB](./vuln-db/) & [Tests](./tests/) |
+| **Contributor** | Adding to the public good knowledge base | [CONTRIBUTING.md](./CONTRIBUTING.md) |
+
+## What this repo is / is not
+- **It is**: A curated security knowledge base, a gold-standard collection of audit reports, and a suite of secure design patterns for Sui Move.
+- **It is not**: A replacement for professional security audits, a general-purpose Move tutorial, or a dumping ground for unverified code.
 
 ## Vuln DB + PoC Tests
 
@@ -30,88 +105,8 @@ This repository contains public security audit reports produced by DXDLABS.
 - Run unit + testnet integration: `cd tests && ./run_tests.sh`
 - Windows (MSYS2): install PyYAML with `pacman -S mingw-w64-x86_64-python-yaml`
 
-- ## For AI Agents
-
-This repository provides comprehensive resources for AI agents performing smart contract security audits. Follow these guidelines to ensure thorough and high-quality audits.
-
-### Quick Start Guide
-
-1. **Read Core Documents First**:
-   - [AGENT_GUIDELINES.md](./AGENT_GUIDELINES.md) - Complete audit methodology and best practices
-   - [SENIOR_AGENT_ARCHITECTURE.md](./SENIOR_AGENT_ARCHITECTURE.md) - System architecture and capabilities
-   - [SENIOR_QUALITY_GATES.md](./SENIOR_QUALITY_GATES.md) - Quality checkpoints and metrics
-   - [SENIOR_CONTEXT_MANAGEMENT.md](./SENIOR_CONTEXT_MANAGEMENT.md) - Context handling strategies
-
-2. **Follow the Audit Workflow**:
-   - Phase 1: Reconnaissance (20%) - Understand project scope and goals
-   - Phase 2: Static Analysis (30%) - Identify code-level vulnerabilities
-   - Phase 3: Business Logic (25%) - Analyze economic and logic flaws
-   - Phase 4: Integration Testing (15%) - Test component interactions
-   - Phase 5: Reporting (10%) - Document findings clearly
-
-3. **Use Available Resources**:
-   - `/resources/move/` - Move/Sui security patterns and vulnerabilities
-   - `/resources/move/checklists/` - Audit checklists for different protocols
-   - `/resources/move/safe/` - Secure coding patterns
-   - `/resources/move/vulnerable/` - Vulnerable code examples
-   - `/templates/` - Report templates
-
-### Key Principles
-
-✅ **Thoroughness**: Analyze 100% of in-scope code  
-✅ **Context-Aware**: Understand business logic and economics  
-✅ **Systematic**: Follow structured methodology consistently  
-✅ **Documentation**: Record findings with clear evidence  
-
-### Severity Classification
-
-- **Critical**: Direct loss of funds, protocol insolvency
-- **High**: Indirect loss of funds, significant exploitation
-- **Medium**: Griefing attacks, temporary DoS
-- **Low**: Best practice violations, gas inefficiencies
-- **Informational**: Documentation issues, suggestions
-
-### Common Vulnerabilities to Check
-
-1. **Access Control**: Missing or improper permission checks
-2. **Reentrancy**: External calls before state updates
-3. **Integer Issues**: Overflow/underflow in calculations
-4. **Unchecked Calls**: Ignoring return values
-5. **Oracle Manipulation**: Price feed attacks
-6. **Flash Loan Attacks**: Economic exploitation
-7. **Centralization Risks**: Admin key abuse
-
-### Quality Checklist
-
-Before submitting findings:
-
-```markdown
-- [ ] All in-scope code reviewed
-- [ ] Severity properly assessed
-- [ ] PoC provided for critical/high issues
-- [ ] Recommendations are actionable
-- [ ] No false positives
-- [ ] Report well-structured
-- [ ] Code examples tested
-```
-
-### Tools and References
-
-**Static Analysis**:
-- Slither (Ethereum)
-- Mythril (Ethereum)
-- Move Prover (Move/Sui)
-
-**Dynamic Testing**:
-- Echidna (Fuzzing)
-- Foundry (Testing)
-
-**Standards**:
-- OWASP Smart Contract Top 10
-- ERC Standards
-- Move Documentation
-
-For detailed guidance, always refer to [AGENT_GUIDELINES.md](./AGENT_GUIDELINES.md).
+## 🤖 For AI Agents
+This repository is optimized for AI-driven security analysis. For detailed instructions on methodology, tools, and quality gates, see the [AI Agent Security Audit Guide](./docs/AI_AGENT_GUIDE.md).
 
 ## Professional Audit Services
 
@@ -224,6 +219,15 @@ Hands-on examples for Move Prover formal verification using MSL specs.
 - GitHub Actions CI: Auto-verify on PRs.
 
 See [prover-examples/README.md](./prover-examples/README.md).
+
+### 💎 Verified Patterns (High-Assurance)
+Our "Verified Patterns" methodology bridges the gap between identified vulnerabilities and production-ready code. Every **Critical** vulnerability in our registry is prioritized for formal verification.
+
+Current Verified Patterns:
+- **AGENT-001 (Unauthorized Tool Call)**: [Verified Move Proof](prover-examples/sources/agent_unauthorized_tool_prevent.move)
+- **AGENT-002 (Spend Limit Bypass)**: [Verified Move Proof](prover-examples/sources/agent_spend_limit_enforce.move)
+- **AGENT-003 (Permission Abuse)**: [Verified Move Proof](prover-examples/sources/agent_policy_guard.move)
+- **DeFi Guard**: [Safe Transfer Proof](prover-examples/sources/safe_transfer.move)
 
 ## Report Format
 

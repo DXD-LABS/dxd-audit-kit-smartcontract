@@ -1,24 +1,28 @@
+id: DXD-SUI-2025-024
 name: Nemo Economic Logic Exploit
 date: 2025-09-08
 loss: $2.4M USDC
-description: Logic flaw in yield/bridge handling allows stolen funds bridged cross-chain (Arbitrum → Ethereum) before maintenance. Despite Move safety, protocol-level economic bug (yield split PT/YT abuse).
+description: Logic flaw in yield/bridge handling allows stolen funds bridged cross-chain
+  (Arbitrum → Ethereum) before maintenance. Despite Move safety, protocol-level economic
+  bug (yield split PT/YT abuse).
 impact: High - Cross-chain drain, TVL drop mạnh, dù language prevent reentrancy/overflow.
 severity: High
-code_vuln: |
-  // Vulnerable: No post-bridge verification
-  fun repay_yield(...) {
-      bridge(stolen_funds, ...);
-      // No assert bridge success or verified
-  }
-code_fixed: |
-  fun repay_yield(...) {
-      let bridged = bridge(stolen_funds, ...);
-      assert!(verified_bridge(bridged), E_BRIDGE_FAIL);
-      ...
-  }
+code_vuln: "// Vulnerable: No post-bridge verification\nfun repay_yield(...) {\n \
+  \   bridge(stolen_funds, ...);\n    // No assert bridge success or verified\n}\n"
+code_fixed: "fun repay_yield(...) {\n    let bridged = bridge(stolen_funds, ...);\n\
+  \    assert!(verified_bridge(bridged), E_BRIDGE_FAIL);\n    ...\n}\n"
 test_vector: Bridge stolen USDC via Circle → external drain trước khi suspend contracts.
 references:
-  - https://www.coindesk.com/markets/2025/09/08/sui-based-yield-protocol-nemo-exploited-for-usd2-4m-in-usdc
-  - https://finance.yahoo.com/news/nemo-protocol-loses-2-4m-163622264.html
-  - https://x.com/PeckShieldAlert/status/1832698375635837332
+- https://www.coindesk.com/markets/2025/09/08/sui-based-yield-protocol-nemo-exploited-for-usd2-4m-in-usdc
+- https://finance.yahoo.com/news/nemo-protocol-loses-2-4m-163622264.html
+- https://x.com/PeckShieldAlert/status/1832698375635837332
 sui_specific: true
+bvss:
+  impact: High
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Millions
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required

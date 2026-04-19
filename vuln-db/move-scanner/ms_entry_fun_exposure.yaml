@@ -1,3 +1,4 @@
+id: DXD-MS-2026-006
 name: MS-012 Entry Function Over-exposure
 name_vi: Lỗ hổng Phơi bày Hàm Entry (Entry Function Over-exposure)
 name_zh: MS-012 Entry 函数暴露过度漏洞
@@ -37,3 +38,13 @@ test_vector: "Try to call initialize_vault from a non-admin account on an alread
 references:
   - "https://docs.sui.io/concepts/sui-architecture"
 sui_specific: false
+
+bvss:
+  impact: 'High'
+  likelihood: 'Medium'
+  exploitability: 'Network'
+  economic_loss: 'Millions'
+  scope: 'Unchanged'
+  is_immutable: true
+  exploit_maturity: 'POC'
+  privileged_access: 'Not Required'

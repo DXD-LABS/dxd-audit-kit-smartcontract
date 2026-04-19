@@ -1,3 +1,4 @@
+id: DXD-MS-2026-003
 name: MS-003 Cross-Module Permission Defect
 name_vi: Lỗi Phân quyền Giữa Các Module (Cross-Module)
 name_zh: MS-003 跨模块权限缺陷
@@ -36,3 +37,13 @@ test_vector: "Try calling internal_mint from a malicious 'friend' module with un
 references:
   - "https://docs.sui.io/concepts/sui-architecture"
 sui_specific: false
+
+bvss:
+  impact: 'High'
+  likelihood: 'Medium'
+  exploitability: 'Network'
+  economic_loss: 'Millions'
+  scope: 'Unchanged'
+  is_immutable: true
+  exploit_maturity: 'POC'
+  privileged_access: 'Not Required'

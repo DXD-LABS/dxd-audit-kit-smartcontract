@@ -1,26 +1,30 @@
+id: DXD-SUI-2025-014
 name: AGENT-007 Verifiable Intent Failure
 date: 2025-12-07
 loss: Logic bypass mapping
-description: An agent executes a transaction without on-chain verifiable intent proof (e.g., ZK Proof or Multi-Signature verification missing).
+description: An agent executes a transaction without on-chain verifiable intent proof
+  (e.g., ZK Proof or Multi-Signature verification missing).
 impact: Medium
 severity: Medium
-code_vuln: |
-  public entry fun execute_action_vulnerable(
-      wallet: &mut AgentWallet, target: address, amount: u64, ctx: &mut TxContext
-  ) {
-      let extracted = coin::split(&mut wallet.balance, amount, ctx);
-      transfer::public_transfer(extracted, target);
-  }
-code_fixed: |
-  public fun execute_action_fixed(
-      wallet: &mut AgentWallet, target: address, amount: u64, proof: IntentProof, ctx: &mut TxContext
-  ) {
-      assert!(proof.is_valid, EMissingIntentProof);
-      let extracted = coin::split(&mut wallet.balance, amount, ctx);
-      transfer::public_transfer(extracted, target);
-  }
-test_vector: Send a transaction omitting IntentProof entirely, relying on the function not checking it.
+code_vuln: "public entry fun execute_action_vulnerable(\n    wallet: &mut AgentWallet,\
+  \ target: address, amount: u64, ctx: &mut TxContext\n) {\n    let extracted = coin::split(&mut\
+  \ wallet.balance, amount, ctx);\n    transfer::public_transfer(extracted, target);\n\
+  }\n"
+code_fixed: "public fun execute_action_fixed(\n    wallet: &mut AgentWallet, target:\
+  \ address, amount: u64, proof: IntentProof, ctx: &mut TxContext\n) {\n    assert!(proof.is_valid,\
+  \ EMissingIntentProof);\n    let extracted = coin::split(&mut wallet.balance, amount,\
+  \ ctx);\n    transfer::public_transfer(extracted, target);\n}\n"
+test_vector: Send a transaction omitting IntentProof entirely, relying on the function
+  not checking it.
 references:
-  - https://arxiv.org/html/2601.04583v1
-
+- https://arxiv.org/html/2601.04583v1
 sui_specific: true
+bvss:
+  impact: Medium
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Thousands
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required

@@ -1,3 +1,4 @@
+id: DXD-MS-2026-009
 name: MS-010 Phantom Type Safety Bypass
 name_vi: Lỗi Bỏ qua Bảo mật Kiểu Phantom (Phantom Type)
 name_zh: MS-010 虚型（Phantom Type）安全绕过漏洞
@@ -40,3 +41,13 @@ test_vector: "Try calling deposit_fixed with TypeA but claim it as TypeB via gen
 references:
   - "https://docs.sui.io/concepts/sui-architecture"
 sui_specific: false
+
+bvss:
+  impact: 'High'
+  likelihood: 'Medium'
+  exploitability: 'Network'
+  economic_loss: 'Millions'
+  scope: 'Unchanged'
+  is_immutable: true
+  exploit_maturity: 'POC'
+  privileged_access: 'Not Required'

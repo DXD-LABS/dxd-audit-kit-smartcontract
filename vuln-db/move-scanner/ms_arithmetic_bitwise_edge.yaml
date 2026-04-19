@@ -1,3 +1,4 @@
+id: DXD-MS-2026-001
 name: MS-005 Arithmetic Bitwise Edge Case
 name_vi: Lỗi Cận Biên Số học Bitwise
 name_zh: MS-005 算术位运算（Bitwise）边缘案例
@@ -35,3 +36,13 @@ test_vector: "Pack 129-bit value into 128-bit slot -> verify if it corrupts adja
 references:
   - "https://docs.sui.io/concepts/sui-architecture"
 sui_specific: false
+
+bvss:
+  impact: 'Medium'
+  likelihood: 'Medium'
+  exploitability: 'Network'
+  economic_loss: 'Thousands'
+  scope: 'Unchanged'
+  is_immutable: true
+  exploit_maturity: 'POC'
+  privileged_access: 'Not Required'

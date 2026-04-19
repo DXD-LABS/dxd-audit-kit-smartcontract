@@ -1,3 +1,4 @@
+id: DXD-MS-2026-002
 name: MS-004 Capability Leak via Object Wrapping
 name_vi: Lỗ hổng Rò rỉ Capability do Bao bọc Đối tượng (Object Wrapping)
 name_zh: MS-004 包装对象导致的权限（Capability）泄露
@@ -36,3 +37,13 @@ test_vector: "Try to extract AdminCap from a PublicContainer as a non-admin user
 references:
   - "https://docs.sui.io/concepts/sui-architecture"
 sui_specific: true
+
+bvss:
+  impact: 'Critical'
+  likelihood: 'Medium'
+  exploitability: 'Network'
+  economic_loss: 'Millions'
+  scope: 'Unchanged'
+  is_immutable: true
+  exploit_maturity: 'POC'
+  privileged_access: 'Not Required'

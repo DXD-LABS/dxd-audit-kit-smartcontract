@@ -1,21 +1,56 @@
+id: DXD-SUI-2023-001
 name: HamsterWheel DoS Infinite Loop
+name_vi: Tấn công Từ chối Dịch vụ "Hamsterwheel" (Logic Gas Move)
 date: 2023-06-19
 loss: $0 (Network Halt)
 description: >
   A malicious control flow graph can force the verifier into a non-terminating loop,
   stalling validation and causing a denial of service.
+description_vi: >
+  Một loại tấn công DoS trong đó kẻ tấn công gửi các giao dịch gây ra vòng lặp vô hạn 
+  hoặc tính toán cực kỳ tốn kém trong máy ảo Move. Điều này làm chậm mạng hoặc 
+  khiến đối tượng bị khóa.
 impact: Critical - validator halt and potential network disruption.
+impact_vi: Nghiêm trọng - dừng validator và có khả năng gây gián đoạn mạng.
 severity: Critical
-references:
-  - https://www.certik.com/resources/blog/the-hamsterwheel-an-in-depth-exploration-of-a-novel-attack-vector-on-the-sui
+root_cause: >
+  Unbounded loops or deep recursion that approaches the gas limit without 
+  providing a way to 'checkpoint' or partition the work.
+root_cause_vi: >
+  Các vòng lặp không giới hạn hoặc đệ quy sâu tiệm cận giới hạn gas mà không 
+  cung cấp cách thức để 'checkpoint' hoặc phân chia công việc.
+mitigation: >
+  1. Implement Pagination for all dynamic field iterations. 2. Set strict upper 
+  bounds on collection sizes. 3. Avoid deep recursion.
+mitigation_vi: >
+  1. Triển khai Phân trang cho tất cả các lần lặp dynamic field. 2. Thiết lập 
+  giới hạn trên nghiêm ngặt cho kích thước bộ sưu tập. 3. Tránh đệ quy sâu.
+verification: >
+  Stress Testing: Attempt to call the target function with maximum allowed 
+  collection sizes and verify it stays well within gas limits.
+verification_vi: >
+  Kiểm tra căng thẳng (Stress Testing): Cố gắng gọi hàm mục tiêu với kích thước 
+  bộ sưu tập tối đa được phép và xác minh nó nằm trong giới hạn gas.
 code_vuln: |
   // Malicious bytecode structure causes unbounded verifier loop
   loop { if (false) break; }
 code_fixed: |
   // Verifier patch enforces maximum loop depth and aborts
   if (loop_depth > MAX_DEPTH) abort(VERIFIER_LIMIT);
-
 test_vector:
   inputs:
     loop_depth: 1000000
   expected_exploit: Verifier hangs or exceeds limit
+references:
+  - https://www.certik.com/resources/blog/the-hamsterwheel-an-in-depth-exploration-of-a-novel-attack-vector-on-the-sui
+sui_specific: true
+bvss:
+  impact: High
+  likelihood: Medium
+  exploitability: Network
+  economic_loss: Tens of Thousands
+  scope: Unchanged
+  is_immutable: true
+  exploit_maturity: POC
+  privileged_access: Not Required
+formal_spec: ../prover-examples/sources/agent_shared_object_consistency.move

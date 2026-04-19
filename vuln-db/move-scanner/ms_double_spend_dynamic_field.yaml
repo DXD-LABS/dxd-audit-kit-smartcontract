@@ -1,3 +1,4 @@
+id: DXD-MS-2026-005
 name: MS-002 Dynamic Field Double-Spend
 name_vi: Lỗ hổng Double-Spend ở Dynamic Field
 name_zh: MS-002 动态字段双花漏洞
@@ -42,3 +43,13 @@ test_vector: "Perform double deposit -> check if first deposit is overwritten an
 references:
   - "https://docs.sui.io/concepts/sui-architecture"
 sui_specific: true
+
+bvss:
+  impact: 'Critical'
+  likelihood: 'Medium'
+  exploitability: 'Network'
+  economic_loss: 'Millions'
+  scope: 'Unchanged'
+  is_immutable: true
+  exploit_maturity: 'POC'
+  privileged_access: 'Not Required'
