@@ -60,18 +60,18 @@ module vuln_db::fake_token_spoofing {
     }
 
     #[test]
-    #[expected_failure(abort_code = 1)]
     fun test_fixed_prevents_spoof() {
         let scenario_val = test_scenario::begin(@0x1);
         let scenario = &mut scenario_val;
         let pool = new_pool(test_scenario::ctx(scenario));
-        let fake_coin = coin::mint_for_testing<FAKE_SUI>(1000, test_scenario::ctx(scenario));
         
-        // Fixed function prevents this at COMPILE TIME now.
-        // fixed_deposit(&mut pool, fake_coin); 
-        coin::burn_for_testing(fake_coin);
+        // Fixed function works with real SUI
+        let real_sui = coin::mint_for_testing<SUI>(1000, test_scenario::ctx(scenario));
+        fixed_deposit(&mut pool, real_sui);
         
         let Pool { id, sui_reserve } = pool;
+        assert!(balance::value(&sui_reserve) == 1000, 0);
+        
         balance::destroy_for_testing(sui_reserve);
         object::delete(id);
         test_scenario::end(scenario_val);
