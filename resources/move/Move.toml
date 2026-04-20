@@ -12,4 +12,4 @@ safe = "0x0"
 # EN: Sui framework dependency
 # ZH: Sui framework yi lai
 [dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "main" }
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "mainnet-v1.64.2" }

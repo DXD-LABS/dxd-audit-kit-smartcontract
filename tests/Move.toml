@@ -1,7 +1,10 @@
 [package]
 name = "vuln_db"
 version = "0.0.1"
-published-at = "0x0"
+edition = "legacy"
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "mainnet-v1.64.2" }
 
 [addresses]
 vuln_db = "0x0"
