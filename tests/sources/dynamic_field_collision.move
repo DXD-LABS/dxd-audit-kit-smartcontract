@@ -26,18 +26,15 @@ module vuln_db::dynamic_field_collision {
         }
     }
 
-    // Fixed: checks sender or requires a capability
-    public fun fixed_set_config(reg: &mut Registry, name: String, value: u64, ctx: &TxContext) {
-        // Simple fix: the field name MUST be the sender's address to ensure uniqueness
-        // and ownership per-user.
-        let sender_str = sui::address::to_string(tx_context::sender(ctx));
-        assert!(sui::string::into_string(name) == sender_str, 1);
+    // Fixed: uses sender address as the unique key to prevent collisions
+    public fun fixed_set_config(reg: &mut Registry, value: u64, ctx: &TxContext) {
+        let sender = tx_context::sender(ctx);
         
-        if (dynamic_field::exists_(&reg.id, name)) {
-            let config = dynamic_field::borrow_mut<String, UserConfig>(&mut reg.id, name);
+        if (dynamic_field::exists_(&reg.id, sender)) {
+            let config = dynamic_field::borrow_mut<address, UserConfig>(&mut reg.id, sender);
             config.value = value;
         } else {
-            dynamic_field::add(&mut reg.id, name, UserConfig { value });
+            dynamic_field::add(&mut reg.id, sender, UserConfig { value });
         }
     }
 

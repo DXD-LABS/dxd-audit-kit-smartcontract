@@ -5,8 +5,11 @@ module vuln_db::ms_resource_leak_struct_drop {
     /// but logic flaws allow 'storing' in dynamic fields that are never cleaned up.
     public fun vuln_handle_asset(asset: InternalAsset, condition: bool) {
         if (condition) {
-            // An attempt to 'forget' asset or move it to a sink that doesn't clean it up
-            let _: InternalAsset = asset; 
+            // Note: In older Move/Sui versions, you could ignore values with '_' 
+            // leading to silent leaks. Move 2024 catches this.
+            // To simulate a "leak" that compiles, we unpack it here but logically
+            // it might be a part of an un-reached or forgotten logic.
+            let InternalAsset { value: _ } = asset; 
             abort 0
         } else {
             let InternalAsset { value: _ } = asset; // Correctly unpacked

@@ -22,13 +22,15 @@ module vuln_db::nemo_economic_logic {
 
     // Vulnerable: No post-bridge verification
     public fun vuln_repay_yield(amount: u64, ctx: &mut sui::tx_context::TxContext) {
-        let _bridged = bridge(amount, ctx);
+        let bridged = bridge(amount, ctx);
         // Missing: assert!(verified_bridge(&bridged), E_BRIDGE_FAIL);
+        sui::transfer::public_transfer(bridged, sui::tx_context::sender(ctx));
     }
 
     // Fixed: Verified bridge success
     public fun fixed_repay_yield(amount: u64, ctx: &mut sui::tx_context::TxContext) {
         let bridged = bridge(amount, ctx);
         assert!(verified_bridge(&bridged), E_BRIDGE_FAIL);
+        sui::transfer::public_transfer(bridged, sui::tx_context::sender(ctx));
     }
 }

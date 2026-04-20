@@ -4,7 +4,7 @@ module vuln_db::ms_phantom_type_bypass {
 
     /// ❌ VULNERABLE: Missing 'phantom' allowing compiler to perform 
     /// certain type substitutions in complex generic hierarchies.
-    struct PoolVulnerable<T> has key {
+    struct PoolVulnerable<phantom T> has key {
         id: UID,
         balance: Balance<T>
     }

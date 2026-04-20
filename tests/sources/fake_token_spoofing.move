@@ -22,23 +22,18 @@ module vuln_db::fake_token_spoofing {
     }
 
     // Vulnerable: accepts any T and adds to reserve without checking if T is SUI
-    public fun vuln_deposit<T>(pool: &mut Pool, payment: Coin<T>) {
+    public fun vuln_deposit<T>(_pool: &mut Pool, payment: Coin<T>, ctx: &mut TxContext) {
         // This is extremely dangerous - we are adding type T to a Balance of SUI?
-        // Actually, Move won't allow balance::join(&mut Balance<SUI>, Coin<T>) 
-        // because types must match.
-        // The real vulnerability is when the code CASTS or assumes T is SUI 
-        // because it uses dynamic fields or loosely typed logic.
+        // Move won't allow balance::join(&mut Balance<SUI>, Coin<T>) because types must match.
         
-        // Let's simulate the logic error where the protocol thinks it's getting SUI
-        // but it doesn't verify the type at the entry point.
         let _value = coin::value(&payment);
-        // Protocol logic: "Success! You deposited 100 SUI" (but it was actually FAKE)
-        balance::destroy_for_testing(coin::into_balance(payment));
+        // Protocol logic: "Success!" - but we just transfer the (possibly fake) coin to the sender
+        // instead of actually pooling it, to show the lack of type verification.
+        sui::transfer::public_transfer(payment, sui::tx_context::sender(ctx));
     }
 
-    // Fixed: enforce T == SUI
-    public fun fixed_deposit<T>(pool: &mut Pool, payment: Coin<T>) {
-        assert!(type_name::get<T>() == type_name::get<SUI>(), 1);
+    // Fixed: enforce T == SUI by signature
+    public fun fixed_deposit(pool: &mut Pool, payment: Coin<SUI>) {
         balance::join(&mut pool.sui_reserve, coin::into_balance(payment));
     }
 
@@ -56,7 +51,7 @@ module vuln_db::fake_token_spoofing {
         let fake_coin = coin::mint_for_testing<FAKE_SUI>(1000, test_scenario::ctx(scenario));
         
         // Vulnerable function accepts it!
-        vuln_deposit(&mut pool, fake_coin);
+        vuln_deposit(&mut pool, fake_coin, test_scenario::ctx(scenario));
         
         let Pool { id, sui_reserve } = pool;
         balance::destroy_for_testing(sui_reserve);
@@ -72,8 +67,9 @@ module vuln_db::fake_token_spoofing {
         let pool = new_pool(test_scenario::ctx(scenario));
         let fake_coin = coin::mint_for_testing<FAKE_SUI>(1000, test_scenario::ctx(scenario));
         
-        // Fixed function should abort
-        fixed_deposit(&mut pool, fake_coin);
+        // Fixed function prevents this at COMPILE TIME now.
+        // fixed_deposit(&mut pool, fake_coin); 
+        coin::burn_for_testing(fake_coin);
         
         let Pool { id, sui_reserve } = pool;
         balance::destroy_for_testing(sui_reserve);
