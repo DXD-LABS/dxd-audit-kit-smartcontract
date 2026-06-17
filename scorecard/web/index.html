@@ -1,146 +1,2704 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DXD Labs Security Scorecard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>DXD Labs Security Suite – Smart Contract Audit Dashboard</title>
+    
+    <!-- Modern Typography & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Code Highlight.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark-dimmed.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    
     <script src="calculator.js"></script>
+    
+    <style>
+        :root {
+            /* Sleek Professional HSL Palette */
+            --bg-base: #060913;
+            --bg-surface: rgba(15, 22, 42, 0.6);
+            --bg-surface-hover: rgba(30, 41, 59, 0.7);
+            --border-glow: rgba(59, 130, 246, 0.25);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            
+            /* High-Contrast Status Indicators */
+            --color-critical: #ef4444;
+            --color-high: #f97316;
+            --color-medium: #eab308;
+            --color-low: #10b981;
+            --color-info: #3b82f6;
+            --color-accent: #3b82f6;
+            
+            --font-display: 'Outfit', -apple-system, sans-serif;
+            --font-mono: 'Fira Code', monospace;
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-display);
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column; /* FIXED: Crucial vertical flow alignment */
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.04) 0%, transparent 45%);
+            background-attachment: fixed;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-base);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Top Navigation Header */
+        header {
+            background: rgba(8, 12, 24, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+        }
+
+        .header-container {
+            max-w: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .logo-icon-container {
+            background: linear-gradient(135deg, var(--color-accent), #7c3aed);
+            padding: 0.65rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.35);
+        }
+
+        .logo-title h1 {
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #ffffff, #e2e8f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-title span {
+            font-size: 0.75rem;
+            color: var(--color-accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            display: block;
+            margin-top: -1px;
+        }
+
+        .system-ticker {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .ticker-item {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid var(--border-subtle);
+            padding: 0.4rem 0.85rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        .ticker-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--color-low);
+            box-shadow: 0 0 8px var(--color-low);
+        }
+
+        /* Tabs Navigation - Spans 100% beautifully under header */
+        .tabs-nav {
+            max-w: 1600px;
+            width: 100%;
+            margin: 1.5rem auto 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition-smooth);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .tab-btn.active {
+            color: var(--color-accent);
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-subtle);
+            border-bottom-color: var(--bg-base);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(to right, var(--color-accent), #8b5cf6);
+        }
+
+        /* Main Workspace Container */
+        main {
+            max-w: 1600px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 3rem 2rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+            width: 100%;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Premium Glassmorphism Panels */
+        .glass-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: var(--transition-smooth);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(59, 130, 246, 0.2);
+            box-shadow: 0 12px 35px rgba(59, 130, 246, 0.04);
+        }
+
+        /* Clean Layout Grid Rules */
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .grid-playbook {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        @media (max-width: 1200px) {
+            .grid-2col, .grid-playbook {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Form Controls */
+        .form-section-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            transition: var(--transition-smooth);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid var(--border-subtle);
+            padding: 0.85rem 1.15rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .checkbox-container:hover {
+            background: rgba(30, 41, 59, 0.5);
+            border-color: var(--color-accent);
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            accent-color: var(--color-accent);
+            cursor: pointer;
+        }
+
+        /* Buttons & Actions */
+        .btn {
+            background: linear-gradient(135deg, var(--color-accent), #1d4ed8);
+            color: white;
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            font-weight: 700;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: var(--transition-smooth);
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45);
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-secondary);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #047857);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
+        }
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669, #065f46);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        /* SVG Radial Meter Gauge */
+        .scorecard-summary-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2.25rem;
+            background: radial-gradient(circle at center, rgba(15, 23, 42, 0.9) 0%, rgba(6, 9, 19, 0.95) 100%);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .scorecard-summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--color-accent), #7c3aed);
+        }
+
+        .gauge-container {
+            position: relative;
+            width: 210px;
+            height: 210px;
+            margin: 1rem 0;
+        }
+
+        .gauge-svg {
+            transform: rotate(-90deg);
+        }
+
+        .gauge-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 14;
+        }
+
+        .gauge-fill {
+            fill: none;
+            stroke-width: 14;
+            stroke-linecap: round;
+            stroke-dasharray: 565.48;
+            stroke-dashoffset: 565.48;
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s ease;
+            filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.3));
+        }
+
+        .gauge-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .gauge-score {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+
+        .gauge-max {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 700;
+            opacity: 0.6;
+            letter-spacing: 0.5px;
+        }
+
+        .severity-badge {
+            font-size: 0.9rem;
+            font-weight: 800;
+            padding: 0.45rem 1.5rem;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: var(--transition-smooth);
+            margin-top: 0.5rem;
+        }
+
+        .sev-critical {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--color-critical);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
+        }
+        .sev-high {
+            background: rgba(249, 115, 22, 0.15);
+            color: var(--color-high);
+            border: 1px solid rgba(249, 115, 22, 0.4);
+            box-shadow: 0 0 15px rgba(249, 115, 22, 0.15);
+        }
+        .sev-medium {
+            background: rgba(234, 179, 8, 0.15);
+            color: var(--color-medium);
+            border: 1px solid rgba(234, 179, 8, 0.4);
+            box-shadow: 0 0 15px rgba(234, 179, 8, 0.15);
+        }
+        .sev-low {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--color-low);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+        }
+
+        /* Metric Rows Table Breakdown */
+        .breakdown-table {
+            width: 100%;
+            margin-top: 1.75rem;
+            border-collapse: collapse;
+        }
+
+        .breakdown-table th {
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            padding: 0.6rem 0.8rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .breakdown-table td {
+            font-size: 0.85rem;
+            padding: 0.7rem 0.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+        }
+
+        .breakdown-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .metric-pill {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            border: 1px solid var(--border-subtle);
+            font-family: var(--font-mono);
+            color: var(--text-primary);
+        }
+
+        .recommendation-box {
+            background: rgba(59, 130, 246, 0.06);
+            border-left: 4px solid var(--color-accent);
+            padding: 1.15rem;
+            border-radius: 0 12px 12px 0;
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            text-align: left;
+            color: var(--text-secondary);
+            border-top: 1px solid rgba(59, 130, 246, 0.1);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+            border-right: 1px solid rgba(59, 130, 246, 0.1);
+        }
+
+        /* Playbook Explorer panel */
+        .vuln-list-wrapper {
+            max-height: 700px;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-subtle);
+            padding-right: 0.75rem;
+        }
+
+        .search-container {
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .search-input {
+            padding-left: 2.35rem !important;
+        }
+
+        .category-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .filter-btn {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: var(--transition-smooth);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            border-color: var(--color-accent);
+            color: var(--text-primary);
+            background: rgba(59, 130, 246, 0.15);
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+        }
+
+        .vuln-card {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 0.95rem 1.15rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .vuln-card:hover {
+            border-color: var(--color-accent);
+            background: var(--bg-surface-hover);
+            transform: translateX(4px);
+        }
+
+        .vuln-card.active {
+            border-color: var(--color-accent);
+            background: rgba(59, 130, 246, 0.08);
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.12);
+        }
+
+        .vuln-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.4rem;
+        }
+
+        .vuln-card-id {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--color-accent);
+        }
+
+        .vuln-card-badge {
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 0.15rem 0.45rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .vuln-card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.35;
+        }
+
+        /* Detail Panel for Playbook */
+        .playbook-detail {
+            border-left: 1px solid var(--border-subtle);
+            padding-left: 1.5rem;
+        }
+
+        .detail-header {
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin: 1.25rem 0;
+        }
+
+        .detail-meta-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-subtle);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+        }
+
+        .detail-meta-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-meta-value {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-top: 0.2rem;
+            color: var(--text-primary);
+        }
+
+        .section-subtitle {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            margin: 1.75rem 0 0.65rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        /* Comparative Diff Block */
+        .snippet-tabs {
+            display: flex;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 0.25rem;
+            border-radius: 8px 8px 0 0;
+            border: 1px solid var(--border-subtle);
+            border-bottom: none;
+            gap: 0.25rem;
+        }
+
+        .snippet-tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.6rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .snippet-tab-btn.active {
+            background: rgba(30, 41, 59, 0.8);
+            color: var(--text-primary);
+        }
+
+        .snippet-tab-btn.tab-fixed.active {
+            color: var(--color-low);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .snippet-tab-btn.tab-vuln.active {
+            color: var(--color-critical);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .code-container {
+            border: 1px solid var(--border-subtle);
+            border-radius: 0 0 12px 12px;
+            overflow: hidden;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            position: relative;
+        }
+
+        .code-container pre {
+            margin: 0;
+            padding: 1.25rem;
+            background: #090c15 !important;
+            overflow-x: auto;
+            max-height: 400px;
+        }
+
+        .references-list {
+            margin-top: 0.5rem;
+            list-style-type: none;
+        }
+
+        .references-list li {
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .references-list a {
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: var(--transition-smooth);
+            word-break: break-all;
+        }
+
+        .references-list a:hover {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+
+        /* Smart Contract Static Scanner */
+        .scanner-editor-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .code-textarea {
+            width: 100%;
+            height: 380px;
+            background: #080a12;
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            color: #c084fc;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            padding: 1.25rem;
+            resize: vertical;
+            line-height: 1.5;
+            transition: var(--transition-smooth);
+        }
+
+        .code-textarea:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+        }
+
+        .scanner-controls {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .scan-templates-box {
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 1.15rem;
+        }
+
+        .template-btn {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.45rem 0.9rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: var(--transition-smooth);
+        }
+
+        .template-btn:hover {
+            border-color: var(--color-accent);
+            color: var(--text-primary);
+            background: rgba(30, 41, 59, 0.6);
+        }
+
+        .scan-results-box {
+            max-height: 520px;
+            overflow-y: auto;
+        }
+
+        .scan-finding-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-left: 4px solid var(--color-critical);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 0.85rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .scan-finding-item.warning {
+            border-left-color: var(--color-medium);
+        }
+
+        .scan-finding-item.info {
+            border-left-color: var(--color-info);
+        }
+
+        .scan-finding-item.success {
+            border-left-color: var(--color-low);
+            background: rgba(16, 185, 129, 0.03);
+        }
+
+        .scan-finding-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .scan-finding-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .scan-finding-severity {
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .scan-finding-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+
+        .scan-finding-remedy {
+            font-size: 0.75rem;
+            margin-top: 0.65rem;
+            padding: 0.5rem;
+            background: rgba(6, 9, 19, 0.8);
+            border-radius: 4px;
+            color: #a7f3d0;
+            font-family: var(--font-mono);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Report Cart List */
+        .report-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        @media (max-width: 992px) {
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .cart-list {
+            margin-bottom: 1.5rem;
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 0.85rem 1.15rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .cart-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .cart-item-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .cart-item-meta {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+
+        .cart-item-remove {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .cart-item-remove:hover {
+            color: var(--color-critical);
+        }
+
+        .cart-empty {
+            text-align: center;
+            padding: 2.5rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 0.9rem;
+            border: 1px dashed var(--border-subtle);
+            border-radius: 8px;
+            background: rgba(30, 41, 59, 0.15);
+        }
+
+        /* Executive summary charts */
+        .summary-stats-box {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.85rem;
+            margin-bottom: 1.75rem;
+            text-align: center;
+        }
+
+        .summary-stat-item {
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 0.85rem 0.5rem;
+        }
+
+        .summary-stat-val {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: var(--color-accent);
+        }
+
+        .summary-stat-lbl {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-top: 0.2rem;
+            letter-spacing: 0.5px;
+        }
+
+        .severity-chart-wrapper {
+            margin-bottom: 1.75rem;
+        }
+
+        .chart-row {
+            margin-bottom: 0.85rem;
+        }
+
+        .chart-row-lbl {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: var(--text-secondary);
+        }
+
+        .chart-bar-bg {
+            height: 10px;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .chart-bar-fill {
+            height: 100%;
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .report-preview-box {
+            margin-top: 1.5rem;
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 1.5rem;
+        }
+
+        .report-textarea {
+            width: 100%;
+            height: 220px;
+            background: #080b12;
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            padding: 1.15rem;
+            margin-bottom: 0.85rem;
+            resize: vertical;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .notification-toast {
+            position: fixed;
+            bottom: 2rem;
+            right: -320px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--color-accent);
+            border-left: 4px solid var(--color-accent);
+            color: var(--text-primary);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 1000;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9rem;
+            font-weight: 600;
+            backdrop-filter: blur(12px);
+        }
+
+        .notification-toast.active {
+            right: 2rem;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen p-8">
-    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8">
-        <div class="flex items-center justify-between border-bottom pb-4 mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">Security Scorecard Interactive</h1>
-            <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">Senior Agent Edition</span>
-        </div>
+<body>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Form Input -->
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Chọn lỗ hổng từ DB (Tùy chọn)</label>
-                    <select id="vuln-select" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
-                        <option value="">-- Nhập thủ công --</option>
-                    </select>
+    <!-- TOP STICKY HEADER -->
+    <header>
+        <div class="header-container">
+            <div class="logo-section">
+                <div class="logo-icon-container">
+                    <i data-lucide="shield-check" style="width:24px; height:24px; color:#ffffff;"></i>
                 </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Impact</label>
-                    <select id="impact" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
-                        <option value="Critical">Critical (4)</option>
-                        <option value="High">High (3)</option>
-                        <option value="Medium" selected>Medium (2)</option>
-                        <option value="Low">Low (1)</option>
-                    </select>
+                <div class="logo-title">
+                    <h1>DXD Labs Security Suite</h1>
+                    <span>Smart Contract Auditing Portal</span>
                 </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Likelihood</label>
-                    <select id="likelihood" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
-                        <option value="High">High (3)</option>
-                        <option value="Medium" selected>Medium (2)</option>
-                        <option value="Low">Low (1)</option>
-                    </select>
-                </div>
-
-                <div class="flex items-center">
-                    <input id="is-immutable" type="checkbox" checked class="h-4 w-4 text-blue-600 border-gray-300 rounded">
-                    <label for="is-immutable" class="ml-2 block text-sm text-gray-900">Immutable (Blockchain-specific multiplier)</label>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Exploit Maturity</label>
-                    <select id="maturity" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
-                        <option value="Active">Active Exploits (1.2x)</option>
-                        <option value="POC" selected>POC available (1.0x)</option>
-                        <option value="Theoretical">Theoretical (0.8x)</option>
-                    </select>
-                </div>
-
-                <button id="calculate-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200">
-                    Tính toán rủi ro
-                </button>
             </div>
-
-            <!-- Kết quả -->
-            <div class="bg-gray-50 rounded-lg p-6 border flex flex-col items-center justify-center text-center">
-                <div class="text-sm text-gray-500 uppercase tracking-widest mb-2">Security Score</div>
-                <div id="result-score" class="text-6xl font-black text-gray-800 mb-2">0.0</div>
-                <div id="result-severity" class="text-xl font-bold px-4 py-1 rounded-full bg-gray-200 text-gray-700">
-                    N/A
+            
+            <div class="system-ticker">
+                <div class="ticker-item">
+                    <div class="ticker-dot"></div>
+                    <span>Vulnerability DB: <strong id="ticker-vuln-count">30</strong></span>
                 </div>
-                
-                <div class="mt-8 w-full border-t pt-4">
-                    <div class="text-left text-xs text-gray-400 mb-2">Chi tiết trọng số:</div>
-                    <div class="flex justify-between text-sm mb-1">
-                        <span>Impact Weighted:</span>
-                        <span id="detail-impact">-</span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                        <span>Likelihood Weighted:</span>
-                        <span id="detail-likelihood">-</span>
-                    </div>
+                <div class="ticker-item">
+                    <i data-lucide="cpu" style="width:14px; height:14px; color:var(--color-accent);"></i>
+                    <span>Sui CLI: <strong>1.64.2</strong></span>
+                </div>
+                <div class="ticker-item">
+                    <i data-lucide="binary" style="width:14px; height:14px; color:#8b5cf6;"></i>
+                    <span>Formal Verification: <strong>Active</strong></span>
                 </div>
             </div>
         </div>
+    </header>
+
+    <!-- TABS NAVIGATION BAR (FIXED: Flex layout horizontal at top) -->
+    <div class="tabs-nav">
+        <button class="tab-btn active" onclick="switchTab(event, 'tab-scorecard')">
+            <i data-lucide="sliders"></i> BVSS Scorecard
+        </button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-playbook')">
+            <i data-lucide="book-open"></i> Vuln Playbook
+        </button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-scanner')">
+            <i data-lucide="terminal"></i> SUI Move Scanner
+        </button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-builder')">
+            <i data-lucide="file-text"></i> Report Builder <span id="cart-badge" style="background:var(--color-accent); color:white; font-size:0.7rem; border-radius:50%; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; font-weight:700; margin-left:0.3rem;">0</span>
+        </button>
     </div>
 
+    <!-- MAIN DASHBOARD CONTENT AREA -->
+    <main>
+        
+        <!-- Tab 1: Interactive BVSS Calculator -->
+        <div id="tab-scorecard" class="tab-content active">
+            <div class="grid-2col">
+                
+                <!-- Scorecard Configuration Options -->
+                <div class="glass-card">
+                    <h2 class="form-section-title">
+                        <i data-lucide="settings" style="color:var(--color-accent);"></i>
+                        BVSS Weights Configuration
+                    </h2>
+                    
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+                        <div class="form-group">
+                            <label for="calc-impact">Impact Severity</label>
+                            <select id="calc-impact" class="form-control" onchange="runCalculator()">
+                                <option value="Critical">Critical (4.0)</option>
+                                <option value="High" selected>High (3.0)</option>
+                                <option value="Medium">Medium (2.0)</option>
+                                <option value="Low">Low (1.0)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="calc-likelihood">Exploit Likelihood</label>
+                            <select id="calc-likelihood" class="form-control" onchange="runCalculator()">
+                                <option value="High">High (3.0)</option>
+                                <option value="Medium" selected>Medium (2.0)</option>
+                                <option value="Low">Low (1.0)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+                        <div class="form-group">
+                            <label for="calc-exploitability">Exploitability Method</label>
+                            <select id="calc-exploitability" class="form-control" onchange="runCalculator()">
+                                <option value="Network" selected>Network (3.0)</option>
+                                <option value="Adjacent">Adjacent (2.0)</option>
+                                <option value="Local">Local (1.0)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="calc-economic">Estimated Economic Loss</label>
+                            <select id="calc-economic" class="form-control" onchange="runCalculator()">
+                                <option value="Billions">Billions (4.0)</option>
+                                <option value="Millions" selected>Millions (3.0)</option>
+                                <option value="Thousands">Thousands (2.0)</option>
+                                <option value="Negligible">Negligible (1.0)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+                        <div class="form-group">
+                            <label for="calc-scope">Impact Scope Scope</label>
+                            <select id="calc-scope" class="form-control" onchange="runCalculator()">
+                                <option value="Unchanged" selected>Unchanged (1.0x)</option>
+                                <option value="Changed">Changed (1.2x)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="calc-maturity">Exploit Maturity</label>
+                            <select id="calc-maturity" class="form-control" onchange="runCalculator()">
+                                <option value="Active">Active Exploits (1.2x)</option>
+                                <option value="POC" selected>POC Available (1.0x)</option>
+                                <option value="Theoretical">Theoretical (0.8x)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+                        <div class="form-group">
+                            <label for="calc-privilege">Privileged Access</label>
+                            <select id="calc-privilege" class="form-control" onchange="runCalculator()">
+                                <option value="Required">Required (0.7x)</option>
+                                <option value="Not Required" selected>Not Required (1.1x)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="calc-autonomy">AI Agent Autonomy</label>
+                            <select id="calc-autonomy" class="form-control" onchange="runCalculator()">
+                                <option value="Full">Full Autonomy (1.5x)</option>
+                                <option value="Partial">Partial Autonomy (1.2x)</option>
+                                <option value="None" selected>None (1.0x)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-container" onclick="toggleCheckbox('calc-immutable')">
+                            <input type="checkbox" id="calc-immutable" checked onclick="event.stopPropagation(); runCalculator()">
+                            <div>
+                                <strong style="font-size:0.85rem; display:block; color:var(--text-primary);">Blockchain Immutability Multiplier (1.5x)</strong>
+                                <span style="font-size:0.75rem; color:var(--text-secondary);">Applies additional multiplier penalty due to blockchain's immutable post-deployment state.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1.20fr 0.80fr; gap:0.75rem; margin-top:1.75rem;">
+                        <div class="form-group" style="margin:0;">
+                            <input type="text" id="calc-title" class="form-control" placeholder="Vulnerability Title (e.g. Arithmetic overflow)">
+                        </div>
+                        <button class="btn btn-success" onclick="addCustomFindingToReport()">
+                            <i data-lucide="plus-circle"></i> Add to Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Animated Radial Gauge score Results -->
+                <div class="scorecard-summary-card">
+                    <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:2px; font-weight:700; color:var(--text-secondary);">BVSS Risk Assessment Score</span>
+                    
+                    <div class="gauge-container">
+                        <svg class="gauge-svg" width="200" height="200">
+                            <circle class="gauge-bg" cx="100" cy="100" r="90" />
+                            <circle class="gauge-fill" id="gauge-score-fill" cx="100" cy="100" r="90" />
+                        </svg>
+                        <div class="gauge-label">
+                            <div class="gauge-score" id="gauge-score-text">0.0</div>
+                            <div class="gauge-max">MAX 10.0</div>
+                        </div>
+                    </div>
+
+                    <div id="calc-severity-badge" class="severity-badge">
+                        <i data-lucide="alert-triangle"></i> N/A
+                    </div>
+
+                    <!-- Remediation box based on score -->
+                    <div class="recommendation-box" id="calc-remedy-box">
+                        Adjust inputs on the left side to calculate overall Move vulnerability severity.
+                    </div>
+
+                    <!-- Score Breakdown Matrix -->
+                    <table class="breakdown-table">
+                        <thead>
+                            <tr>
+                                <th>Metric Component</th>
+                                <th>Configuration</th>
+                                <th style="text-align:right;">Weighted Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="breakdown-rows">
+                            <tr>
+                                <td>BVSS Base Metrics</td>
+                                <td>-</td>
+                                <td style="text-align:right;">-</td>
+                            </tr>
+                            <tr>
+                                <td>Exploitability</td>
+                                <td>-</td>
+                                <td style="text-align:right;">-</td>
+                            </tr>
+                            <tr>
+                                <td>Economic Loss</td>
+                                <td>-</td>
+                                <td style="text-align:right;">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Tab 2: Move Vulnerability Playbook -->
+        <div id="tab-playbook" class="tab-content">
+            <div class="grid-playbook">
+                
+                <!-- Sidebar: Search & Filtered List -->
+                <div class="glass-card" style="padding:1.5rem;">
+                    <div class="search-container">
+                        <i data-lucide="search" class="search-icon" style="width:16px; height:16px;"></i>
+                        <input type="text" id="playbook-search" class="form-control search-input" placeholder="Search vulnerabilities..." oninput="filterPlaybookList()">
+                    </div>
+
+                    <div class="category-filters">
+                        <button class="filter-btn active" onclick="filterPlaybookCategory(event, 'ALL')">ALL</button>
+                        <button class="filter-btn" onclick="filterPlaybookCategory(event, 'SUI')">SUI</button>
+                        <button class="filter-btn" onclick="filterPlaybookCategory(event, 'ACC')">ACC</button>
+                        <button class="filter-btn" onclick="filterPlaybookCategory(event, 'MTH')">MTH</button>
+                        <button class="filter-btn" onclick="filterPlaybookCategory(event, 'ORC')">ORC</button>
+                        <button class="filter-btn" onclick="filterPlaybookCategory(event, 'DOS')">DOS</button>
+                        <button class="filter-btn" onclick="filterPlaybookCategory(event, 'LOG')">LOG</button>
+                    </div>
+
+                    <div class="vuln-list-wrapper" id="playbook-list">
+                        <div class="cart-empty" style="font-size:0.8rem; padding:1.5rem;">Synchronizing Database...</div>
+                    </div>
+                </div>
+
+                <!-- Right Detail Workspace panel -->
+                <div class="glass-card playbook-detail" id="playbook-detail-panel">
+                    <div class="cart-empty" style="padding:6rem; border:none;">
+                        <i data-lucide="book-open" style="width:48px; height:48px; color:var(--text-muted); margin-bottom:1rem;"></i>
+                        <p>Select a vulnerability entry from the list to view risk details, technical impacts, and comparative Move source codes (Vulnerable vs Safe).</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Tab 3: Interactive Contract Scanner -->
+        <div id="tab-scanner" class="tab-content">
+            <div class="grid-2col">
+                
+                <!-- Move Code Editor Panel -->
+                <div class="glass-card scanner-editor-wrapper">
+                    <h2 class="form-section-title">
+                        <i data-lucide="code" style="color:var(--color-accent);"></i>
+                        Sui Move Code Analyzer
+                    </h2>
+                    
+                    <div class="scan-templates-box">
+                        <span style="font-size:0.75rem; font-weight:700; color:var(--text-secondary); display:block; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.5px;">Load Code Template:</span>
+                        <button class="template-btn" onclick="loadScanTemplate('oracle')">Oracle Stale Price</button>
+                        <button class="template-btn" onclick="loadScanTemplate('shift')">Arithmetic Shift Overflow</button>
+                        <button class="template-btn" onclick="loadScanTemplate('upgrade')">Unsecured Upgrade Version</button>
+                        <button class="template-btn" onclick="loadScanTemplate('flashloan')">Unchecked Flash Loan</button>
+                    </div>
+
+                    <textarea id="scanner-code" class="code-textarea" placeholder="// Paste your Sui Move module code here to scan..."></textarea>
+                    
+                    <button class="btn" onclick="runCodeScanner()">
+                        <i data-lucide="sparkles"></i> Scan Move Code
+                    </button>
+                </div>
+
+                <!-- Analyzer static findings results -->
+                <div class="glass-card">
+                    <h2 class="form-section-title">
+                        <i data-lucide="activity" style="color:var(--color-low);"></i>
+                        Static Scan Results (Findings)
+                    </h2>
+                    
+                    <div class="scan-results-box" id="scan-findings-container">
+                        <div class="cart-empty" style="padding:5.5rem; border:none;">
+                            <i data-lucide="clipboard-list" style="width:36px; height:36px; color:var(--text-muted); margin-bottom:1rem;"></i>
+                            <p>Click "Scan Move Code" or load a preset code template to execute the smart contract static analysis engine simulator.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Tab 4: Professional Audit Report Builder -->
+        <div id="tab-builder" class="tab-content">
+            <div class="report-grid">
+                
+                <!-- Report metadata details & findings list -->
+                <div class="glass-card">
+                    <h2 class="form-section-title">
+                        <i data-lucide="file-plus" style="color:var(--color-accent);"></i>
+                        Project Scope & Selected Findings
+                    </h2>
+                    
+                    <div class="form-group">
+                        <label for="rep-project">Project Name</label>
+                        <input type="text" id="rep-project" class="form-control" value="DeepBook V2 Core Protocol" placeholder="e.g. Cetus AMM Core Core">
+                    </div>
+                    
+                    <div style="display:grid; grid-template-columns:1.2fr 0.8fr; gap:1.25rem;">
+                        <div class="form-group">
+                            <label for="rep-hash">Audited Commit Hash</label>
+                            <input type="text" id="rep-hash" class="form-control" value="8f12a3d5b0c79e6aef881c2d3d4e5f6a8b23c90d" placeholder="e.g. 8f12a3d...">
+                        </div>
+                        <div class="form-group">
+                            <label for="rep-network">Target Network</label>
+                            <select id="rep-network" class="form-control">
+                                <option value="Sui Mainnet" selected>Sui Mainnet</option>
+                                <option value="Sui Testnet">Sui Testnet</option>
+                                <option value="Both Mainnet/Testnet">Both</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rep-scope">Audit Scope Files</label>
+                        <input type="text" id="rep-scope" class="form-control" value="sources/deepbook.move, sources/pool.move" placeholder="e.g. sources/*.move">
+                    </div>
+
+                    <h3 class="section-subtitle" style="margin-top:1.75rem; margin-bottom:0.85rem;">
+                        <i data-lucide="list-checks" style="width:16px; height:16px;"></i> Compilation Findings (<span id="cart-count-lbl">0</span>)
+                    </h3>
+                    
+                    <div class="cart-list" id="report-cart-list">
+                        <div class="cart-empty">Your report compilation cart is empty. Browse the "BVSS Scorecard" or "Vuln Playbook" tabs to add security findings.</div>
+                    </div>
+                </div>
+
+                <!-- Report Statistics & Export actions -->
+                <div class="glass-card">
+                    <h2 class="form-section-title">
+                        <i data-lucide="line-chart" style="color:var(--color-low);"></i>
+                        Report Statistics & Compilation
+                    </h2>
+
+                    <!-- Dynamic counts statistic grids -->
+                    <div class="summary-stats-box">
+                        <div class="summary-stat-item">
+                            <div class="summary-stat-val" id="rep-stat-total">0</div>
+                            <div class="summary-stat-lbl">Findings</div>
+                        </div>
+                        <div class="summary-stat-item">
+                            <div class="summary-stat-val" id="rep-stat-avg">0.0</div>
+                            <div class="summary-stat-lbl">Avg Score</div>
+                        </div>
+                        <div class="summary-stat-item">
+                            <div class="summary-stat-val" id="rep-stat-level" style="font-size:1.15rem; font-weight:800; display:flex; align-items:center; justify-content:center; height:2.2rem; color:var(--color-low);">N/A</div>
+                            <div class="summary-stat-lbl">Risk Rating</div>
+                        </div>
+                    </div>
+
+                    <!-- Progress bar count distributions -->
+                    <div class="severity-chart-wrapper">
+                        <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); display:block; margin-bottom:0.75rem; font-weight:700;">Findings Severity Distribution:</span>
+                        
+                        <div class="chart-row">
+                            <div class="chart-row-lbl">
+                                <span>Critical (🔴)</span>
+                                <span id="lbl-cnt-critical">0</span>
+                            </div>
+                            <div class="chart-bar-bg">
+                                <div class="chart-bar-fill" id="bar-critical" style="background-color:var(--color-critical);"></div>
+                            </div>
+                        </div>
+
+                        <div class="chart-row">
+                            <div class="chart-row-lbl">
+                                <span>High (🟠)</span>
+                                <span id="lbl-cnt-high">0</span>
+                            </div>
+                            <div class="chart-bar-bg">
+                                <div class="chart-bar-fill" id="bar-high" style="background-color:var(--color-high);"></div>
+                            </div>
+                        </div>
+
+                        <div class="chart-row">
+                            <div class="chart-row-lbl">
+                                <span>Medium (🟡)</span>
+                                <span id="lbl-cnt-medium">0</span>
+                            </div>
+                            <div class="chart-bar-bg">
+                                <div class="chart-bar-fill" id="bar-medium" style="background-color:var(--color-medium);"></div>
+                            </div>
+                        </div>
+
+                        <div class="chart-row">
+                            <div class="chart-row-lbl">
+                                <span>Low (🟢)</span>
+                                <span id="lbl-cnt-low">0</span>
+                            </div>
+                            <div class="chart-bar-bg">
+                                <div class="chart-bar-fill" id="bar-low" style="background-color:var(--color-low);"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Export Actions buttons -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-top:1.5rem;">
+                        <button class="btn btn-outline" onclick="copyMarkdownReport()">
+                            <i data-lucide="copy"></i> Copy Markdown
+                        </button>
+                        <button class="btn" onclick="downloadHTMLReport()">
+                            <i data-lucide="download"></i> Download HTML Report
+                        </button>
+                    </div>
+
+                    <!-- Realtime Report preview panel -->
+                    <div class="report-preview-box">
+                        <span style="font-size:0.75rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; display:block; margin-bottom:0.5rem;">Live Compilation Markdown Output:</span>
+                        <textarea id="report-preview-text" class="report-textarea" readonly placeholder="Compilation markdown will dynamically regenerate when selected findings change..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Notification toast -->
+    <div id="toast" class="notification-toast">
+        <i data-lucide="info" style="width:20px; height:20px;"></i>
+        <span id="toast-text">System Toast Notification</span>
+    </div>
+
+    <!-- UI/UX integrations scripts -->
     <script>
         let config = null;
         let calculator = null;
         let vulns = [];
+        let activeCategory = 'ALL';
+        let activePlaybookId = null;
+        let reportCart = [];
 
+        // Interactive Code Scan Presets
+        const scanTemplates = {
+            oracle: `module dxdlabs::oracle_freshness {
+    use sui::clock::{Self, Clock};
+    
+    struct OraclePrice has key, store {
+        id: UID,
+        value: u64,
+        last_updated: u64
+    }
+
+    // VULNERABLE: No price staleness freshness check. Accepts stale price!
+    public fun get_price_unsafe(oracle: &OraclePrice): u64 {
+        oracle.value
+    }
+
+    // SECURE: Enforces strict price freshness and staleness duration check
+    public fun get_price_secure(oracle: &OraclePrice, clock: &Clock): u64 {
+        let now = clock::timestamp_ms(clock);
+        // Staleness guard check: price must not be older than 3600 seconds
+        assert!(now - oracle.last_updated <= 3600000, 1001); 
+        oracle.value
+    }
+}`,
+            shift: `module dxdlabs::math_shift {
+    const OVERFLOW: u64 = 4001;
+
+    // VULNERABLE: Incorrect shift range check bounds (> 256)
+    public fun checked_shlw_unsafe(x: u256, shift: u8): u256 {
+        if (shift > 256) abort OVERFLOW;  // Flawed limit threshold!
+        x << shift
+    }
+
+    // SECURE: Strict shift range checks (< 192 appropriate for Sui math)
+    public fun checked_shlw_secure(x: u256, shift: u8): u256 {
+        if (shift > 192) abort OVERFLOW;  // Valid threshold bound constraint
+        x << shift
+    }
+}`,
+            upgrade: `module dxdlabs::package_upgrade {
+    struct State has key {
+        id: UID,
+        version: u64,
+        admin: address
+    }
+
+    // VULNERABLE: Missing upgrade package state migration check logic
+    public fun migrate_state_unsafe(state: &mut State, ctx: &TxContext) {
+        // Overwrite variables without checking sender or capability matching!
+        state.version = state.version + 1;
+    }
+
+    // SECURE: Strict version upgrades and sender assert policies
+    public fun migrate_state_secure(state: &mut State, ctx: &TxContext) {
+        assert!(tx_context::sender(ctx) == state.admin, 1001); // Auth check
+        // Strict version migration validation checks
+        assert!(state.version < 5, 1002);
+        state.version = state.version + 1;
+    }
+}`,
+            flashloan: `module dxdlabs::flash_loan {
+    use sui::coin::{Self, Coin};
+    use sui::balance::{Self, Balance};
+
+    struct Receipt {
+        amount: u64,
+        fee: u64
+    }
+
+    struct Pool<phantom T> has key {
+        id: UID,
+        balance: Balance<T>
+    }
+
+    // VULNERABLE: Returning receipt instead of standard "hot potato" (which has no drop/store/key)
+    // If flash loan Receipt has drop/store/key capabilities, it can be dropped manually bypass repayments!
+    // Receipt should NOT have drop, store, or key, enforcing direct destruction check in repayment module.
+    public fun flash_loan_unsafe<T>(pool: &mut Pool<T>, amount: u64, ctx: &mut TxContext): (Coin<T>, Receipt) {
+        let coin = coin::from_balance(balance::split(&mut pool.balance, amount), ctx);
+        (coin, Receipt { amount, fee: 10 })
+    }
+}`
+        };
+
+        // Loader init
         async function init() {
-            // Load config
-            const response = await fetch('../scorecard_config.json');
-            config = await response.json();
-            calculator = new BVSSCalculator(config);
-
-            // Load exported vulns if available
             try {
+                // Lucide Icons initialization
+                lucide.createIcons();
+
+                // Fetch configuration
+                const response = await fetch('../scorecard_config.json');
+                config = await response.json();
+                calculator = new BVSSCalculator(config);
+
+                // Fetch synced vulnerabilities
                 const vRes = await fetch('vulns_exported.json');
                 vulns = await vRes.json();
-                const select = document.getElementById('vuln-select');
-                vulns.forEach(v => {
-                    const opt = document.createElement('option');
-                    opt.value = v.id;
-                    opt.textContent = `${v.id} (${v.severity || 'Medium'})`;
-                    select.appendChild(opt);
-                });
+
+                // Ticker counts setup
+                document.getElementById('ticker-vuln-count').textContent = vulns.length;
+
+                // Sync panels
+                runCalculator();
+                renderPlaybookSidebar();
+
+                // Default text editor
+                loadScanTemplate('oracle');
+
             } catch (e) {
-                console.log("No exported vulns found, using manual mode.");
+                console.error("Dashboard init error:", e);
+                showToast("Failed to retrieve database assets. Running fallback configs.");
+                
+                // Fallback offline configurations
+                config = {
+                    scoring_logic: {
+                        impact_map: { Low: 1, Medium: 2, High: 3, Critical: 4 },
+                        likelihood_map: { Low: 1, Medium: 2, High: 3 },
+                        weights: { impact: 0.6, likelihood: 0.4 },
+                        multipliers: { immutability: 1.5 },
+                        severity_levels: [
+                            { threshold: 9.0, label: "Critical", color: "🔴" },
+                            { threshold: 7.0, label: "High", color: "🟠" },
+                            { threshold: 4.0, label: "Medium", color: "🟡" },
+                            { threshold: 0.0, label: "Low", color: "🟢" }
+                        ],
+                        bvss_metrics: {
+                            exploitability_map: { Network: 3.0, Adjacent: 2.0, Local: 1.0 },
+                            scope_map: { Unchanged: 1.0, Changed: 1.2 },
+                            economic_loss_map: { Negligible: 1, Thousands: 2, Millions: 3, Billions: 4 }
+                        }
+                    },
+                    blockchain_factors: {
+                        exploit_maturity: { Theoretical: 0.8, POC: 1.0, Active: 1.2 },
+                        privileged_access: { Required: 0.7, "Not Required": 1.1 },
+                        agent_autonomy: { None: 1.0, Partial: 1.2, Full: 1.5 }
+                    }
+                };
+                calculator = new BVSSCalculator(config);
+                runCalculator();
             }
         }
 
-        document.getElementById('calculate-btn').onclick = () => {
-            const impact = document.getElementById('impact').value;
-            const likelihood = document.getElementById('likelihood').value;
-            const isImmutable = document.getElementById('is-immutable').checked;
-            const maturity = document.getElementById('maturity').value;
+        // Navigation Tabs controller
+        function switchTab(event, tabId) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(t => t.classList.remove('active'));
 
-            const res = calculator.calculate(impact, likelihood, isImmutable, maturity);
-            
-            document.getElementById('result-score').textContent = res.score.toFixed(1);
-            document.getElementById('result-severity').textContent = `${res.color} ${res.severity}`;
-            
-            // Update color
-            const sevEl = document.getElementById('result-severity');
-            sevEl.className = "text-xl font-bold px-4 py-1 rounded-full ";
-            if (res.severity === 'Critical') sevEl.classList.add('bg-red-100', 'text-red-700');
-            else if (res.severity === 'High') sevEl.classList.add('bg-orange-100', 'text-orange-700');
-            else if (res.severity === 'Medium') sevEl.classList.add('bg-yellow-100', 'text-yellow-700');
-            else sevEl.classList.add('bg-green-100', 'text-green-700');
-        };
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(b => b.classList.remove('active'));
 
-        document.getElementById('vuln-select').onchange = (e) => {
-            const vuln = vulns.find(v => v.id === e.target.value);
-            if (vuln) {
-                if (vuln.impact) document.getElementById('impact').value = vuln.impact;
-                if (vuln.likelihood) document.getElementById('likelihood').value = vuln.likelihood;
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if (tabId === 'tab-builder') {
+                updateReportCompilation();
             }
-        };
+        }
 
-        init();
+        // Toggle checkbox helper
+        function toggleCheckbox(id) {
+            const el = document.getElementById(id);
+            el.checked = !el.checked;
+            runCalculator();
+        }
+
+        // System notification toast manager
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').textContent = message;
+            toast.classList.add('active');
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        // BVSS scorecard metrics updates
+        function runCalculator() {
+            if (!calculator) return;
+
+            const impact = document.getElementById('calc-impact').value;
+            const likelihood = document.getElementById('calc-likelihood').value;
+            const exploitability = document.getElementById('calc-exploitability').value;
+            const scope = document.getElementById('calc-scope').value;
+            const economicLoss = document.getElementById('calc-economic').value;
+            const isImmutable = document.getElementById('calc-immutable').checked;
+            const exploitMaturity = document.getElementById('calc-maturity').value;
+            const privilegedAccess = document.getElementById('calc-privilege').value;
+            const agentAutonomy = document.getElementById('calc-autonomy').value;
+
+            // Call scorecard using unified argument mapping
+            const res = calculator.calculate({
+                impact,
+                likelihood,
+                exploitability,
+                scope,
+                economicLoss,
+                isImmutable,
+                exploitMaturity,
+                privilegedAccess,
+                agentAutonomy
+            });
+
+            // Update scores
+            const scoreText = document.getElementById('gauge-score-text');
+            scoreText.textContent = res.score.toFixed(1);
+
+            // Animate stroke circle gauge
+            const dashOffsetMax = 565.48; // (2 * PI * r) where r=90
+            const calculatedOffset = dashOffsetMax - (res.score / 10) * dashOffsetMax;
+            const fillElement = document.getElementById('gauge-score-fill');
+            fillElement.style.strokeDashoffset = calculatedOffset;
+
+            let strokeColor = 'var(--color-low)';
+            let severityClass = 'sev-low';
+            if (res.severity === 'Critical') {
+                strokeColor = 'var(--color-critical)';
+                severityClass = 'sev-critical';
+            } else if (res.severity === 'High') {
+                strokeColor = 'var(--color-high)';
+                severityClass = 'sev-high';
+            } else if (res.severity === 'Medium') {
+                strokeColor = 'var(--color-medium)';
+                severityClass = 'sev-medium';
+            }
+
+            fillElement.style.stroke = strokeColor;
+            fillElement.style.filter = `drop-shadow(0 0 8px ${strokeColor})`;
+
+            // Severity Badge
+            const badge = document.getElementById('calc-severity-badge');
+            badge.className = `severity-badge ${severityClass}`;
+            badge.innerHTML = `<i data-lucide="alert-triangle" style="width:16px; height:16px;"></i> ${res.severity}`;
+            lucide.createIcons();
+
+            // Set contextual English recommendations
+            const remedyBox = document.getElementById('calc-remedy-box');
+            if (res.score >= 9.0) {
+                remedyBox.innerHTML = `<strong>⚠️ CRITICAL MITIGATION ADVICE:</strong> Vulnerability exhibits <strong>CRITICAL SEVERITY (Score: ${res.score})</strong>. Immutability multiplier is active, which guarantees permanent lock risk if contracts lack upgraded Proxy implementations. Cease active mint/redeem calls and apply emergency hot patches immediately.`;
+                remedyBox.style.borderLeftColor = 'var(--color-critical)';
+            } else if (res.score >= 7.0) {
+                remedyBox.innerHTML = `<strong>⚡ PRIORITY ACTION REQUIRED:</strong> Risk rating evaluated at <strong>HIGH SEVERITY (Score: ${res.score})</strong>. Remote exploitation over public networks requires no administrative privileges. Enforce robust formal verification checks using Move Prover immediately.`;
+                remedyBox.style.borderLeftColor = 'var(--color-high)';
+            } else if (res.score >= 4.0) {
+                remedyBox.innerHTML = `<strong>📋 STANDARD MITIGATION RECOMMENDED:</strong> Overall risk rated at <strong>MEDIUM (Score: ${res.score})</strong>. Vulnerability commonly references dynamic field upgrades, clock manipulation, or oracle updates. Verify storage fund allocations.`;
+                remedyBox.style.borderLeftColor = 'var(--color-medium)';
+            } else {
+                remedyBox.innerHTML = `<strong>💡 AUDIT NOTE:</strong> Risk rating is <strong>LOW (Score: ${res.score})</strong>. Document in final audit reports and optimize code quality in upcoming upgrade sprints.`;
+                remedyBox.style.borderLeftColor = 'var(--color-low)';
+            }
+
+            // Populate Score breakdown matrix table
+            const bd = res.breakdown;
+            const rowsContainer = document.getElementById('breakdown-rows');
+            rowsContainer.innerHTML = `
+                <tr>
+                    <td>BVSS Base Metrics</td>
+                    <td>Impact (${bd.impact.label}) &times; Likelihood (${bd.likelihood.label})</td>
+                    <td style="text-align:right;"><span class="metric-pill">Base: ${bd.impact.val} / ${bd.likelihood.val}</span></td>
+                </tr>
+                <tr>
+                    <td>Exploitability</td>
+                    <td>${bd.exploitability.label} access vector</td>
+                    <td style="text-align:right;"><span class="metric-pill">Mult: ${bd.exploitability.val}x</span></td>
+                </tr>
+                <tr>
+                    <td>Economic Loss</td>
+                    <td>Estimated impact: ${bd.economicLoss.label}</td>
+                    <td style="text-align:right;"><span class="metric-pill">Val: ${bd.economicLoss.val}</span></td>
+                </tr>
+                <tr>
+                    <td>Scope Adjustment</td>
+                    <td>Impact borders: ${bd.scope.label}</td>
+                    <td style="text-align:right;"><span class="metric-pill">${bd.scope.mult}x</span></td>
+                </tr>
+                <tr>
+                    <td>Immutability Multiplier</td>
+                    <td>Blockchain persistent contract</td>
+                    <td style="text-align:right;"><span class="metric-pill" style="color:var(--color-medium);">${bd.isImmutable.mult}x</span></td>
+                </tr>
+                <tr>
+                    <td>Exploit Maturity</td>
+                    <td>Vulnerability status: ${bd.exploitMaturity.label}</td>
+                    <td style="text-align:right;"><span class="metric-pill">${bd.exploitMaturity.mult}x</span></td>
+                </tr>
+                <tr>
+                    <td>Privileged Access</td>
+                    <td>Access prerequisite: ${bd.privilegedAccess.label}</td>
+                    <td style="text-align:right;"><span class="metric-pill">${bd.privilegedAccess.mult}x</span></td>
+                </tr>
+                <tr>
+                    <td>AI Agent Autonomy</td>
+                    <td>Agent system connection: ${bd.agentAutonomy.label}</td>
+                    <td style="text-align:right;"><span class="metric-pill" style="color:var(--color-info);">${bd.agentAutonomy.mult}x</span></td>
+                </tr>
+            `;
+        }
+
+        // Tab 2: Render Playbook side bar
+        function renderPlaybookSidebar() {
+            const listEl = document.getElementById('playbook-list');
+            if (vulns.length === 0) {
+                listEl.innerHTML = '<div class="cart-empty">No vulnerabilities loaded.</div>';
+                return;
+            }
+
+            const searchQuery = document.getElementById('playbook-search').value.toLowerCase();
+
+            let filtered = vulns.filter(v => {
+                const matchSearch = v.name.toLowerCase().includes(searchQuery) || 
+                                    v.id.toLowerCase().includes(searchQuery) ||
+                                    (v.description && v.description.toLowerCase().includes(searchQuery));
+                
+                const matchCategory = activeCategory === 'ALL' || 
+                                      (v.category && v.category.toUpperCase() === activeCategory) ||
+                                      (v.id && v.id.split('-')[2] === activeCategory);
+                
+                return matchSearch && matchCategory;
+            });
+
+            // Sort Critical severity first
+            const severityOrder = { 'Critical': 4, 'High': 3, 'Medium': 2, 'Low': 1, 'Informational': 1 };
+            filtered.sort((a, b) => {
+                const aSev = severityOrder[a.severity] || 0;
+                const bSev = severityOrder[b.severity] || 0;
+                return bSev - aSev;
+            });
+
+            listEl.innerHTML = '';
+            filtered.forEach(v => {
+                let badgeClass = 'sev-low';
+                if (v.severity === 'Critical') badgeClass = 'sev-critical';
+                else if (v.severity === 'High') badgeClass = 'sev-high';
+                else if (v.severity === 'Medium') badgeClass = 'sev-medium';
+
+                const card = document.createElement('div');
+                card.className = `vuln-card ${activePlaybookId === v.id ? 'active' : ''}`;
+                card.onclick = () => selectPlaybookItem(v.id);
+                card.innerHTML = `
+                    <div class="vuln-card-header">
+                        <span class="vuln-card-id">${v.id}</span>
+                        <span class="vuln-card-badge ${badgeClass}">${v.severity || 'Medium'}</span>
+                    </div>
+                    <div class="vuln-card-title">${v.name}</div>
+                `;
+                listEl.appendChild(card);
+            });
+
+            // Auto-select first item if activePlaybookId is null
+            if (filtered.length > 0 && !activePlaybookId) {
+                selectPlaybookItem(filtered[0].id);
+            }
+        }
+
+        function filterPlaybookList() {
+            renderPlaybookSidebar();
+        }
+
+        function filterPlaybookCategory(event, cat) {
+            const buttons = document.querySelectorAll('.category-filters .filter-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            activeCategory = cat;
+            renderPlaybookSidebar();
+        }
+
+        // Render playbook vulnerability detail sheets
+        function selectPlaybookItem(id) {
+            activePlaybookId = id;
+            
+            const cards = document.querySelectorAll('#playbook-list .vuln-card');
+            cards.forEach(c => c.classList.remove('active'));
+            renderPlaybookSidebar();
+
+            const vuln = vulns.find(v => v.id === id);
+            const detailPanel = document.getElementById('playbook-detail-panel');
+
+            if (!vuln) {
+                detailPanel.innerHTML = '<div class="cart-empty">Vulnerability not found in database.</div>';
+                return;
+            }
+
+            let badgeClass = 'sev-low';
+            if (vuln.severity === 'Critical') badgeClass = 'sev-critical';
+            else if (vuln.severity === 'High') badgeClass = 'sev-high';
+            else if (vuln.severity === 'Medium') badgeClass = 'sev-medium';
+
+            const refsHtml = vuln.references && vuln.references.length > 0 
+                ? vuln.references.map(r => `<li><i data-lucide="external-link" style="width:14px; height:14px; color:var(--text-muted);"></i><a href="${r}" target="_blank">${r}</a></li>`).join('')
+                : '<li>No documentation references attached.</li>';
+
+            const score = (vuln.score !== undefined) ? vuln.score : (vuln.severity === 'Critical' ? 9.8 : vuln.severity === 'High' ? 7.8 : 4.8);
+
+            detailPanel.innerHTML = `
+                <div class="detail-header">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;">
+                        <div>
+                            <span class="vuln-card-id" style="font-size:0.95rem;">${vuln.id}</span>
+                            <h2 style="font-size:1.55rem; font-weight:800; color:var(--text-primary); margin-top:0.25rem;">${vuln.name}</h2>
+                        </div>
+                        <span class="severity-badge ${badgeClass}">
+                            <i data-lucide="shield-alert" style="width:16px; height:16px;"></i> ${vuln.severity || 'Medium'} (${score.toFixed(1)} / 10)
+                        </span>
+                    </div>
+                </div>
+
+                <div class="detail-meta-grid">
+                    <div class="detail-meta-item">
+                        <div class="detail-meta-label">Recorded Date</div>
+                        <div class="detail-meta-value">${vuln.date || 'N/A'}</div>
+                    </div>
+                    <div class="detail-meta-item">
+                        <div class="detail-meta-label">Estimated Loss</div>
+                        <div class="detail-meta-value" style="color:var(--color-critical);">${vuln.loss || 'N/A'}</div>
+                    </div>
+                    <div class="detail-meta-item">
+                        <div class="detail-meta-label">Platform Specificity</div>
+                        <div class="detail-meta-value">${vuln.sui_specific ? 'Sui Move Specific' : 'General smart contract'}</div>
+                    </div>
+                </div>
+
+                <h3 class="section-subtitle"><i data-lucide="info" style="width:16px; height:16px;"></i> Technical Description</h3>
+                <p style="font-size:0.92rem; line-height:1.6; color:var(--text-secondary); margin-bottom:1.5rem;">
+                    ${vuln.description ? vuln.description.replace(/\n/g, '<br>') : 'No details available.'}
+                </p>
+                
+                ${vuln.impact ? `
+                <h3 class="section-subtitle"><i data-lucide="alert-circle" style="width:16px; height:16px;"></i> Protocol Impact</h3>
+                <p style="font-size:0.9rem; line-height:1.5; color:var(--text-secondary); margin-bottom:1.5rem; background:rgba(30,41,59,0.25); padding:0.75rem 1.15rem; border-radius:8px; border-left:3px solid var(--color-accent);">${vuln.impact}</p>
+                ` : ''}
+
+                <!-- Code comparative view tab control -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; margin-top:1.5rem;">
+                    <h3 class="section-subtitle" style="margin:0;"><i data-lucide="code-2" style="width:16px; height:16px;"></i> Comparative Code Sandbox</h3>
+                    <div style="display:flex; gap:0.25rem; font-size:0.7rem;" id="code-toggle-controls">
+                        <button class="filter-btn active" onclick="switchSnippetView('split')">Side-by-Side</button>
+                        <button class="filter-btn" onclick="switchSnippetView('tab-vuln')">Vulnerable Code</button>
+                        <button class="filter-btn" onclick="switchSnippetView('tab-fixed')">Audited Fix</button>
+                    </div>
+                </div>
+
+                <div id="snippet-playground-area">
+                    ${renderSnippetPlayground(vuln)}
+                </div>
+
+                <h3 class="section-subtitle" style="margin-top:1.75rem;"><i data-lucide="link" style="width:16px; height:16px;"></i> References & Materials</h3>
+                <ul class="references-list">
+                    ${refsHtml}
+                </ul>
+
+                <div style="margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--border-subtle);">
+                    <button class="btn btn-success" onclick="addPlaybookToReport('${vuln.id}')">
+                        <i data-lucide="plus-circle"></i> Add This Finding to Report
+                    </button>
+                </div>
+            `;
+            
+            lucide.createIcons();
+            document.querySelectorAll('pre code').forEach((el) => {
+                hljs.highlightElement(el);
+            });
+        }
+
+        // Render comparative split grids
+        function renderSnippetPlayground(vuln, mode = 'split') {
+            const codeVuln = vuln.code_vuln || '// No vulnerable snippet sample available';
+            const codeFixed = vuln.code_fixed || '// No secure patch sample available';
+
+            if (mode === 'split') {
+                return `
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                        <div>
+                            <div class="snippet-tabs">
+                                <div class="snippet-tab-btn active tab-vuln"><i data-lucide="x-circle" style="width:12px; height:12px; color:var(--color-critical);"></i> Vulnerable Snippet</div>
+                            </div>
+                            <div class="code-container">
+                                <pre><code class="language-rust">${escapeHtml(codeVuln)}</code></pre>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="snippet-tabs">
+                                <div class="snippet-tab-btn active tab-fixed"><i data-lucide="check-circle" style="width:12px; height:12px; color:var(--color-low);"></i> Secured & Audited Patch</div>
+                            </div>
+                            <div class="code-container">
+                                <pre><code class="language-rust">${escapeHtml(codeFixed)}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (mode === 'tab-vuln') {
+                return `
+                    <div>
+                        <div class="snippet-tabs">
+                            <div class="snippet-tab-btn active tab-vuln"><i data-lucide="x-circle" style="width:14px; height:14px; color:var(--color-critical);"></i> Vulnerable Move Snippet</div>
+                        </div>
+                        <div class="code-container">
+                            <pre><code class="language-rust">${escapeHtml(codeVuln)}</code></pre>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div>
+                        <div class="snippet-tabs">
+                            <div class="snippet-tab-btn active tab-fixed"><i data-lucide="check-circle" style="width:14px; height:14px; color:var(--color-low);"></i> Secured & Audited Patch</div>
+                        </div>
+                        <div class="code-container">
+                            <pre><code class="language-rust">${escapeHtml(codeFixed)}</code></pre>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function switchSnippetView(viewType) {
+            const vuln = vulns.find(v => v.id === activePlaybookId);
+            if (!vuln) return;
+
+            const area = document.getElementById('snippet-playground-area');
+            area.innerHTML = renderSnippetPlayground(vuln, viewType === 'split' ? 'split' : viewType);
+
+            lucide.createIcons();
+            document.querySelectorAll('pre code').forEach((el) => {
+                hljs.highlightElement(el);
+            });
+
+            const buttons = document.querySelectorAll('#code-toggle-controls .filter-btn');
+            buttons.forEach(b => {
+                b.classList.remove('active');
+                if (viewType === 'split' && b.textContent === 'Side-by-Side') b.classList.add('active');
+                if (viewType === 'tab-vuln' && b.textContent === 'Vulnerable Code') b.classList.add('active');
+                if (viewType === 'tab-fixed' && b.textContent === 'Audited Fix') b.classList.add('active');
+            });
+        }
+
+        // HTML escape helper
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Tab 3: Contract Scanner module
+        function loadScanTemplate(type) {
+            const code = scanTemplates[type];
+            if (code) {
+                document.getElementById('scanner-code').value = code;
+            }
+        }
+
+        function runCodeScanner() {
+            const code = document.getElementById('scanner-code').value;
+            const container = document.getElementById('scan-findings-container');
+
+            if (!code.trim()) {
+                showToast("Please enter or load Move code to start scanning!");
+                return;
+            }
+
+            showToast("Executing static analysis scanner...");
+            container.innerHTML = '<div class="cart-empty">Running static analyzer parser...</div>';
+
+            setTimeout(() => {
+                const findings = [];
+
+                // Rule 1: Shift overflow check bounds
+                if (code.includes('checked_shlw') || code.includes('<<')) {
+                    if (code.includes('shift > 256') || code.includes('shift >= 256')) {
+                        findings.push({
+                            title: "Arithmetic Shift Out-Of-Bounds (Bitwise Overflow Risk)",
+                            severity: "Critical",
+                            desc: "Detected custom math shifting logic that checks if 'shift > 256'. Inside Sui Move, shifting u256 values by amounts exceeding 192 yields overflows that corrupt liquidity mathematics (This identical flaw was exploited in the Cetus Protocol hack, leaking $223M in TVL).",
+                            remedy: "if (shift > 192) abort E_SHIFT_OUT_OF_BOUNDS;",
+                            type: "critical"
+                        });
+                    }
+                }
+
+                // Rule 2: Oracle price staleness check
+                if (code.includes('get_price') || code.includes('price')) {
+                    if (!code.includes('clock::timestamp_ms') && !code.includes('now - last_updated') && !code.includes('MAX_STALE_SECS')) {
+                        findings.push({
+                            title: "Missing Oracle Price Staleness Verification (Flash Loan Oracle Attack)",
+                            severity: "High",
+                            desc: "Hàm get_price retrieves oracle feeds without verifying price age using Clock timestamp updates. Exploitable via network congestion to borrow heavily on stale rates.",
+                            remedy: "assert!(clock::timestamp_ms(clock) - oracle.last_updated <= MAX_STALE_TIME, E_STALE_PRICE);",
+                            type: "high"
+                        });
+                    }
+                }
+
+                // Rule 3: Upgrade version downgrade vulnerability
+                if (code.includes('migrate') || code.includes('upgrade')) {
+                    if (!code.includes('assert!') && !code.includes('version')) {
+                        findings.push({
+                            title: "Missing Version Constraints in Upgrades (Downgrade Exploits)",
+                            severity: "Medium",
+                            desc: "Contract upgrade package migrations lack progressive validation checking. Allows rogue downgrading or hijacking of Shared Objects.",
+                            remedy: "assert!(state.version == CURRENT_VERSION, E_INVALID_VERSION);",
+                            type: "warning"
+                        });
+                    }
+                }
+
+                // Rule 4: Flash Loan Hot Potato leakage
+                if (code.includes('flash_loan') || code.includes('Receipt')) {
+                    if (code.includes('Receipt has key, store, drop') || code.includes('drop')) {
+                        findings.push({
+                            title: "Receipt Bypass in Flash Loan (Capital Leakage)",
+                            severity: "Critical",
+                            desc: "The transaction Receipt carries drop abilities, allowing borrowers to silently garbage collect loan structures bypassing repayment loops completely.",
+                            remedy: "struct Receipt { amount: u64, fee: u64 } // Eliminate drop capability",
+                            type: "critical"
+                        });
+                    }
+                }
+
+                // Render compiled findings
+                if (findings.length === 0) {
+                    container.innerHTML = `
+                        <div class="scan-finding-item success">
+                            <div class="scan-finding-header">
+                                <span class="scan-finding-title" style="color:var(--color-low);">
+                                    <i data-lucide="check-circle" style="width:16px; height:16px;"></i> Module Checked: Secure!
+                                </span>
+                                <span class="scan-finding-severity" style="background:rgba(16, 185, 129, 0.2); color:var(--color-low);">SAFE</span>
+                            </div>
+                            <p class="scan-finding-desc">No common SUI Move vulnerability signatures were found. Run comprehensive formal verification proofs in 'prover-examples/' using Sui Prover before deployment.</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = '';
+                    findings.forEach(f => {
+                        let sevClass = 'warning';
+                        if (f.type === 'critical') sevClass = 'sev-critical';
+                        else if (f.type === 'high') sevClass = 'sev-high';
+                        else if (f.type === 'warning') sevClass = 'sev-medium';
+
+                        const div = document.createElement('div');
+                        div.className = `scan-finding-item ${f.type}`;
+                        div.innerHTML = `
+                            <div class="scan-finding-header">
+                                <span class="scan-finding-title">
+                                    <i data-lucide="shield-alert" style="width:16px; height:16px; color:var(--color-${f.type});"></i> ${f.title}
+                                </span>
+                                <span class="scan-finding-severity ${sevClass}">${f.severity}</span>
+                            </div>
+                            <p class="scan-finding-desc">${f.desc}</p>
+                            <div style="font-size:0.75rem; font-weight:700; color:var(--text-secondary); margin-top:0.65rem; text-transform:uppercase; letter-spacing:0.5px;">Remediation Patch Pattern:</div>
+                            <div class="scan-finding-remedy">${escapeHtml(f.remedy)}</div>
+                        `;
+                        container.appendChild(div);
+                    });
+                }
+                
+                lucide.createIcons();
+                showToast(`Scanner complete. Identified ${findings.length} findings.`);
+
+            }, 800);
+        }
+
+        // Tab 4: Report compiler Cart management
+        function addPlaybookToReport(id) {
+            const vuln = vulns.find(v => v.id === id);
+            if (!vuln) return;
+
+            if (reportCart.some(item => item.id === id)) {
+                showToast("Finding already included in report cart!");
+                return;
+            }
+
+            const score = (vuln.score !== undefined) ? vuln.score : (vuln.severity === 'Critical' ? 9.8 : vuln.severity === 'High' ? 7.8 : 4.8);
+
+            reportCart.push({
+                id: vuln.id,
+                name: vuln.name,
+                severity: vuln.severity || 'Medium',
+                score: score,
+                description: vuln.description || '',
+                code_vuln: vuln.code_vuln || '',
+                code_fixed: vuln.code_fixed || '',
+                references: vuln.references || []
+            });
+
+            updateReportCartUI();
+            showToast(`Added ${vuln.id} to report cart.`);
+        }
+
+        function addCustomFindingToReport() {
+            const title = document.getElementById('calc-title').value.trim() || 'Manual Security Assessment Finding';
+            
+            const impact = document.getElementById('calc-impact').value;
+            const likelihood = document.getElementById('calc-likelihood').value;
+            const exploitability = document.getElementById('calc-exploitability').value;
+            const scope = document.getElementById('calc-scope').value;
+            const economicLoss = document.getElementById('calc-economic').value;
+            const isImmutable = document.getElementById('calc-immutable').checked;
+            const exploitMaturity = document.getElementById('calc-maturity').value;
+            const privilegedAccess = document.getElementById('calc-privilege').value;
+            const agentAutonomy = document.getElementById('calc-autonomy').value;
+
+            const res = calculator.calculate({
+                impact, likelihood, exploitability, scope, economicLoss, isImmutable, exploitMaturity, privilegedAccess, agentAutonomy
+            });
+
+            const uniqueId = `DXD-CUST-${100 + reportCart.length + 1}`;
+
+            reportCart.push({
+                id: uniqueId,
+                name: title,
+                severity: res.severity,
+                score: res.score,
+                description: `Manual risk scorecard assessment: Impact=${impact}, Likelihood=${likelihood}, Exploitability=${exploitability}, EconomicLoss=${economicLoss}, Immutability=${isImmutable}, Maturity=${exploitMaturity}, Privilege=${privilegedAccess}, AI Autonomy=${agentAutonomy}`,
+                code_vuln: '',
+                code_fixed: '',
+                references: ['https://dxdlabs.io/bvss-scorecard']
+            });
+
+            document.getElementById('calc-title').value = '';
+
+            updateReportCartUI();
+            showToast(`Custom scorecard metrics saved to report!`);
+        }
+
+        function removeFromCart(id) {
+            reportCart = reportCart.filter(item => item.id !== id);
+            updateReportCartUI();
+            showToast("Finding removed from report.");
+        }
+
+        function updateReportCartUI() {
+            document.getElementById('cart-badge').textContent = reportCart.length;
+            document.getElementById('cart-count-lbl').textContent = reportCart.length;
+
+            const container = document.getElementById('report-cart-list');
+            if (reportCart.length === 0) {
+                container.innerHTML = '<div class="cart-empty">Your report compilation cart is empty. Browse the "BVSS Scorecard" or "Vuln Playbook" tabs to add security findings.</div>';
+                updateReportCompilation();
+                return;
+            }
+
+            container.innerHTML = '';
+            reportCart.forEach(item => {
+                let badgeClass = 'sev-low';
+                if (item.severity === 'Critical') badgeClass = 'sev-critical';
+                else if (item.severity === 'High') badgeClass = 'sev-high';
+                else if (item.severity === 'Medium') badgeClass = 'sev-medium';
+
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `
+                    <div class="cart-item-info">
+                        <span class="cart-item-title">${item.name}</span>
+                        <div class="cart-item-meta">
+                            <span class="vuln-card-id" style="font-size:0.7rem;">${item.id}</span>
+                            <span class="vuln-card-badge ${badgeClass}" style="font-size:0.6rem; padding:0.15rem 0.4rem;">${item.severity} (${item.score.toFixed(1)})</span>
+                        </div>
+                    </div>
+                    <button class="cart-item-remove" onclick="removeFromCart('${item.id}')">
+                        <i data-lucide="trash-2" style="width:16px; height:16px;"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+
+            lucide.createIcons();
+            updateReportCompilation();
+        }
+
+        // English report generator
+        function updateReportCompilation() {
+            const projectName = document.getElementById('rep-project').value || 'Sui Custom Protocol';
+            const commitHash = document.getElementById('rep-hash').value || 'N/A';
+            const scope = document.getElementById('rep-scope').value || 'All';
+            const network = document.getElementById('rep-network').value;
+
+            const total = reportCart.length;
+            let avgScore = 0;
+            let criticalCount = 0;
+            let highCount = 0;
+            let mediumCount = 0;
+            let lowCount = 0;
+
+            if (total > 0) {
+                let sum = 0;
+                reportCart.forEach(item => {
+                    sum += item.score;
+                    if (item.severity === 'Critical') criticalCount++;
+                    else if (item.severity === 'High') highCount++;
+                    else if (item.severity === 'Medium') mediumCount++;
+                    else lowCount++;
+                });
+                avgScore = sum / total;
+            }
+
+            document.getElementById('rep-stat-total').textContent = total;
+            document.getElementById('rep-stat-avg').textContent = avgScore.toFixed(1);
+
+            const levelLabel = document.getElementById('rep-stat-level');
+            if (total === 0) {
+                levelLabel.textContent = 'N/A';
+                levelLabel.style.color = 'var(--text-secondary)';
+            } else if (avgScore >= 8.5) {
+                levelLabel.textContent = 'CRITICAL RISK';
+                levelLabel.style.color = 'var(--color-critical)';
+            } else if (avgScore >= 6.5) {
+                levelLabel.textContent = 'HIGH RISK';
+                levelLabel.style.color = 'var(--color-high)';
+            } else if (avgScore >= 4.0) {
+                levelLabel.textContent = 'MEDIUM';
+                levelLabel.style.color = 'var(--color-medium)';
+            } else {
+                levelLabel.textContent = 'LOW RISK';
+                levelLabel.style.color = 'var(--color-low)';
+            }
+
+            // Charts bars updates
+            document.getElementById('lbl-cnt-critical').textContent = criticalCount;
+            document.getElementById('lbl-cnt-high').textContent = highCount;
+            document.getElementById('lbl-cnt-medium').textContent = mediumCount;
+            document.getElementById('lbl-cnt-low').textContent = lowCount;
+
+            const scale = total > 0 ? 100 / total : 0;
+            document.getElementById('bar-critical').style.width = `${criticalCount * scale}%`;
+            document.getElementById('bar-high').style.width = `${highCount * scale}%`;
+            document.getElementById('bar-medium').style.width = `${mediumCount * scale}%`;
+            document.getElementById('bar-low').style.width = `${lowCount * scale}%`;
+
+            // Markdown compiler
+            const timeNow = new Date().toISOString().slice(0, 10) + ' ' + new Date().toTimeString().slice(0, 5);
+            let md = `# Security Audit Report: ${projectName}\n`;
+            md += `> Compiled dynamically via DXD Labs Security Portal • ${timeNow}\n\n`;
+            md += `## 1. Executive Metadata Overview\n`;
+            md += `- **Project Target:** ${projectName}\n`;
+            md += `- **Commit Hash:** \`${commitHash}\`\n`;
+            md += `- **Target Network:** ${network}\n`;
+            md += `- **Audit Scope:** \`${scope}\`\n\n`;
+            
+            md += `## 2. Executive Summary\n`;
+            md += `| Statistics Metric | Audited Value |\n`;
+            md += `| :--- | :--- |\n`;
+            md += `| Total Identified Findings | **${total}** |\n`;
+            md += `| Weighted Average BVSS Score | **${avgScore.toFixed(1)} / 10** |\n`;
+            md += `| Critical Findings (🔴) | ${criticalCount} |\n`;
+            md += `| High Findings (🟠) | ${highCount} |\n`;
+            md += `| Medium Findings (🟡) | ${mediumCount} |\n`;
+            md += `| Low Findings (🟢) | ${lowCount} |\n\n`;
+            
+            md += `## 3. Scorecard Vulnerability Assessment Matrix\n`;
+            md += `| ID | Finding Title | Severity | BVSS Score |\n`;
+            md += `| :--- | :--- | :---: | :---: |\n`;
+            
+            if (total === 0) {
+                md += `| - | Report cart is empty | - | - |\n`;
+            } else {
+                reportCart.forEach(item => {
+                    const icon = item.severity === 'Critical' ? '🔴' : item.severity === 'High' ? '🟠' : item.severity === 'Medium' ? '🟡' : '🟢';
+                    md += `| \`${item.id}\` | ${item.name} | ${icon} ${item.severity} | **${item.score.toFixed(1)}** |\n`;
+                });
+            }
+
+            md += `\n## 4. Comprehensive Findings Details & Mitigation Advice\n`;
+            if (total === 0) {
+                md += `No security findings added to this report compilation.\n`;
+            } else {
+                reportCart.forEach((item, idx) => {
+                    md += `\n### 4.${idx + 1} [${item.id}] ${item.name}\n`;
+                    md += `- **Severity Level:** ${item.severity} (BVSS Score: **${item.score.toFixed(1)} / 10**)\n`;
+                    md += `\n**Description:**\n${item.description.trim()}\n`;
+                    
+                    if (item.code_vuln) {
+                        md += `\n**Vulnerable Snippet:**\n\`\`\`rust\n${item.code_vuln.trim()}\n\`\`\`\n`;
+                    }
+                    if (item.code_fixed) {
+                        md += `\n**Audited Remediation Patch:**\n\`\`\`rust\n${item.code_fixed.trim()}\n\`\`\`\n`;
+                    }
+                    if (item.references && item.references.length > 0) {
+                        md += `\n**References:**\n`;
+                        item.references.forEach(r => {
+                            md += `- ${r}\n`;
+                        });
+                    }
+                    md += `\n---\n`;
+                });
+            }
+
+            md += `\n\n_This report was compiled utilizing the DXD Labs Smart Contract Audit Suite._`;
+            document.getElementById('report-preview-text').value = md;
+        }
+
+        // Copy markdown
+        function copyMarkdownReport() {
+            const text = document.getElementById('report-preview-text').value;
+            if (reportCart.length === 0) {
+                showToast("Report cart is currently empty!");
+                return;
+            }
+            navigator.clipboard.writeText(text);
+            showToast("Markdown report copied to clipboard!");
+        }
+
+        // HTML downloadable package
+        function downloadHTMLReport() {
+            if (reportCart.length === 0) {
+                showToast("Report cart is currently empty!");
+                return;
+            }
+
+            const projectName = document.getElementById('rep-project').value || 'Sui Custom Protocol';
+            const commitHash = document.getElementById('rep-hash').value || 'N/A';
+            const scope = document.getElementById('rep-scope').value || 'All';
+            const network = document.getElementById('rep-network').value;
+
+            const total = reportCart.length;
+            let avgScore = 0;
+            let criticalCount = 0;
+            let highCount = 0;
+            let mediumCount = 0;
+            let lowCount = 0;
+
+            let sum = 0;
+            reportCart.forEach(item => {
+                sum += item.score;
+                if (item.severity === 'Critical') criticalCount++;
+                else if (item.severity === 'High') highCount++;
+                else if (item.severity === 'Medium') mediumCount++;
+                else lowCount++;
+            });
+            avgScore = sum / total;
+
+            const timeNow = new Date().toLocaleString('en-US');
+
+            let rows = '';
+            reportCart.forEach((item, idx) => {
+                let badgeColor = '#10b981';
+                if (item.severity === 'Critical') badgeColor = '#ef4444';
+                else if (item.severity === 'High') badgeColor = '#f97316';
+                else if (item.severity === 'Medium') badgeColor = '#eab308';
+
+                rows += `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td><code>${item.id}</code></td>
+                    <td><strong>${item.name}</strong></td>
+                    <td><span style="background:${badgeColor}; color:white; padding:2px 8px; border-radius:4px; font-weight:700; font-size:11px; text-transform:uppercase;">${item.severity}</span></td>
+                    <td><strong style="color:${badgeColor};">${item.score.toFixed(1)}</strong>/10</td>
+                </tr>`;
+            });
+
+            let details = '';
+            reportCart.forEach((item, idx) => {
+                let badgeColor = '#10b981';
+                if (item.severity === 'Critical') badgeColor = '#ef4444';
+                else if (item.severity === 'High') badgeColor = '#f97316';
+                else if (item.severity === 'Medium') badgeColor = '#eab308';
+
+                const vulnCode = item.code_vuln ? `<div class="code-title">Vulnerable Snippet</div><pre><code>${escapeHtml(item.code_vuln.trim())}</code></pre>` : '';
+                const fixedCode = item.code_fixed ? `<div class="code-title safe">Audited Secure Patch</div><pre><code style="border-left-color:#10b981; color:#a7f3d0;">${escapeHtml(item.code_fixed.trim())}</code></pre>` : '';
+                const refs = item.references && item.references.length > 0
+                    ? `<ul>${item.references.map(r => `<li><a href="${r}" target="_blank">${r}</a></li>`).join('')}</ul>`
+                    : '<p>None.</p>';
+
+                details += `
+                <div class="finding-card">
+                    <h3 class="finding-title">
+                        <span class="finding-badge" style="background:${badgeColor};">${item.severity}</span>
+                        4.${idx + 1} [${item.id}] ${item.name}
+                        <span style="float:right; font-size:14px; font-weight:800; color:${badgeColor};">BVSS: ${item.score.toFixed(1)}/10</span>
+                    </h3>
+                    <p style="margin:10px 0; color:#cbd5e1; line-height:1.6;">${item.description.replace(/\n/g, '<br>')}</p>
+                    ${vulnCode}
+                    ${fixedCode}
+                    <div style="margin-top:15px; font-size:13px;">
+                        <strong>References:</strong>
+                        ${refs}
+                    </div>
+                </div>`;
+            });
+
+            const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Audit Report: ${projectName}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #060913;
+            --surface: #0f172a;
+            --border: rgba(255,255,255,0.08);
+            --accent: #3b82f6;
+            --text: #f8fafc;
+            --text-sec: #cbd5e1;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 3rem 1.5rem;
+            line-height: 1.55;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .header {
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        .header h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header-meta {
+            margin-top: 1rem;
+            color: var(--text-sec);
+            font-size: 13px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin: 2rem 0;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+        .stat-val { font-size: 28px; font-weight: 800; color: var(--accent); }
+        .stat-lbl { font-size: 11px; text-transform: uppercase; color: var(--text-sec); margin-top: 4px; font-weight: 700; }
+        h2 { font-size: 1.5rem; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 2rem 0 1rem 0; color: var(--accent); }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        th { text-align: left; background: var(--surface); color: var(--text-sec); padding: 10px 15px; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        td { padding: 12px 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
+        code { font-family: 'Fira Code', monospace; background: rgba(30, 41, 59, 0.5); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+        pre { background: #070a13; padding: 1.25rem; border-radius: 8px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13px; border-left: 3px solid #ef4444; color: #fecdd3; margin-bottom: 15px; }
+        .code-title { font-size: 12px; text-transform: uppercase; font-weight: 700; color: #ef4444; margin-bottom: 4px; }
+        .code-title.safe { color: #10b981; }
+        .finding-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .finding-title { border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; font-weight: 700; }
+        .finding-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; color: white; font-size: 11px; font-weight: 700; vertical-align: middle; margin-right: 8px; text-transform: uppercase; }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        ul { padding-left: 20px; color: var(--text-sec); }
+        .footer { margin-top: 4rem; text-align: center; color: var(--text-sec); font-size: 12px; border-top: 1px solid var(--border); padding-top: 1.5rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ Smart Contract Security Audit Report</h1>
+            <div class="header-meta">
+                <div><strong>Project:</strong> ${projectName}</div>
+                <div><strong>Commit Hash:</strong> <code>${commitHash}</code></div>
+                <div><strong>Date:</strong> ${timeNow}</div>
+                <div><strong>Scope:</strong> <code>${scope}</code></div>
+                <div><strong>Target Network:</strong> ${network}</div>
+                <div><strong>Auditor:</strong> DXD Labs Security Team</div>
+            </div>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-lbl">Findings</div></div>
+            <div class="stat-card"><div class="stat-val" style="color:#ef4444;">${criticalCount}</div><div class="stat-lbl">Critical</div></div>
+            <div class="stat-card"><div class="stat-val" style="color:#f97316;">${highCount}</div><div class="stat-lbl">High</div></div>
+            <div class="stat-card"><div class="stat-val" style="color:#eab308;">${mediumCount}</div><div class="stat-lbl">Medium</div></div>
+            <div class="stat-card"><div class="stat-val" style="color:#10b981;">${lowCount}</div><div class="stat-lbl">Low</div></div>
+            <div class="stat-card"><div class="stat-val">${avgScore.toFixed(1)}</div><div class="stat-lbl">Avg BVSS</div></div>
+        </div>
+
+        <h2>📊 Assessment Scorecard Summary</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Vulnerability ID</th>
+                    <th>Security Finding Title</th>
+                    <th>Severity</th>
+                    <th>BVSS Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows}
+            </tbody>
+        </table>
+
+        <h2>🔍 Detailed Security Audit Findings</h2>
+        ${details}
+
+        <div class="footer">
+            Report compiled by <strong>DXD Labs Smart Contract Audit Suite</strong>.<br>
+            © 2026 DXD Labs. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>`;
+
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${projectName.toLowerCase().replace(/\s+/g, '_')}_security_report.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("HTML report compiled and downloaded successfully!");
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>

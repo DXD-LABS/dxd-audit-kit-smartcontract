@@ -1,0 +1,81 @@
+{
+  "version": "1.0.0",
+  "project": "DXD Labs Smart Contract Audit",
+  "scoring_logic": {
+    "impact_map": {
+      "Low": 1,
+      "Medium": 2,
+      "High": 3,
+      "Critical": 4
+    },
+    "likelihood_map": {
+      "Low": 1,
+      "Medium": 2,
+      "High": 3
+    },
+    "weights": {
+      "impact": 0.6,
+      "likelihood": 0.4
+    },
+    "multipliers": {
+      "immutability": 1.5,
+      "on_chain_immutable": 2.0,
+      "autonomous_agent": 1.8
+    },
+    "severity_levels": [
+      {
+        "threshold": 9.0,
+        "label": "Critical",
+        "color": "🔴"
+      },
+      {
+        "threshold": 7.0,
+        "label": "High",
+        "color": "🟠"
+      },
+      {
+        "threshold": 4.0,
+        "label": "Medium",
+        "color": "🟡"
+      },
+      {
+        "threshold": 0.0,
+        "label": "Low",
+        "color": "🟢"
+      }
+    ],
+    "bvss_metrics": {
+      "exploitability_map": {
+        "Network": 3.0,
+        "Adjacent": 2.0,
+        "Local": 1.0
+      },
+      "scope_map": {
+        "Unchanged": 1.0,
+        "Changed": 1.2
+      },
+      "economic_loss_map": {
+        "Negligible": 1,
+        "Thousands": 2,
+        "Millions": 3,
+        "Billions": 4
+      }
+    }
+  },
+  "blockchain_factors": {
+    "exploit_maturity": {
+      "Theoretical": 0.8,
+      "POC": 1.0,
+      "Active": 1.2
+    },
+    "privileged_access": {
+      "Required": 0.7,
+      "Not Required": 1.1
+    },
+    "agent_autonomy": {
+      "None": 1.0,
+      "Partial": 1.2,
+      "Full": 1.5
+    }
+  }
+}
